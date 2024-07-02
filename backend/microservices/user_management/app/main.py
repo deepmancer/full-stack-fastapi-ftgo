@@ -1,34 +1,25 @@
-import uvloop
 import asyncio
-from app.data_access.init_db import init_db
-from app.grpc.user_service import serve
-from app.configs.logging import setup_logging
-from prometheus_client import start_http_server, Summary
-import logging
-from foodzood.backend.microservices.user_management.app.data_access.redis.redis_client import redis_client
+import os
+import uvloop
+from dotenv import load_dotenv
+from app import events
+from utils.dynamic_port import get_dynamic_port
 
-# Initialize logging
-setup_logging()
-logger = logging.getLogger(__name__)
+async def serve():
+    # Load environment variables from .env file
+    load_dotenv()
+    
+    container_name = os.getenv('USER_SERVICE_CONTAINER_NAME')
+    internal_port = int(os.getenv('INTERNAL_PORT', 50051))
+    
+    grpc_port = get_dynamic_port(container_name, internal_port)
+    print(f"gRPC server is starting on port {grpc_port}...")
 
-# Initialize uvloop
-uvloop.install()
+    grpc_server = await events.create_grpc_server()
+    grpc_server.add_insecure_port(f'[::]:{grpc_port}')
+    await grpc_server.start()
+    await grpc_server.wait_for_termination()
 
-# Initialize Prometheus metrics
-REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
-
-# Health check endpoint
-async def health_check():
-    logger.info("Health check endpoint called.")
-    return {"status": "healthy"}
-
-async def main():
-    logger.info("Starting gRPC server...")
-    start_http_server(8000)
-    await init_db()
-    logger.info("Database initialized.")
-    await serve()
-
-if __name__ == "__main__":
-    logger.info("Starting the application...")
-    asyncio.run(main())
+if __name__ == '__main__':
+    uvloop.install()
+    asyncio.run(serve())

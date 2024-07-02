@@ -1,27 +1,26 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.9-slim
+FROM python:3.9.12-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the dependencies file to the working directory
-COPY pyproject.toml poetry.lock ./
+# Copy the requirements file into the container
+COPY requirements.txt requirements.txt
 
-# Install Poetry
-RUN pip install poetry
+# Install the required packages
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install the dependencies
-RUN poetry install
-
-# Copy the content of the local src directory to the working directory
+# Copy the rest of the application code into the container
 COPY . .
 
-# Install redis-py
-RUN poetry add redis
+# Install grpcio-tools to generate pb2 files
+RUN pip install grpcio-tools
 
-# Make ports 50051 and 8000 available to the world outside this container
+# Generate pb2 files
+RUN python -m grpc_tools.protoc -I./app/protos --python_out=./app/grpc_interface --grpc_python_out=./app/grpc_interface ./app/protos/user_service.proto
+
+# Expose the gRPC port (will be dynamically allocated)
 EXPOSE 50051
-EXPOSE 8000
 
-# Define the command to run the application
-CMD ["poetry", "run", "python", "app/main.py"]
+# Run the application
+CMD ["python", "app/main.py"]

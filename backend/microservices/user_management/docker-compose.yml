@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:13
-    container_name: user_postgres
+    container_name: ${POSTGRES_CONTAINER_NAME}
     env_file:
       - .env
     environment:
@@ -17,13 +17,34 @@ services:
 
   redis:
     image: redis:6
-    container_name: user_redis
+    container_name: ${REDIS_CONTAINER_NAME}
     env_file:
       - .env
     ports:
       - "0:6379" # This will dynamically allocate a host port for Redis
     volumes:
       - redis_data:/data
+
+  user_service:
+    build:
+      context: .
+    container_name: ${USER_SERVICE_CONTAINER_NAME}
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_DB: ${REDIS_DB}
+      CONTAINER_NAME: ${USER_SERVICE_CONTAINER_NAME}
+      INTERNAL_PORT: 50051
+    ports:
+      - "0:50051" # This will dynamically allocate a host port for the gRPC service
+    depends_on:
+      - postgres
+      - redis
 
 volumes:
   postgres_data:
