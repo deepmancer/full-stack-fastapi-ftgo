@@ -11,7 +11,7 @@ class User(Base):
     id = Column(UUIDType(as_uuid=True), primary_key=True, default=uuid4)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
-    phone_number = Column(String, unique=True, nullable=False)
+    phone_number = Column(String, nullable=False)
     phone_number_verified = Column(Boolean, default=False)
     hashed_password = Column(String, nullable=False)
     gender = Column(String, nullable=True)
@@ -21,3 +21,4 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     
     addresses = relationship("UserAddress", back_populates="user", cascade="all, delete-orphan")
+    role = relationship("Role", uselist=False, back_populates="user")

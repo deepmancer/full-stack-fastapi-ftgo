@@ -3,8 +3,8 @@
 import asyncio
 from dotenv import load_dotenv
 
-from backend.microservices.user.app.application.handler import UserHandler
-from domain.user import UserService
+from application.handler import UserHandler
+from domain.user import UserDomain
 from data_access.crud.address import UserRepository
 from data_access.session.db import PostgresSession
 from data_access.session.cache import RedisSession
@@ -12,7 +12,6 @@ from configs.db import PostgresConfig
 from configs.cache import RedisConfig
 
 async def initialize_services():
-    load_dotenv()
     
     postgres_config = PostgresConfig()
     redis_config = RedisConfig()
@@ -24,7 +23,7 @@ async def initialize_services():
     await redis_session.initialize()
 
     user_repository = UserRepository(postgres_session.get_session)
-    user_service = UserService(user_repository, redis_session)
+    user_service = User(user_repository, redis_session)
     user_handler = UserHandler(user_service)
     
     return user_handler

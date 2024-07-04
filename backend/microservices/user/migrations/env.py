@@ -8,7 +8,7 @@ from alembic import context
 from dotenv import load_dotenv
 from configs.postgres import PostgresConfig
 
-# Load environment variables from .env file
+# Load environment variables from env file
 load_dotenv()
 
 # Add the app directory to sys.path

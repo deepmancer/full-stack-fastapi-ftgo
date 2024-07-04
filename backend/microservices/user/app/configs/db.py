@@ -1,12 +1,7 @@
-from pydantic import BaseModel, Field, PostgresDsn
+from configs.base import BaseConfig
 from decouple import config as de_config
 
-class PostgresConfig(BaseModel):
-    class Config:
-        env_file: str = ".env"
-        case_sensitive: bool = True
-        validate_assignment: bool = True
-
+class PostgresConfig(BaseConfig):
     container_name: str = de_config("DB_CONTAINER_NAME", default="user_db")
 
     host: str = de_config("POSTGRES_HOST")

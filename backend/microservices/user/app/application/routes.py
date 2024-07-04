@@ -1,12 +1,19 @@
 import os
 from fastapi import FastAPI
-from application.schemas.user import (
+from application.schema import (
     RegisterRequest, RegisterResponse,
     AuthenticatePhoneNumberRequest, AuthenticatePhoneNumberResponse,
     LoginRequest, LoginResponse,
-    GetUserInfoResponse, AddAddressRequest, AddressResponse,
-    ModifyAddressRequest, DeleteAddressRequest, SetPreferredAddressRequest
+    GetUserInfoRequest, GetUserInfoResponse,
+    AddAddressRequest, AddressResponse,
+    ModifyAddressRequest,
+    DeleteAddressRequest,
+    SetPreferredAddressRequest,
+    DeleteAccountRequest, DeleteAccountResponse,
+    DeleteAllAddressesRequest, DeleteAllAddressesResponse
 )
+from domain.user import UserDomain
+
 
 app = FastAPI(title=os.getenv("SERVICE_CONTAINER_NAME"), debug=True)
 
