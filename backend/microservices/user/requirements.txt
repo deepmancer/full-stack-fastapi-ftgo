@@ -18,13 +18,15 @@ mypy
 passlib
 pathlib
 pre-commit
+pyotp
+bcrypt
 psycopg2-binary
 pydantic
 pytest
 pytest-asyncio
+PyJWT
 pytest-cov
 pytest-xdist
-python-decouple
 python-decouple
 python-dotenv
 python-jose
@@ -32,6 +34,7 @@ python-slugify
 redis
 SQLAlchemy==2.0.0b3
 sqlalchemy
+pytz
 trio
 uvicorn
 uvloop

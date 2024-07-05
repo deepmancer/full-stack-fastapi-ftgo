@@ -1,46 +1,45 @@
 import os
-from fastapi import FastAPI
-from schemas.user import (
-    RegisterRequest, RegisterResponse,
-    AuthenticatePhoneNumberRequest, AuthenticatePhoneNumberResponse,
-    LoginRequest, LoginResponse,
-    GetUserInfoResponse, AddAddressRequest, AddressResponse,
-    ModifyAddressRequest, DeleteAddressRequest, SetPreferredAddressRequest
+import fastapi
+import uvicorn
+from loguru import logger
+
+from fastapi.middleware.cors import CORSMiddleware
+
+from config.logger import init_logging
+from application.endpoints import app as api_endpoint_router
+from data_access.events.lifecycle import setup, teardown
+
+app = fastapi.FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-from events import events
 
-app = FastAPI(title=os.getenv("SERVICE_CONTAINER_NAME"), debug=True)
+app.include_router(router=api_endpoint_router, prefix=os.getenv("API_PREFIX", "/user"))
 
-@app.post("/register", response_model=RegisterResponse)
-async def register(request: RegisterRequest):
-    return await events["register"](request)
+@app.on_event("startup")
+async def startup_event():
+    await setup()
 
-@app.post("/authenticate-phone-number", response_model=AuthenticatePhoneNumberResponse)
-async def authenticate_phone_number(request: AuthenticatePhoneNumberRequest):
-    return await events["authenticate_phone_number"](request)
+@app.on_event("shutdown")
+async def shutdown_event():
+    await teardown()
 
-@app.post("/login", response_model=LoginResponse)
-async def login(request: LoginRequest):
-    return await events["login"](request)
 
-@app.get("/user-info", response_model=GetUserInfoResponse)
-async def get_user_info(user_id: str):
-    request = GetUserInfoRequest(user_id=user_id)
-    return await events["get_user_info"](request)
+if __name__ == "__main__":
+    init_logging()
+  
+    host = os.getenv("SERVICE_HOST", "127.0.0.1")
+    port = int(os.getenv("SERVICE_PORT", 5020))
+    debug = os.getenv("DEBUG", "True").lower() in ["true", "1", "t"]
 
-@app.post("/add-address", response_model=AddressResponse)
-async def add_address(request: AddAddressRequest):
-    return await events["add_address"](request)
-
-@app.post("/modify-address", response_model=AddressResponse)
-async def modify_address(request: ModifyAddressRequest):
-    return await events["modify_address"](request)
-
-@app.delete("/delete-address", response_model=AddressResponse)
-async def delete_address(address_id: str):
-    request = DeleteAddressRequest(address_id=address_id)
-    return await events["delete_address"](request)
-
-@app.post("/set-preferred-address", response_model=AddressResponse)
-async def set_preferred_address(request: SetPreferredAddressRequest):
-    return await events["set_preferred_address"](request)
+    uvicorn.run(
+        "main:app",
+        host=host,
+        port=port,
+        reload=True,
+        log_level="debug" if debug else "info",
+    )

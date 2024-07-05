@@ -1,9 +1,36 @@
 version: '3.8'
 
-include:
-  - "./infra.yaml"
-
 services:
+  postgresql:
+    image: postgres:13
+    container_name: ${DB_CONTAINER_NAME}
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5438
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5438:5438"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    container_name: ${CACHE_CONTAINER_NAME}
+    env_file:
+      - .env
+    environment:
+      REDIS_DB: ${REDIS_DB}
+    ports:
+      - "6235:6235"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--port", "6235"]
+
   backend:
     build:
       context: .
@@ -28,21 +55,14 @@ services:
       CONTAINER_NAME: ${SERVICE_CONTAINER_NAME}
       SERVICE_PORT: ${SERVICE_PORT}
     depends_on:
-      - database
-      - cache
+      - postgresql
+      - redis
+    ports:
+      - "5020:5020"
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    expose:
-      - ${SERVICE_PORT}
-    ports:
-      - "${SERVICE_PORT}:${SERVICE_PORT}"
-    deploy:
-      resources:
-        limits:
-          memory: 1.5G
 
 volumes:
   postgres_data:
-    external: true
   redis_data:
-    external: true

@@ -6,7 +6,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from dotenv import load_dotenv
-from configs.postgres import PostgresConfig
+from config.db import PostgresConfig
 
 # Load environment variables from env file
 load_dotenv()
@@ -26,7 +26,7 @@ config = context.config
 fileConfig(config.config_file_name)
 
 # Construct the SQLAlchemy URL dynamically
-database_url = f'postgresql://{postgres_config.user}:{postgres_config.password}@{postgres_config.host}:{postgres_config.port}/{postgres_config.db}'
+database_url = postgres_config.sync_url
 config.set_main_option('sqlalchemy.url', database_url)
 
 print("Database URL: ", database_url)
@@ -34,6 +34,7 @@ print("Database URL: ", database_url)
 from data_access.models.base import Base  # import your base
 from data_access.models.user import User  # import your User model
 from data_access.models.address import UserAddress  # import your UserAddress model
+from data_access.models.role import Role  # import your UserAddress model
 
 # Set target_metadata to Base.metadata
 target_metadata = Base.metadata

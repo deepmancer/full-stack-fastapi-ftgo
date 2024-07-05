@@ -1,29 +1,31 @@
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
-WORKDIR /user_service
-
-# Set up Python behaviour
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV VIRTUAL_ENV=/opt/venv
-
-# Switch on virtual environment
-RUN python3 -m venv $VIRTUAL_ENV
+# Set environment variables
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Set the server port
-EXPOSE 8000
+EXPOSE 5020
+# # Install system dependencies
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     build-essential \
+#     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update \
-  && apt-get -y install netcat gcc postgresql \
-  && apt-get clean
-
+# Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip
-COPY ./requirements.txt ./
-RUN pip3 install -r requirements.txt
 
-COPY . /user_service/
+# Copy requirements.txt before other files to leverage Docker cache
+COPY ./requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-ENV PYTHONPATH=/user_service/app/
+# Copy the application code to the container
+COPY . /user_service
 
-CMD uvicorn user_service.app.main:app --reload --workers 4 --host 0.0.0.0 --port 8000
+# Set the working directory
+WORKDIR /user_service
+
+# Set the PYTHONPATH environment variable
+ENV PYTHONPATH=/user_service/app
+
+# Command to run the application
+CMD ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "5020"]

@@ -1,18 +1,19 @@
 from pydantic import BaseModel, Field, validator, BaseConfig
-from utils.validators import validate_password, validate_phone_number, validate_email
-
+from utils.validators import validate_password, validate_phone_number, validate_email, validate_enum
+from config.roles import RoleName
 
 class BaseSchema(BaseModel):
     class Config(BaseConfig):
-        orm_mode: bool = True
+        from_attributes: bool = True
         validate_assignment: bool = True
-        allow_population_by_field_name: bool = True
+        populate_by_name: bool = True
 
 class RegisterRequest(BaseSchema):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     phone_number: str = Field(..., min_length=1, max_length=15)
     password: str = Field(..., min_length=8, max_length=128)
+    role_name: str = Field(..., min_length=1, max_length=50)
 
     @validator('password')
     def validate_password_field(cls, value):
@@ -22,23 +23,25 @@ class RegisterRequest(BaseSchema):
     def validate_phone_number_field(cls, value):
         return validate_phone_number(value)
 
+    @validator('role_name')
+    def validate_role_name_field(cls, value):
+        return validate_enum(value, RoleName)
+
 class RegisterResponse(BaseSchema):
-    auth_code: str = Field(..., min_length=1, max_length=10)
-
-class AuthenticatePhoneNumberRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
-    phone_number: str = Field(..., min_length=1, max_length=15)
     auth_code: str = Field(..., min_length=1, max_length=10)
 
-    @validator('phone_number')
-    def validate_phone_number_field(cls, value):
-        return validate_phone_number(value)
+class AuthenticateAccountRequest(BaseSchema):
+    user_id: str = Field(..., min_length=1, max_length=36)
+    auth_code: str = Field(..., min_length=1, max_length=10)
 
-class AuthenticatePhoneNumberResponse(BaseSchema):
-    success: bool
+class AuthenticateAccountResponse(BaseSchema):
+    access_token: str = Field(..., min_length=1, max_length=100)
+    access_token_ttl_seconds: int = Field(..., ge=1)
 
 class LoginRequest(BaseSchema):
     phone_number: str = Field(..., min_length=1, max_length=15)
+    role_name: str = Field(..., min_length=1, max_length=50)
     password: str = Field(..., min_length=8, max_length=128)
 
     @validator('password')
@@ -49,8 +52,13 @@ class LoginRequest(BaseSchema):
     def validate_phone_number_field(cls, value):
         return validate_phone_number(value)
 
+    @validator('role_name')
+    def validate_role_name_field(cls, value):
+        return validate_enum(value, RoleName)
+
 class LoginResponse(BaseSchema):
-    token: str
+    access_token: str
+    access_token_ttl_seconds: int = Field(..., ge=1)
 
 class GetUserInfoRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
@@ -60,10 +68,8 @@ class GetUserInfoResponse(BaseSchema):
     last_name: str = Field(..., min_length=1, max_length=50)
     phone_number: str = Field(..., min_length=1, max_length=15)
     email: str = Field(..., min_length=1, max_length=100)
-    phone_number_verified: bool
     gender: str = Field(..., min_length=1, max_length=10)
-    created_at: str
-    updated_at: str
+    role_name: str = Field(..., min_length=1, max_length=50)
 
     @validator('phone_number')
     def validate_phone_number_field(cls, value):
@@ -72,6 +78,10 @@ class GetUserInfoResponse(BaseSchema):
     @validator('email')
     def validate_email_field(cls, value):
         return validate_email(value)
+
+    @validator('role_name')
+    def validate_role_name_field(cls, value):
+        return validate_enum(value, RoleName)
 
 class AddAddressRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
@@ -83,24 +93,23 @@ class AddAddressRequest(BaseSchema):
     country: str = Field(..., min_length=1, max_length=50)
 
 class AddressResponse(BaseSchema):
-    id: str = Field(..., min_length=1, max_length=36)
-    success: bool
-
-class ModifyAddressRequest(BaseSchema):
     address_id: str = Field(..., min_length=1, max_length=36)
-    address_line_1: str = Field(..., min_length=1, max_length=100)
-    address_line_2: str = Field(..., max_length=100)
-    city: str = Field(..., min_length=1, max_length=50)
-    state: str = Field(..., min_length=1, max_length=50)
-    postal_code: str = Field(..., min_length=1, max_length=20)
-    country: str = Field(..., min_length=1, max_length=50)
 
 class DeleteAddressRequest(BaseSchema):
+    user_id: str = Field(..., min_length=1, max_length=36)
     address_id: str = Field(..., min_length=1, max_length=36)
+
+class DeleteAddressResponse(BaseSchema):
+    address_id: str = Field(..., min_length=1, max_length=36)
+    success: bool
 
 class SetPreferredAddressRequest(BaseSchema):
+    user_id: str = Field(..., min_length=1, max_length=36)
     address_id: str = Field(..., min_length=1, max_length=36)
 
+class SetPreferredAddressResponse(BaseSchema):
+    address_id: str = Field(..., min_length=1, max_length=36)
+    success: bool
 class DeleteAccountRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
 
@@ -111,4 +120,5 @@ class DeleteAllAddressesRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
 
 class DeleteAllAddressesResponse(BaseSchema):
+    address_ids: list[str] = Field(...)
     success: bool

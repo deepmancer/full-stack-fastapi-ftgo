@@ -25,7 +25,6 @@ def upgrade() -> None:
     sa.Column('first_name', sa.String(), nullable=False),
     sa.Column('last_name', sa.String(), nullable=False),
     sa.Column('phone_number', sa.String(), nullable=False),
-    sa.Column('phone_number_verified', sa.Boolean(), nullable=True),
     sa.Column('hashed_password', sa.String(), nullable=False),
     sa.Column('gender', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=True),
