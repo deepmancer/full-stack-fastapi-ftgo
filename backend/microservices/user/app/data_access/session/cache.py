@@ -27,27 +27,22 @@ class CacheDataAccess(BaseDataAccess):
             await self.session.close()
             self.session = None
 
-    @classmethod
-    async def get(cls, key: str) -> str:
-        session = await cls.get_or_create_session()
+    async def get(self, key: str) -> str:
+        session = await self.get_or_create_session()
         return await session.get(key)
 
-    @classmethod
-    async def set(cls, key: str, value: str, ttl=None) -> None:
-        session = await cls.get_or_create_session()
+    async def set(self, key: str, value: str, ttl=None) -> None:
+        session = await self.get_or_create_session()
         await session.set(key, value, ex=ttl)
 
-    @classmethod
-    async def delete(cls, key: str) -> None:
-        session = await cls.get_or_create_session()
+    async def delete(self, key: str) -> None:
+        session = await self.get_or_create_session()
         await session.delete(key)
 
-    @classmethod
-    async def expire(cls, key: str, ttl: int) -> None:
-        session = await cls.get_or_create_session()
+    async def expire(self, key: str, ttl: int) -> None:
+        session = await self.get_or_create_session()
         await session.expire(key, ttl)
 
-    @classmethod
-    async def pipeline(cls):
-        session = await cls.get_or_create_session()
+    async def pipeline(self):
+        session = await self.get_or_create_session()
         return session.pipeline()

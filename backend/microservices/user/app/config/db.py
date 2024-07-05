@@ -16,6 +16,10 @@ class PostgresConfig(BaseConfig):
     enable_expire_on_commit: bool = de_config("ENABLE_DB_EXPIRE_ON_COMMIT", default=True, cast=bool)
 
     @property
+    def local_url(self) -> str:
+        return f"{self.db_schema}://{self.user}:{self.password}@localhost:{self.port}/{self.db}"
+
+    @property
     def sync_url(self) -> str:
         return f"{self.db_schema}://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
     

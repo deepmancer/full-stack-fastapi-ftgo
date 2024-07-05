@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, Boolean, DateTime, func
-from sqlalchemy.dialects.postgresql import UUID as UUIDType
 from uuid import uuid4
 from sqlalchemy.orm import relationship
 from data_access.models.base import Base
@@ -8,7 +7,7 @@ from data_access.models.base import Base
 class User(Base):
     __tablename__ = "user_profile"
 
-    id = Column(UUIDType(as_uuid=True), primary_key=True, default=uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)

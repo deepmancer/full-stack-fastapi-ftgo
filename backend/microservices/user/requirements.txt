@@ -1,4 +1,4 @@
-alembic
+alembic==1.8.1
 argon2_cffi
 asgi_lifespan
 asyncio

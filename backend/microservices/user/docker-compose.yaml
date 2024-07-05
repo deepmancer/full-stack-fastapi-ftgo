@@ -12,11 +12,13 @@ services:
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    expose:
+      - 5438
     ports:
       - "5438:5438"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+    command: ["postgres", "-c", "port=5438"]
   redis:
     image: redis:6.2-alpine
     restart: always
@@ -25,6 +27,8 @@ services:
       - .env
     environment:
       REDIS_DB: ${REDIS_DB}
+    expose:
+      - 6235
     ports:
       - "6235:6235"
     volumes:
@@ -59,7 +63,8 @@ services:
       - redis
     ports:
       - "5020:5020"
-
+    expose:
+      - 5020
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 

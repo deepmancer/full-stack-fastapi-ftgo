@@ -33,10 +33,6 @@ class DatabaseDataAccess(BaseDataAccess):
             raise
         finally:
             await session.close()
-            
-    # async def get_or_create_session(self) -> AsyncGenerator[AsyncSession, None]:
-    #     async with self.async_session_maker() as session:
-    #         yield session
 
     async def connect(self) -> None:
         async with self.async_engine.begin() as connection:

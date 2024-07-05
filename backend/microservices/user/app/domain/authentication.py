@@ -11,7 +11,7 @@ class Authenticator:
 
     @staticmethod
     def create_auth_code(user_id: str) -> str:
-        auth_code = Authenticator.otp.now()
+        auth_code = Authenticator._otp.now()
         return auth_code, Authenticator._otp.interval
 
     @staticmethod

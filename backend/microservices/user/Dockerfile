@@ -6,10 +6,11 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Set the server port
 EXPOSE 5020
-# # Install system dependencies
-# RUN apt-get update && apt-get install -y --no-install-recommends \
-#     build-essential \
-#     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    netcat-openbsd \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip
@@ -27,5 +28,12 @@ WORKDIR /user_service
 # Set the PYTHONPATH environment variable
 ENV PYTHONPATH=/user_service/app
 
-# Command to run the application
-CMD ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "5020"]
+# Copy the Alembic configuration file
+COPY alembic.ini /user_service/alembic.ini
+
+# Copy the entry point script
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Command to run the entry point script
+ENTRYPOINT ["/entrypoint.sh"]

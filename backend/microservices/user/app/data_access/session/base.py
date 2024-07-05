@@ -6,7 +6,7 @@ class BaseDataAccess:
     _instance = None
     _lock = asyncio.Lock()
 
-    async def get_or_create_session(self, *args, **kwargs) -> Any:
+    async def get_or_create_session(self) -> Any:
         """Create or retrieve a session."""
         raise NotImplementedError()
 
