@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, validator, BaseConfig
-from utils.validators import validate_password, validate_phone_number, validate_email, validate_enum
-from config.roles import RoleName
+from utils.validators import validate_password, validate_phone_number, validate_enum
+from config.enums import RoleName
 
 class BaseSchema(BaseModel):
     class Config(BaseConfig):
@@ -67,17 +67,12 @@ class GetUserInfoResponse(BaseSchema):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     phone_number: str = Field(..., min_length=1, max_length=15)
-    email: str = Field(..., min_length=1, max_length=100)
     gender: str = Field(..., min_length=1, max_length=10)
     role_name: str = Field(..., min_length=1, max_length=50)
 
     @validator('phone_number')
     def validate_phone_number_field(cls, value):
         return validate_phone_number(value)
-
-    @validator('email')
-    def validate_email_field(cls, value):
-        return validate_email(value)
 
     @validator('role_name')
     def validate_role_name_field(cls, value):

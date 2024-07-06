@@ -20,12 +20,6 @@ def validate_phone_number(value: str) -> str:
         raise PhoneNumberValidationError('Invalid phone number format')
     return value
 
-def validate_email(value: str) -> str:
-    return value
-    if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', value):
-        raise EmailValidationError('Invalid email format')
-    return value
-
 def validate_enum(value, enum_class: enum.Enum):
     if value not in [field.value for field in enum_class]:
         raise ValueError("Invalid role name")

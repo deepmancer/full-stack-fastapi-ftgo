@@ -33,10 +33,10 @@ async def delete_address(request: DeleteAddressRequest):
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
     
 @router.post("/set-preferred", response_model=AddressResponse)
-async def set_preferred_address(request: SetPreferredAddressRequest):
+async def set_address_as_default(request: SetPreferredAddressRequest):
     try:
         user = await UserDomain.from_user_id(request.user_id)
-        address_id = await user.set_preferred_address(request.address_id)
+        address_id = await user.set_address_as_default(request.address_id)
         return AddressResponse(address_id=address_id)
     except Exception as e:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))

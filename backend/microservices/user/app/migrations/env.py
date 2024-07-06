@@ -22,7 +22,7 @@ fileConfig(alembic_config.config_file_name)
 from config.db import PostgresConfig  # Ensure correct import
 from data_access.models.base import Base
 from data_access.models.user import User
-from data_access.models.address import UserAddress
+from data_access.models.address import Address
 from data_access.models.role import Role
 target_metadata = Base.metadata
 

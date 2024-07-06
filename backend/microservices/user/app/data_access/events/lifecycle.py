@@ -1,8 +1,8 @@
 import asyncio
 from typing import Any
 from data_access.repository import UserRepository
-from data_access.session.db import DatabaseDataAccess
-from data_access.session.cache import CacheDataAccess
+from data_access.connection.db import DatabaseDataAccess
+from data_access.connection.cache import CacheDataAccess
 from config.db import PostgresConfig
 from config.cache import RedisConfig
 

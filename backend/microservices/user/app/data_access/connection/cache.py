@@ -1,8 +1,9 @@
+import contextlib
 import redis.asyncio as redis
 from loguru import logger
 from typing import Optional
 from config.cache import RedisConfig
-from data_access.session.base import BaseDataAccess
+from data_access.connection.base import BaseDataAccess
 
 class CacheDataAccess(BaseDataAccess):
     _config: Optional[RedisConfig] = None
@@ -11,10 +12,11 @@ class CacheDataAccess(BaseDataAccess):
         self.initialize(config)
         self.session = None
 
+    @contextlib.asynccontextmanager
     async def get_or_create_session(self) -> redis.Redis:
         if self.session is None:
             await self.connect()
-        return self.session
+        yield self.session
 
     async def connect(self) -> None:
         logger.debug(f"Connecting to Redis at {self._config.url}")

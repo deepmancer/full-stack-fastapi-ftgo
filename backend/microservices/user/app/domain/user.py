@@ -3,9 +3,10 @@ from loguru import logger
 from domain.password import PasswordHandler
 from domain.authorization import TokenHandler
 from domain.authentication import Authenticator
-from data_access.repository import UserRepository
+from data_access.repository.user import UserRepository
+from data_access.repository.session import SessionRepository
 from data_access.models.user import User
-from data_access.models.address import UserAddress
+from data_access.models.address import Address
 from data_access.models.role import Role
 from config.db import PostgresConfig
 from config.cache import RedisConfig
@@ -20,35 +21,28 @@ class UserDomain:
         first_name: str,
         last_name: str,
         phone_number: str,
-        hashed_password: str,
+        password: str,
         gender: Optional[str],
-        email: Optional[str],
         created_at: str,
         updated_at: Optional[str],
         is_verified: bool,
-        role_name: Optional[str] = None,
+        role_name: Optional[str],
     ):
         self.user_id = user_id
         self.first_name = first_name
         self.last_name = last_name
         self.phone_number = phone_number
-        self.hashed_password = hashed_password
+        self.password = password
         self.gender = gender
-        self.email = email
         self.created_at = created_at
         self.updated_at = updated_at
         self.is_verified = is_verified
-
         self.role_name = role_name
-        self._addresses = None
-
-    async def load_addresses(self) -> List[UserAddress]:
-        if self._addresses is None:
-            self._addresses = await UserRepository.get_addresses_by_user_id(self.user_id)
-        return self._addresses
+        
+        self.addresses = None
 
     @staticmethod
-    async def from_user_id(user_id: str) -> "UserDomain":
+    async def from_user_id(user_id: str):
         user = await UserRepository.get_user_by_id(user_id)
         if not user:
             raise "User not found"
@@ -63,6 +57,11 @@ class UserDomain:
             raise "Access token is invalid"
 
         return UserDomain._from_user(user)
+
+    async def load_addresses(self) -> List[Address]:
+        if self._addresses is None:
+            self._addresses = await UserRepository.get_addresses_by_user_id(self.user_id)
+        return self._addresses
 
     @staticmethod
     async def from_phone_number_role(phone_number: str, role_name: str) -> "UserDomain":
@@ -81,7 +80,6 @@ class UserDomain:
             phone_number=user.phone_number,
             hashed_password=user.hashed_password,
             gender=user.gender,
-            email=user.email,
             created_at=str(user.created_at),
             updated_at=str(user.updated_at) if user.updated_at else None,
             is_verified=user.is_verified,
@@ -122,10 +120,10 @@ class UserDomain:
             raise "User is not verified"
 
         access_token = await UserRepository.get_token_by_user_id(self.user_id)
-        if access_token and TokenHandler.validate_token(self.user_id, self.hashed_password, access_token):
+        if access_token and TokenHandler.validate_token(self.user_id, self.password, access_token):
             return access_token, TokenHandler.get_token_ttl(access_token)
 
-        access_token, ttl = TokenHandler.generate_token(self.user_id, self.hashed_password)
+        access_token, ttl = TokenHandler.generate_token(self.user_id, self.password)
         await UserRepository.cache_token(self.user_id, access_token, ttl=ttl)
 
         return access_token, ttl
@@ -139,8 +137,8 @@ class UserDomain:
         await UserRepository.delete_address(address_id)
         return True
 
-    async def set_preferred_address(self, address_id: str) -> bool:
-        await UserRepository.set_preferred_address(address_id)
+    async def set_address_as_default(self, address_id: str) -> bool:
+        await UserRepository.set_address_as_default(address_id)
         return True
 
     
@@ -153,7 +151,7 @@ class UserDomain:
         self.first_name = user.first_name
         self.last_name = user.last_name
         self.phone_number = user.phone_number
-        self.hashed_password = user.hashed_password
+        self.password = user.hashed_password
         
         self._addresses = await UserRepository.get_addresses_by_user_id(self.user_id)
         
@@ -166,9 +164,8 @@ class UserDomain:
             "first_name": self.first_name,
             "last_name": self.last_name,
             "phone_number": self.phone_number,
-            "hashed_password": self.hashed_password,
+            "hashed_password": self.password,
             "gender": self.gender,
-            "email": self.email,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "is_verified": self.is_verified,

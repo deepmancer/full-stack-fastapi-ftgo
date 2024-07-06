@@ -9,7 +9,3 @@ class PasswordValidationError(ValidationError):
 class PhoneNumberValidationError(ValidationError):
     """Exception raised for phone number validation errors."""
     pass
-
-class EmailValidationError(ValidationError):
-    """Exception raised for email validation errors."""
-    pass

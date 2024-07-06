@@ -6,7 +6,7 @@ import asyncio
 import hashlib
 
 from config.access_token import ACCESS_TOKEN_TTL_SEC, ALGORITHM
-from config.timezone import UTC
+from config.timezone import tz
 
 class TokenHandler:
     @staticmethod
@@ -18,7 +18,7 @@ class TokenHandler:
     @staticmethod
     def generate_token(user_id: str, user_secret: str) -> str:
         try:
-            expire = datetime.datetime.now(UTC) + datetime.timedelta(seconds=ACCESS_TOKEN_TTL_SEC)
+            expire = datetime.datetime.now(tz) + datetime.timedelta(seconds=ACCESS_TOKEN_TTL_SEC)
             to_encode = {"sub": user_id, "exp": expire}
             user_specific_secret = TokenHandler._generate_secret_key(user_id, user_secret)
             encoded_jwt = jwt.encode(to_encode, user_specific_secret, algorithm=ALGORITHM)
@@ -31,7 +31,7 @@ class TokenHandler:
         try:
             payload = jwt.decode(token, options={"verify_signature": False})
             expire = datetime.datetime.fromtimestamp(payload["exp"], UTC)
-            ttl = expire - datetime.datetime.now(UTC)
+            ttl = expire - datetime.datetime.now(tz)
             return ttl.seconds
         except PyJWTError:
             return 0
@@ -46,7 +46,7 @@ class TokenHandler:
             token_user_id: str = payload.get("sub")
             if token_user_id is None or token_user_id != user_id:
                 return False
-            if datetime.datetime.now(UTC) > datetime.datetime.fromtimestamp(payload["exp"], UTC):
+            if datetime.datetime.now(tz) > datetime.datetime.fromtimestamp(payload["exp"], UTC):
                 return False
             return True
         except PyJWTError:
