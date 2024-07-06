@@ -53,7 +53,7 @@ class SessionRepository:
         await cls.data_access.delete(key)
 
     @classmethod
-    async def flush_user_cached_data(cls, user_id: str):
+    async def delete_user_data(cls, user_id: str):
         auth_key = cls.create_auth_key(user_id)
         token_key = cls.create_token_key(user_id)
         async with cls.data_access.pipeline() as pipe:

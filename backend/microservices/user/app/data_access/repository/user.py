@@ -11,9 +11,8 @@ from config.db import PostgresConfig
 from utils.time import utcnow
 
 from data_access.connection.db import DatabaseDataAccess
-from data_access.models.account import Account
+from data_access.models.profile import Profile
 from data_access.models.address import Address
-from data_access.models.role import Role
 from data_access.models.base import Base
 
 
@@ -27,103 +26,83 @@ class UserRepository:
     @classmethod
     async def create_user(
         cls,
+        user_id: str,
         first_name: str,
         last_name: str,
         phone_number: str,
-        password: str,
-        role_name: str,
-        national_code: str = None,
+        hashed_password: str,
+        role: str,
+        national_id: str = None,
     ) -> UserProfile:
         async with cls.data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
-                    new_account = Account(
+                    new_profile = Profile(
+                        id=user_id,
                         first_name=first_name,
                         last_name=last_name,
                         phone_number=phone_number,
-                        hashed_password=password,
+                        hashed_password=hashed_password,
                         national_id=national_id,
+                        role=role,
                     )
-                    session.add(new_account)
+                    session.add(new_profile)
                     await session.flush()
-                    await session.refresh(new_account)
+                    await session.refresh(new_profile)
 
-                    new_role = Role(
-                        role_name=role_name,
-                        user_id=new_account.id,
-                    )
-                    session.add(new_role)
-                    await session.flush()
-                    await session.refresh(new_role)
-
-                    logger.info(f"User with user_id: {new_account.id} and phone_number: {phone_number} was created successfully")    
-                    return dict(
-                        account=new_account,
-                        role=new_role,
-                        addresses=[],
-                    )
+                    logger.info(f"User with user_id: {new_profile.id} and phone_number: {new_profile.phone_number} was created successfully")    
+                    return new_profile
                 except Exception as e:
                     await session.rollback()
                     message = f"Error occurred while creating user: {e}"
-                    logger.error(message, first_name=first_name, last_name=last_name, phone_number=phone_number, role_name=role_name)
+                    logger.error(message, first_name=first_name, last_name=last_name, phone_number=phone_number, role=role, national_id=national_id, hashed_password=hashed_password)
                     raise e
+
     @classmethod
-    async def load_user(cls, user_id: str):
+    async def load_user_by_id(cls, user_id: str):
         try:
-            account = await cls.data_access.load_from_table_by_query(Account, {"id": user_id}, one_or_none=True)
-            role = await cls.data_access.load_from_table_by_query(Role, {"user_id": user_id}, one_or_none=True)
-            addresses = await cls.data_access.load_from_table_by_query(Address, {"user_id": user_id})
-            return dict(
-                account=account,
-                role=role,
-                addresses=addresses,
-            )
+            profile = await cls.data_access.load_from_table_by_query(Profile, {"id": user_id}, one_or_none=True)
+            return profile
         except Exception as e:
             message = f"Error occurred while loading user: {e}"
             logger.error(message, user_id=user_id)
             raise e
 
     @classmethod
-    async def exists_role_for_phone_number(cls, phone_number: str, role_name: str) -> bool:
+    async def load_user_by_phone_number_and_role(cls, phone_number: str, role: str):
+        try:
+            profile = await cls.data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=True)
+            return profile
+        except Exception as e:
+            message = f"Error occurred while loading user by phone number & role: {e}"
+            logger.error(message, phone_number=phone_number, role=role)
+            raise e
+
+    @classmethod
+    async def exists_role_for_phone_number(cls, phone_number: str, role: str) -> bool:
         async with cls.data_access.get_or_create_session() as session:
             try:
-                result = await session.execute(
-                    select(Account).join(Role).filter(Account.phone_number == phone_number, Role.role_name == role_name)
-                )
-                return result.scalars().one_or_none() is not None
+                result = await cls.data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=False)
+                return len(result) > 0
             except Exception as e:
                 message = f"Error occurred while checking if phone number is taken: {e}"
-                logger.error(message, phone_number=phone_number, role_name=role_name)
+                logger.error(message, phone_number=phone_number, role=role)
                 raise e
 
     @classmethod
-    async def verify_user(cls, user_id: str) -> Optional[Account]:
+    async def verify_user(cls, user_id: str) -> Optional[Profile]:
         async with cls.data_access.get_or_create_session() as session:
             try:
-                result = await session.execute(select(Account).filter_by(id=user_id))
-                user_account = result.scalars().one_or_none()
-                if user_account:
-                    user_account.verified_at = utcnow()
+                result = await session.execute(select(Profile).filter_by(id=user_id))
+                user_profile = result.scalars().one_or_none()
+                if user_profile:
+                    user_profile.verified_at = utcnow()
                     await session.commit()
 
-                return user_account
+                return user_profile
             except Exception as e:
                 message = f"Error occurred while authenticating user: {e}"
                 logger.error(message, user_id=user_id)
-                raise e
-
-    @classmethod
-    async def load_user_by_role_and_phone_number(cls, phone_number: str, role_name: str) -> Optional[Account]:
-        async with cls.data_access.get_or_create_session() as session:
-            try:
-                result = await session.execute(
-                    select(Account).join(Role).filter(Account.phone_number == phone_number, Role.role_name == role_name)
-                )
-                user_account = result.scalars().one_or_none()
-                return user_account
-            except Exception as e:
-                message = f"Error occurred while retrieving user by phone number and role: {e}"
-                logger.error(message, phone_number=phone_number, role_name=role_name)
                 raise e
 
     @classmethod
@@ -131,17 +110,14 @@ class UserRepository:
         async with cls.data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
-                    result = await session.execute(select(UserAccount).filter_by(id=user_id))
-                    user_account = result.scalars().one_or_none()
-                    roles = await session.execute(select(Role).filter_by(user_id=user_id)).scalars().all()
-                    for role in roles:
-                        await session.delete(role)
-
+                    result = await session.execute(select(UserProfile).filter_by(id=user_id))
+                    user_profile = result.scalars().one_or_none()
+                  
                     addresses = await session.execute(select(Address).filter_by(user_id=user_id)).scalars().all()
                     for address in addresses:
                         await session.delete(address)
+                    await session.delete(user_profile)
 
-                    await session.delete(user_account)
                     await session.commit()
                 except Exception as e:
                     await session.rollback()
@@ -201,7 +177,7 @@ class UserRepository:
 
 
     @classmethod
-    async def get_user_addresses(cls, user_id: str) -> List[Address]:
+    async def load_user_addresses(cls, user_id: str) -> List[Address]:
         try:
             addresses = await cls.data_access.load_from_table_by_query(Address, {"user_id": user_id})
             return addresses
@@ -211,7 +187,7 @@ class UserRepository:
             raise e
 
     @classmethod
-    async def get_address_by_id(cls, address_id: str) -> Optional[Address]:
+    async def load_address_by_id(cls, address_id: str) -> Optional[Address]:
         try:
             address = await cls.data_access.load_from_table_by_query(Address, {"id: address_id"}, one_or_none=True)
             return address

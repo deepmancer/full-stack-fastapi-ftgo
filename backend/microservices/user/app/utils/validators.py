@@ -1,6 +1,6 @@
 import re
 import enum
-from utils.exceptions import PasswordValidationError, PhoneNumberValidationError, EmailValidationError
+from utils.exceptions import PasswordValidationError, PhoneNumberValidationError
 
 def validate_password(value: str) -> str:
     return value

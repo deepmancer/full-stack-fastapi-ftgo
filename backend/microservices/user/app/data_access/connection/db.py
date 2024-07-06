@@ -5,30 +5,15 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine
 )
-from typing import Optional, List, Dict, Type
+from typing import Optional, Dict, Type
 from loguru import logger
 
 from sqlalchemy.future import select
-from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
 
 from config.db import PostgresConfig
-from utils.time import utcnow
-from data_access.models.account import Account
-from data_access.models.address import Address
-from data_access.models.role import Role
 from data_access.models.base import Base
-from typing import Type, Dict
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.exc import IntegrityError
-from loguru import logger
-
-from data_access.connection.db import DatabaseDataAccess
-
-from config.db import PostgresConfig
 from data_access.connection.base import BaseDataAccess
-from typing import AsyncGenerator, Optional
 
 class DatabaseDataAccess(BaseDataAccess):
     _config: Optional[PostgresConfig] = None

@@ -1,6 +1,7 @@
 import asyncio
 from typing import Any
-from data_access.repository import UserRepository
+from data_access.repository.session import SessionRepository
+from data_access.repository.user import UserRepository
 from data_access.connection.db import DatabaseDataAccess
 from data_access.connection.cache import CacheDataAccess
 from config.db import PostgresConfig
@@ -13,7 +14,8 @@ async def setup() -> None:
     DatabaseDataAccess.initialize(db_config)
     CacheDataAccess.initialize(cache_config)
     
-    UserRepository.initialize(db_config, cache_config)
+    UserRepository.initialize(db_config)
+    SessionRepository.initialize(cache_config)
 
     db_da = await DatabaseDataAccess.get_instance()
     cache_da = await CacheDataAccess.get_instance()

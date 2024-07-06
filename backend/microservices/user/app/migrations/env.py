@@ -21,15 +21,14 @@ fileConfig(alembic_config.config_file_name)
 # for 'autogenerate' support
 from config.db import PostgresConfig  # Ensure correct import
 from data_access.models.base import Base
-from data_access.models.user import User
+from data_access.models.profile import Profile
 from data_access.models.address import Address
-from data_access.models.role import Role
 target_metadata = Base.metadata
 
 def get_url():
     db_config = PostgresConfig()
     logger.debug(f"database url: {db_config.sync_url}")
-    return db_config.sync_url
+    return db_config.local_url
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
