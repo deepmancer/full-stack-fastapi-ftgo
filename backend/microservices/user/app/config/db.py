@@ -13,7 +13,7 @@ class PostgresConfig(BaseConfig):
 
     enable_echo_log: bool = de_config("ENABLE_DB_ECHO_LOG", default=False, cast=bool)
     enable_force_rollback: bool = de_config("ENABLE_DB_FORCE_ROLLBACK", default=False, cast=bool)
-    enable_expire_on_commit: bool = de_config("ENABLE_DB_EXPIRE_ON_COMMIT", default=True, cast=bool)
+    enable_expire_on_commit: bool = de_config("ENABLE_DB_EXPIRE_ON_COMMIT", default=False, cast=bool)
 
     @property
     def local_url(self) -> str:

@@ -21,7 +21,10 @@ from utils.exceptions import (
     InvalidPasswordError,
     AuthenticationCodeError,
     AddressNotFoundError,
+    UserAlreadyVerifiedError,
     DefaultAddressDeletionError,
+    UnverifiedSessionError,
+    UnmatchedTokenWithUserIdError,
 )
 
 class UserDomain:
@@ -34,10 +37,10 @@ class UserDomain:
         role: str,
         hashed_password: str,
         gender: Optional[str],
-        national_id: Optional[str],
         created_at: str,
         updated_at: Optional[str],
         verified_at: Optional[str],
+        national_id: Optional[str] = None,
     ):
         self.user_id = user_id
         self.first_name = first_name
@@ -53,7 +56,7 @@ class UserDomain:
         self.addresses = None
 
     @staticmethod
-    async def load(user_id: str):
+    async def load(user_id: str, access_token: str):
         user_profile = await UserRepository.load_user_by_id(user_id)
         if not user_profile:
             raise UserNotFoundError()
@@ -64,7 +67,10 @@ class UserDomain:
 
         access_token = await user._get_access_token()
         if not access_token:
-            raise UserNotVerifiedError()
+            raise UnverifiedSessionError()
+
+        if not TokenHandler.validate_token(user.user_id, user._get_secret(), access_token):
+            raise UnmatchedTokenWithUserIdError()
 
         return user
 
@@ -77,11 +83,12 @@ class UserDomain:
         role: str,
         national_id: Optional[str] = None,
     ) -> str:
-        if not (await UserRepository.exists_role_for_phone_number(phone_number, role)):
+        if (await UserRepository.exists_role_for_phone_number(phone_number, role)):
             raise AccountExistsError()
 
         user_id = UUIDGenerator.generate()
         hashed_password = PasswordHandler.hash_password(password)
+
         new_profile = await UserRepository.create_user(
             user_id,
             first_name,
@@ -103,16 +110,16 @@ class UserDomain:
 
         user = UserDomain._from_profile(profile)
         if user.is_verified():
-            raise UserNotVerifiedError()
+            raise UserAlreadyVerifiedError()
 
         if not Authenticator.verify_auth_code(auth_code):
             raise AuthenticationCodeError()
         
         stored_auth_code = await user._get_auth_code()
         if stored_auth_code and stored_auth_code == auth_code:
-            verified_profile = await UserRepository.verify_user(self.user_id)
-            self.verified_at = verified_profile.verified_at
-            self.updated_at = verified_profile.updated_at
+            verified_profile = await UserRepository.verify_user(user.user_id)
+            user.verified_at = verified_profile.verified_at
+            user.updated_at = verified_profile.updated_at
         else:
             raise InvalidAuthenticationCodeError()
 
@@ -128,17 +135,17 @@ class UserDomain:
         if not user.is_verified():
             raise UserNotVerifiedError()
 
-        hashed_password = PasswordHandler.hash_password(password)
-        if hashed_password != user.hashed_password:
+      
+        if not PasswordHandler.verify_password(password, user.hashed_password):
             raise InvalidPasswordError()
 
         access_token = await user._get_access_token()
 
         if access_token:
-            return access_token
+            return user.user_id, access_token
 
         access_token = await user._generate_session_token()
-        return access_token
+        return user.user_id, access_token
 
     async def delete_account(self) -> bool:
         await UserRepository.delete_user(self.user_id)
@@ -156,11 +163,28 @@ class UserDomain:
     async def logout(self):
         await SessionRepository.delete_user_token(self.user_id)
 
-    async def add_address(self, address_line_1: str, address_line_2: str, city: str, state: str, postal_code: str = None, country: str = None) -> str:
-        address =  await AddressDomain.add_address(self.user_id, address_line_1, address_line_2, city, state, postal_code, country)
-        self.addresses.append(address)
-        return address.to_dict()
+    async def add_address(self, address_line_1: str, address_line_2: str, city: str, postal_code: str = None, country: str = None) -> str:
+        address =  await AddressDomain.add_address(self.user_id, address_line_1, address_line_2, city, postal_code, country)
+        if self.addresses is None:
+            self.addresses = [address]
+        else:
+            self.addresses.append(address)
+        
+        return address.address_id
 
+    async def get_address_info(self, address_id: str) -> Dict[str, Any]:
+        address = await self.get_address(address_id)
+        if not address:
+            raise AddressNotFoundError()
+        
+        return address.get_info()
+    
+    async def get_addresses_info(self) -> List[Dict[str, Any]]:
+        if not self.addresses:
+            await self.load_addresses()
+        
+        return [address.get_info() for address in self.addresses]
+    
     async def get_address(self, address_id: str) -> Optional[AddressDomain]:
         if not self.addresses:
             await self.load_addresses()
@@ -182,15 +206,17 @@ class UserDomain:
         await AddressDomain.delete_address(address_id)
         return address_id
 
-    async def set_preferred_address(self, address_id: str) -> bool:
+    async def set_address_as_default(self, address_id: str) -> bool:
         address = await self.get_address(address_id)
+
         if not address:
-            raise AddressNotFoundError
+            raise AddressNotFoundError()
         if address.is_default:
             return True
         
         default_address = next((address for address in self.addresses if address.is_default), None)
-        await default_address.unset_as_default()
+        if default_address is not None and default_address.address_id != address_id:
+            await default_address.unset_as_default()
         await address.set_as_default()
         return address_id
 
@@ -250,7 +276,7 @@ class UserDomain:
         return access_token
 
     @staticmethod
-    def _from_profile(profile: Profile) -> "UserDomain":
+    def _from_profile(profile: Profile):
         if not profile:
             return None
 

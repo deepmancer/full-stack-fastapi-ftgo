@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from data_access.connection.cache import CacheDataAccess
 from config.cache import RedisConfig
 
@@ -56,7 +56,17 @@ class SessionRepository:
     async def delete_user_data(cls, user_id: str):
         auth_key = cls.create_auth_key(user_id)
         token_key = cls.create_token_key(user_id)
-        async with cls.data_access.pipeline() as pipe:
+        pipeline = await cls.data_access.pipeline()
+        pipeline.delete(auth_key)
+        pipeline.delete(token_key)
+        await pipeline.execute()
+
+    @classmethod
+    async def delete_users_data(cls, user_ids: List[str]):
+        pipe = await cls.data_access.pipeline()
+        for user_id in user_ids:
+            auth_key = cls.create_auth_key(user_id)
+            token_key = cls.create_token_key(user_id)
             pipe.delete(auth_key)
             pipe.delete(token_key)
-            await pipe.execute()
+        await pipe.execute()

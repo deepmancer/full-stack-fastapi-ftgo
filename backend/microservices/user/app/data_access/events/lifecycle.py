@@ -24,7 +24,11 @@ async def setup() -> None:
     logger.info("Connected to cache")
     await db_da.connect()
     logger.info("Connected to database")
+
+    unverified_users = await UserRepository.delete_unverified_users()
+    await SessionRepository.delete_users_data(unverified_users)
     
+    logger.info(f"Deleted unverified users with ids: {unverified_users}")
 
 async def teardown() -> None:
     db_da = await DatabaseDataAccess.get_instance()

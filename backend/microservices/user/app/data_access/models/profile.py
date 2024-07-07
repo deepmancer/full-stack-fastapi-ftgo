@@ -9,7 +9,7 @@ from config.enums import Gender, Roles
 class Profile(Base):
     __tablename__ = "user_profile"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid4().hex()))
+    id = Column(String, primary_key=True, default=lambda: uuid4().hex)
     phone_number = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
     national_id = Column(String, nullable=True)

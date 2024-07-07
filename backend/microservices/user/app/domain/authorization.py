@@ -2,7 +2,6 @@ import jwt
 import datetime
 from typing import Optional
 from jwt import PyJWTError
-import asyncio
 import hashlib
 
 from config.access_token import ACCESS_TOKEN_TTL_SEC, ALGORITHM
@@ -19,24 +18,24 @@ class TokenHandler:
     def generate_token(user_id: str, user_secret: str) -> str:
         try:
             expire = datetime.datetime.now(tz) + datetime.timedelta(seconds=ACCESS_TOKEN_TTL_SEC)
-            to_encode = {"sub": user_id, "exp": expire}
+            to_encode = {"sub": user_id, "exp": expire.timestamp()}
             user_specific_secret = TokenHandler._generate_secret_key(user_id, user_secret)
             encoded_jwt = jwt.encode(to_encode, user_specific_secret, algorithm=ALGORITHM)
-            return encoded_jwt, TokenHandler.get_token_ttl(encoded_jwt)
+            return encoded_jwt, TokenHandler.get_token_ttl(encoded_jwt, user_specific_secret)
         except Exception as e:
             raise Exception("Token generation failed") from e
 
     @staticmethod
-    def get_token_ttl(token: str) -> int:
+    def get_token_ttl(token: str, secret: str) -> int:
         try:
-            payload = jwt.decode(token, options={"verify_signature": False})
-            expire = datetime.datetime.fromtimestamp(payload["exp"], UTC)
+            payload = jwt.decode(token, secret, algorithms=[ALGORITHM])
+            expire = datetime.datetime.fromtimestamp(payload["exp"], tz)
             ttl = expire - datetime.datetime.now(tz)
             return ttl.seconds
         except PyJWTError:
             return 0
         except Exception as e:
-            raise Exception("Token ttl retrieval failed") from e
+            raise Exception("Token TTL retrieval failed") from e
 
     @staticmethod
     def validate_token(user_id: str, user_secret: str, token: str) -> bool:
@@ -46,7 +45,7 @@ class TokenHandler:
             token_user_id: str = payload.get("sub")
             if token_user_id is None or token_user_id != user_id:
                 return False
-            if datetime.datetime.now(tz) > datetime.datetime.fromtimestamp(payload["exp"], UTC):
+            if datetime.datetime.now(tz) > datetime.datetime.fromtimestamp(payload["exp"], tz):
                 return False
             return True
         except PyJWTError:

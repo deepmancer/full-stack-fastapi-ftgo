@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine
 )
+from sqlalchemy import MetaData, Table
+
 from typing import Optional, Dict, Type
 from loguru import logger
 
@@ -48,22 +50,22 @@ class DatabaseDataAccess(BaseDataAccess):
     async def disconnect(self) -> None:
         await self.async_engine.dispose()
 
-    async def load_from_table_by_query(self, model: Type[Base],  query: Dict[str, str], one_or_none: bool = False):
+    async def load_from_table_by_query(self, model: Type[Base], query: Dict[str, str], one_or_none: bool = False):
         async with self.get_or_create_session() as session:
             try:
                 result = await session.execute(
                     select(model).filter_by(**query)
-                ).scalars()
+                )
                 if one_or_none:
-                    return result.one_or_none()
-                return result.all()
+                    return result.scalars().one_or_none()
+                return result.scalars().all()
             except Exception as e:
                 message = f"Error occurred while loading records: {e}"
                 logger.error(message, model=model, query=query, one_or_none=one_or_none)
                 raise e
 
     async def update_table_by_query(self, model: Type[Base], query: Dict[str, str], update_fields: Dict[str, str]):
-        async with self.data_access.get_or_create_session() as session:
+        async with self.get_or_create_session() as session:
             try:
                 async with session.begin():
                     result = await session.execute(
@@ -89,7 +91,7 @@ class DatabaseDataAccess(BaseDataAccess):
                 raise e
 
     async def delete_from_table_by_query(self, model: Type[Base], query: Dict[str, str]):
-        async with self.data_access.get_or_create_session() as session:
+        async with self.get_or_create_session() as session:
             try:
                 async with session.begin():
                     result = await session.execute(

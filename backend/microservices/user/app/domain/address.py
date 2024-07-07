@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from data_access.repository.user import UserRepository
 from data_access.models.address import Address
 from config.timezone import tz
@@ -74,6 +74,16 @@ class AddressDomain:
     async def unset_as_default(self) -> bool:
         await UserRepository.update_address(self.address_id, {"is_default": False})
         self.is_default = False
+
+    def get_info(self) -> Dict[str, Any]:
+        return dict(
+            is_default=self.is_default,
+            address_line_1=self.address_line_1,
+            address_line_2=self.address_line_2,
+            city=self.city,
+            postal_code=self.postal_code,
+            country=self.country,
+        )
 
     def to_dict(self):
         return {

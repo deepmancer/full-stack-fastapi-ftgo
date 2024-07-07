@@ -2,22 +2,14 @@ import bcrypt
 
 class PasswordHandler:
     @staticmethod
-    def hash_password(password: str):
+    def hash_password(password: str) -> str:
         salt = bcrypt.gensalt()
-        return bcrypt.hashpw(
-            password=password.encode(
-                encoding="utf-8",
-            ),
-            salt=salt,
-        ).decode("utf-8")
+        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+        return hashed.decode('utf-8')
 
     @staticmethod
-    def verify_password(raw_password: str, hashed_password: str):
-        return bcrypt.checkpw(
-            password=raw_password.encode(
-                encoding="utf-8",
-            ),
-            hashed_password=hashed_password.encode(
-                encoding="utf-8",
-            ),
-        )
+    def verify_password(raw_password: str, hashed_password: str) -> bool:
+        try:
+            return bcrypt.checkpw(raw_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        except ValueError:
+            return False

@@ -21,6 +21,7 @@ def validate_phone_number(value: str) -> str:
     return value
 
 def validate_enum(value, enum_class: enum.Enum):
+    return value
     if value not in [field.value for field in enum_class]:
         raise ValueError("Invalid role name")
     return value

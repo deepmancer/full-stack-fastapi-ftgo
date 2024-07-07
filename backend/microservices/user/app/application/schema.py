@@ -58,12 +58,15 @@ class LoginRequest(BaseSchema):
         return validate_enum(value, Roles)
 
 class LoginResponse(BaseSchema):
-    access_token: str
+    user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
 
 class GetUserInfoRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
 
 class GetUserInfoResponse(BaseSchema):
+    user_id: str = Field(..., min_length=1, max_length=36)
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     phone_number: str = Field(..., min_length=1, max_length=15)
@@ -78,8 +81,28 @@ class GetUserInfoResponse(BaseSchema):
     def validate_role_field(cls, value):
         return validate_enum(value, Roles)
 
+class AddressInfoRequest(BaseSchema):
+    user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
+    address_id: str = Field(..., min_length=1, max_length=36)
+    
+class AddressInfoResponse(BaseSchema):
+    address_line_1: str = Field(..., min_length=1, max_length=100)
+    address_line_2: str = Field(..., max_length=100)
+    city: str = Field(..., min_length=1, max_length=50)
+    postal_code: Optional[str] = Field(None, min_length=1, max_length=20)
+    country: Optional[str] = Field(None, min_length=1, max_length=50)
+    is_default: bool = Field(...)
+
+class AllAddressesRequest(BaseSchema):
+    user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
+
+class AllAddressesResponse(BaseSchema):
+    addresses: list[AddressInfoResponse] = Field(...)
 class AddAddressRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
     address_line_1: str = Field(..., min_length=1, max_length=100)
     address_line_2: str = Field(..., max_length=100)
     city: str = Field(..., min_length=1, max_length=50)
@@ -91,34 +114,37 @@ class AddressResponse(BaseSchema):
 
 class DeleteAddressRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
     address_id: str = Field(..., min_length=1, max_length=36)
 
 class DeleteAddressResponse(BaseSchema):
     address_id: str = Field(..., min_length=1, max_length=36)
-    success: bool
-
+    
 class SetPreferredAddressRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
     address_id: str = Field(..., min_length=1, max_length=36)
 
 class SetPreferredAddressResponse(BaseSchema):
     address_id: str = Field(..., min_length=1, max_length=36)
-    success: bool
+
 class DeleteProfileRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
 
 class DeleteProfileResponse(BaseSchema):
-    success: bool
+    user_id: str = Field(..., min_length=1, max_length=36)
 
 class DeleteAllAddressesRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
+    access_token: str = Field(..., min_length=1, max_length=200)
 
 class DeleteAllAddressesResponse(BaseSchema):
     address_ids: list[str] = Field(...)
-    success: bool
 
 class LogoutRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
-    
+    access_token: str = Field(..., min_length=1, max_length=200)
+
 class LogoutResponse(BaseSchema):
-    success: bool
+    user_id: str = Field(..., min_length=1, max_length=36)

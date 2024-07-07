@@ -33,7 +33,7 @@ class UserRepository:
         hashed_password: str,
         role: str,
         national_id: str = None,
-    ) -> UserProfile:
+    ) -> Profile:
         async with cls.data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
@@ -80,14 +80,13 @@ class UserRepository:
 
     @classmethod
     async def exists_role_for_phone_number(cls, phone_number: str, role: str) -> bool:
-        async with cls.data_access.get_or_create_session() as session:
-            try:
-                result = await cls.data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=False)
-                return len(result) > 0
-            except Exception as e:
-                message = f"Error occurred while checking if phone number is taken: {e}"
-                logger.error(message, phone_number=phone_number, role=role)
-                raise e
+        try:
+            result = await cls.data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=False)
+            return len(result) > 0
+        except Exception as e:
+            message = f"Error occurred while checking if phone number is taken: {e}"
+            logger.error(message, phone_number=phone_number, role=role)
+            raise e
 
     @classmethod
     async def verify_user(cls, user_id: str) -> Optional[Profile]:
@@ -98,10 +97,11 @@ class UserRepository:
                 if user_profile:
                     user_profile.verified_at = utcnow()
                     await session.commit()
-
+                    await session.refresh(user_profile)  # Refresh to ensure the instance is up-to-date and bound
+                
                 return user_profile
             except Exception as e:
-                message = f"Error occurred while authenticating user: {e}"
+                message = f"Error occurred while verifying user: {e}"
                 logger.error(message, user_id=user_id)
                 raise e
 
@@ -110,10 +110,10 @@ class UserRepository:
         async with cls.data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
-                    result = await session.execute(select(UserProfile).filter_by(id=user_id))
+                    result = await session.execute(select(Profile).filter_by(id=user_id))
                     user_profile = result.scalars().one_or_none()
                   
-                    addresses = await session.execute(select(Address).filter_by(user_id=user_id)).scalars().all()
+                    addresses = (await session.execute(select(Address).filter_by(user_id=user_id))).scalars().all()
                     for address in addresses:
                         await session.delete(address)
                     await session.delete(user_profile)
@@ -139,7 +139,8 @@ class UserRepository:
                         country=country,
                     )
                     session.add(new_address)
-                    await session.commit()
+                    await session.flush()
+                    await session.refresh(new_address)
                     return new_address
                 except Exception as e:
                     await session.rollback()
@@ -195,3 +196,30 @@ class UserRepository:
             message = f"Error occurred while retrieving address: {e}"
             logger.error(message, address_id=address_id)
             raise e
+
+    @classmethod
+    async def delete_unverified_users(cls) -> List[str]:
+        async with cls.data_access.get_or_create_session() as session:
+            async with session.begin():
+                try:
+                    result = await session.execute(select(Profile).filter_by(verified_at=None))
+                    unverified_users = result.scalars().all()
+                    unverified_user_ids = [user.id for user in unverified_users]
+                    
+                    for user in unverified_users:
+                        addresses = (await session.execute(select(Address).filter_by(user_id=user.id))).scalars().all()
+                        for address in addresses:
+                            await session.delete(address)
+                    
+                    for user in unverified_users:
+                        await session.delete(user)
+                    
+                    await session.commit()
+                    
+                    logger.info(f"Deleted unverified users: {unverified_user_ids}")
+                    return unverified_user_ids
+                except Exception as e:
+                    await session.rollback()
+                    message = f"Error occurred while deleting unverified users: {e}"
+                    logger.error(message)
+                    raise e

@@ -30,21 +30,21 @@ class CacheDataAccess(BaseDataAccess):
             self.session = None
 
     async def get(self, key: str) -> str:
-        session = await self.get_or_create_session()
-        return await session.get(key)
+        async with self.get_or_create_session() as session:
+            return await session.get(key)
 
     async def set(self, key: str, value: str, ttl=None) -> None:
-        session = await self.get_or_create_session()
-        await session.set(key, value, ex=ttl)
+        async with self.get_or_create_session() as session:
+            await session.set(key, value, ex=ttl)
 
     async def delete(self, key: str) -> None:
-        session = await self.get_or_create_session()
-        await session.delete(key)
+        async with self.get_or_create_session() as session:
+            await session.delete(key)
 
     async def expire(self, key: str, ttl: int) -> None:
-        session = await self.get_or_create_session()
-        await session.expire(key, ttl)
+        async with self.get_or_create_session() as session:
+            await session.expire(key, ttl)
 
     async def pipeline(self):
-        session = await self.get_or_create_session()
-        return session.pipeline()
+        async with self.get_or_create_session() as session:
+            return session.pipeline()

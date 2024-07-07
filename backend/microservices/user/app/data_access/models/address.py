@@ -7,7 +7,7 @@ from config.timezone import tz
 class Address(Base):
     __tablename__ = "user_address"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid4().hex()))
+    id = Column(String, primary_key=True, default=lambda: uuid4().hex)
     user_id = Column(String, ForeignKey("user_profile.id"), nullable=False)
     address_line_1 = Column(String, nullable=False)
     address_line_2 = Column(String, nullable=True)

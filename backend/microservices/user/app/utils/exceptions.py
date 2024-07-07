@@ -20,6 +20,23 @@ class UserNotVerifiedError(ValidationError):
     def __init__(self):
         super().__init__("User is not verified")
 
+class UnverifiedSessionError(ValidationError):
+    """Exception raised when a user is not verified."""
+    def __init__(self):
+        super().__init__("User is not logged in")
+
+class UnmatchedTokenWithUserIdError(ValidationError):
+    """Exception raised when a user is not verified."""
+    def __init__(self):
+        super().__init__("User is not verified")
+
+
+class UserAlreadyVerifiedError(ValidationError):
+    """Exception raised when a user is not verified."""
+    def __init__(self):
+        super().__init__("User cannot be verified more than once")
+
+
 class AccountExistsError(ValidationError):
     """Exception raised when an account already exists for a phone number and role."""
     def __init__(self):
@@ -29,6 +46,11 @@ class InvalidPasswordError(ValidationError):
     """Exception raised when a password is invalid."""
     def __init__(self):
         super().__init__("Invalid password")
+
+class AuthenticationCodeError(ValidationError):
+    """Exception raised for authentication code errors."""
+    def __init__(self, message="authentication code error"):
+        super().__init__(message)
 
 class InvalidAuthenticationCodeError(ValidationError):
     """Exception raised for authentication code errors."""

@@ -28,7 +28,7 @@ target_metadata = Base.metadata
 def get_url():
     db_config = PostgresConfig()
     logger.debug(f"database url: {db_config.sync_url}")
-    return db_config.local_url
+    return db_config.sync_url
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
