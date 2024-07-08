@@ -17,7 +17,7 @@ services:
     ports:
       - "5438:5438"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - user_postgres_data:/var/lib/postgresql/data
     command: ["postgres", "-c", "port=5438"]
   redis:
     image: redis:6.2-alpine
@@ -32,7 +32,7 @@ services:
     ports:
       - "6235:6235"
     volumes:
-      - redis_data:/data
+      - user_redis_data:/data
     command: ["redis-server", "--port", "6235"]
 
   backend:
@@ -69,5 +69,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
-  postgres_data:
-  redis_data:
+  user_postgres_data:
+  user_redis_data:

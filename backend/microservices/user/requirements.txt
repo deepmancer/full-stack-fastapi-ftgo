@@ -35,6 +35,8 @@ redis
 SQLAlchemy==2.0.0b3
 sqlalchemy
 pytz
+validators
 trio
 uvicorn
 uvloop
+starlette

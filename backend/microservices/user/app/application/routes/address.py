@@ -2,6 +2,11 @@ import os
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.exception_handlers import (
+    http_exception_handler,
+    request_validation_exception_handler,
+)
+from fastapi.exceptions import RequestValidationError
 
 from application import get_logger
 from application.schema import (
@@ -14,6 +19,7 @@ from application.schema import (
 from domain.user import UserDomain
 
 router = APIRouter(prefix="/address", tags=["address"])
+
 
 @router.post("/add", response_model=AddressResponse)
 async def add_address(request: AddAddressRequest):

@@ -1,12 +1,20 @@
 import os
 import fastapi
 import uvicorn
-from loguru import logger
 
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exception_handlers import (
+    http_exception_handler,
+    request_validation_exception_handler,
+)
+from fastapi.exceptions import RequestValidationError
+from config.exceptions import ApplicationError
+from application.routes.profile import router as user_profile_router
+from application.routes.address import router as address_router
 
 from config.logger import init_logging
-from application.endpoints import app as api_endpoint_router
+from config.logger_factory import LoggerFactory
+from config.enums import LayerNames
 from data_access.events.lifecycle import setup, teardown
 
 app = fastapi.FastAPI()
@@ -18,7 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router=api_endpoint_router, prefix=os.getenv("API_PREFIX", "/user"))
+app.include_router(router=user_profile_router, prefix=os.getenv("API_PREFIX", ""))
+app.include_router(router=address_router, prefix=os.getenv("API_PREFIX", ""))
 
 @app.on_event("startup")
 async def startup_event():
@@ -28,6 +37,11 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     await teardown()
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    LoggerFactory.get_logger(LayerNames.APP.value).error(f"{exc}")
+    return await request_validation_exception_handler(request, exc)
 
 
 if __name__ == "__main__":

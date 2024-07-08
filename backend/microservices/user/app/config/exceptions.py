@@ -16,7 +16,7 @@ class BaseError(Exception):
 
     def __str__(self) -> str:
         layer_info = f"layer: {self.layer} | " if self.layer else ""
-        cause_info = "\n" + f"{' ' * (len(layer_info) - 2)}└── Caused by: {self.__cause__}" if self.__cause__ else ""
+        cause_info = "\n " + f"Caused by: {self.__cause__}" if self.__cause__ else ""
         return f"{layer_info}{self.message}{cause_info}"
 
 class ApplicationError(BaseError):
