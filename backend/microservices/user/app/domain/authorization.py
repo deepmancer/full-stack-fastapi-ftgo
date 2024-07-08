@@ -3,6 +3,7 @@ import datetime
 from typing import Optional
 from jwt import PyJWTError
 import hashlib
+from domain.exceptions import TokenGenerationError, TokenTTLRetrievalError, TokenValidationError
 
 from config.access_token import ACCESS_TOKEN_TTL_SEC, ALGORITHM
 from config.timezone import tz
@@ -23,7 +24,7 @@ class TokenHandler:
             encoded_jwt = jwt.encode(to_encode, user_specific_secret, algorithm=ALGORITHM)
             return encoded_jwt, TokenHandler.get_token_ttl(encoded_jwt, user_specific_secret)
         except Exception as e:
-            raise Exception("Token generation failed") from e
+            raise TokenGenerationError(user_id=user_id, message=e.args[0])
 
     @staticmethod
     def get_token_ttl(token: str, secret: str) -> int:
@@ -35,7 +36,7 @@ class TokenHandler:
         except PyJWTError:
             return 0
         except Exception as e:
-            raise Exception("Token TTL retrieval failed") from e
+            raise TokenTTLRetrievalError(token=token, message=e.args[0])
 
     @staticmethod
     def validate_token(user_id: str, user_secret: str, token: str) -> bool:
@@ -48,7 +49,5 @@ class TokenHandler:
             if datetime.datetime.now(tz) > datetime.datetime.fromtimestamp(payload["exp"], tz):
                 return False
             return True
-        except PyJWTError:
-            return False
         except Exception as e:
-            raise Exception("Token validation failed") from e
+            raise TokenValidationError(user_id=user_id, token=token, message=e.args[0])

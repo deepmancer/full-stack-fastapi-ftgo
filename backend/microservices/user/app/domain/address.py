@@ -31,7 +31,7 @@ class AddressDomain:
     async def load(address_id: str) -> "AddressDomain":
         address = await UserRepository.load_address_by_id(address_id)
         if not address:
-            raise "Address not found"
+            return None
 
         return AddressDomain._from_address(address)
 

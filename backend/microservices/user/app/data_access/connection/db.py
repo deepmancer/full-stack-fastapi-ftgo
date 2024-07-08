@@ -16,7 +16,8 @@ from sqlalchemy.exc import IntegrityError
 from config.db import PostgresConfig
 from data_access.models.base import Base
 from data_access.connection.base import BaseDataAccess
-
+from data_access import get_logger
+from data_access.exceptions import DatabaseConnectionError, DatabaseSessionCreationError, DatabaseTransactionError
 class DatabaseDataAccess(BaseDataAccess):
     _config: Optional[PostgresConfig] = None
 
@@ -37,15 +38,20 @@ class DatabaseDataAccess(BaseDataAccess):
         session = self.async_session_maker()
         try:
             yield session
-        except Exception:
+        except Exception as e:
+            get_logger().error(f"Failed to create session for Postgres at {self._config.async_url}")
             await session.rollback()
-            raise
+            raise DatabaseSessionCreationError() from e
         finally:
             await session.close()
 
     async def connect(self) -> None:
-        async with self.async_engine.begin() as connection:
-            await connection.run_sync(lambda conn: None)
+        try:
+            async with self.async_engine.begin() as connection:
+                await connection.run_sync(lambda conn: None)
+        except Exception as e:
+            get_logger().error(f"Failed to connect to Postgres at {self._config.async_url}")
+            raise DatabaseConnectionError(self._config.async_url) from e
 
     async def disconnect(self) -> None:
         await self.async_engine.dispose()
@@ -62,7 +68,7 @@ class DatabaseDataAccess(BaseDataAccess):
             except Exception as e:
                 message = f"Error occurred while loading records: {e}"
                 logger.error(message, model=model, query=query, one_or_none=one_or_none)
-                raise e
+                raise DatabaseTransactionError(query) from e
 
     async def update_table_by_query(self, model: Type[Base], query: Dict[str, str], update_fields: Dict[str, str]):
         async with self.get_or_create_session() as session:
@@ -88,7 +94,7 @@ class DatabaseDataAccess(BaseDataAccess):
                 await session.rollback()
                 message = f"Error occurred while updating records: {e}"
                 logger.error(message, model=model, query=query, update_fields=update_fields)
-                raise e
+                raise DatabaseTransactionError(query) from e
 
     async def delete_from_table_by_query(self, model: Type[Base], query: Dict[str, str]):
         async with self.get_or_create_session() as session:
@@ -113,4 +119,4 @@ class DatabaseDataAccess(BaseDataAccess):
                 await session.rollback()
                 message = f"Error occurred while deleting records: {e}"
                 logger.error(message, model=model, query=query)
-                raise e
+                raise DatabaseTransactionError(query) from e

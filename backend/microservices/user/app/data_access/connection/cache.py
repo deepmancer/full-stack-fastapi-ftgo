@@ -1,9 +1,10 @@
 import contextlib
 import redis.asyncio as redis
-from loguru import logger
 from typing import Optional
 from config.cache import RedisConfig
 from data_access.connection.base import BaseDataAccess
+from data_access.exceptions import CacheConnectionError, CacheSessionCreationError
+from data_access import get_logger
 
 class CacheDataAccess(BaseDataAccess):
     _config: Optional[RedisConfig] = None
@@ -14,16 +15,23 @@ class CacheDataAccess(BaseDataAccess):
 
     @contextlib.asynccontextmanager
     async def get_or_create_session(self) -> redis.Redis:
-        if self.session is None:
-            await self.connect()
-        yield self.session
+        try:
+            if self.session is None:
+                await self.connect()
+            yield self.session
+        except Exception as e:
+            get_logger().error(f"Failed to create session for Redis at {self._config.url}")
+            raise CacheSessionCreationError() from e
 
     async def connect(self) -> None:
-        logger.debug(f"Connecting to Redis at {self._config.url}")
-        self.session = redis.Redis.from_url(self._config.url, decode_responses=True)
-        await self.session.ping()
-        
-
+        try:
+            get_logger().info(f"Connecting to Redis at {self._config.url}")
+            self.session = redis.Redis.from_url(self._config.url, decode_responses=True)
+            await self.session.ping()
+        except Exception as e:
+            get_logger().error(f"Failed to connect to Redis at {self._config.url}")
+            raise CacheConnectionError(self._config.url) from e
+            
     async def disconnect(self) -> None:
         if self.session:
             await self.session.close()

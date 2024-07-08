@@ -10,3 +10,8 @@ class Gender(enum.Enum):
     MALE = 'male'
     FEMALE = 'female'
     UNKNOWN = 'unknown'
+    
+class LayerNames(enum.Enum):
+    APP = "app"
+    DOMAIN = "domain"
+    DATA_ACCESS = "data"

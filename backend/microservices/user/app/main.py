@@ -23,6 +23,7 @@ app.include_router(router=api_endpoint_router, prefix=os.getenv("API_PREFIX", "/
 @app.on_event("startup")
 async def startup_event():
     await setup()
+    init_logging()
 
 @app.on_event("shutdown")
 async def shutdown_event():

@@ -66,7 +66,7 @@ class UserRepository:
         except Exception as e:
             message = f"Error occurred while loading user: {e}"
             logger.error(message, user_id=user_id)
-            raise e
+            return None
 
     @classmethod
     async def load_user_by_phone_number_and_role(cls, phone_number: str, role: str):
@@ -76,7 +76,7 @@ class UserRepository:
         except Exception as e:
             message = f"Error occurred while loading user by phone number & role: {e}"
             logger.error(message, phone_number=phone_number, role=role)
-            raise e
+            return None
 
     @classmethod
     async def exists_role_for_phone_number(cls, phone_number: str, role: str) -> bool:
