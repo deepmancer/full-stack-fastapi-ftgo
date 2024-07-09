@@ -1,9 +1,8 @@
 import os
-from loguru import logger
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-
+from application import get_logger
 from application.schema import (
     RegisterRequest, RegisterResponse,
     AuthenticateAccountRequest, AuthenticateAccountResponse,
@@ -30,17 +29,16 @@ async def register(request: RegisterRequest):
         )
         return RegisterResponse(user_id=user_id, auth_code=auth_code)
     except Exception as e:
-        logger.error(f"Error occurred while registering user: {e}", request=request)
+        get_logger().error(f"Error occurred while registering user: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
 @router.post("/verify", response_model=AuthenticateAccountResponse)
 async def verify_account(request: AuthenticateAccountRequest):
     try:
-        user_id = await UserDomain.verify_account(request.user_id, request.auth_code)
-       
+        user_id = await UserDomain.verify_account(request.user_id, request.auth_code.strip())
         return AuthenticateAccountResponse(user_id=user_id)
     except Exception as e:
-        logger.error(f"Error occurred while verifying the account: {e}", request=request)
+        get_logger().error(f"Error occurred while verifying the account: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
 @router.post("/login", response_model=LoginResponse)
@@ -49,7 +47,7 @@ async def login(request: LoginRequest):
         user_id, access_token = await UserDomain.login(request.phone_number, request.password, request.role)
         return LoginResponse(user_id=user_id, access_token=access_token)
     except Exception as e:
-        logger.error(f"Error occurred while logging the user in: {e}", request=request)
+        get_logger().error(f"Error occurred while logging the user in: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
 # logout api
@@ -60,7 +58,7 @@ async def logout(request: LogoutRequest):
         await user.logout()
         return LogoutResponse(user_id=user.user_id)
     except Exception as e:
-        logger.error(f"Error occurred while logging the user out: {e}", request=request)
+        get_logger().error(f"Error occurred while logging the user out: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
 @router.get("/user_info", response_model=GetUserInfoResponse)
@@ -77,7 +75,7 @@ async def get_info(request: GetUserInfoRequest):
             role=user_info["role"],
         )
     except Exception as e:
-        logger.error(f"Error occurred while getting the user info: {e}", request=request)
+        get_logger().error(f"Error occurred while getting the user info: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
 @router.delete("/delete", response_model=DeleteProfileResponse)
@@ -87,5 +85,5 @@ async def delete_account(request: DeleteProfileRequest):
         await user.delete_account()
         return DeleteProfileResponse(user_id=user.user_id)
     except Exception as e:
-        logger.error(f"Error occurred while deleting the account: {e}", request=request)
+        get_logger().error(f"Error occurred while deleting the account: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))

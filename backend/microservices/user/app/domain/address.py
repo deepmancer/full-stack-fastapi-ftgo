@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict, Any
-from data_access.repository.user import UserRepository
-from data_access.models.address import Address
+from data_access.repository.db_repository import DatabaseRepository
+from models.address import Address
 from config.timezone import tz
 class AddressDomain:
     def __init__(
@@ -29,7 +29,7 @@ class AddressDomain:
 
     @staticmethod
     async def load(address_id: str) -> "AddressDomain":
-        address = await UserRepository.load_address_by_id(address_id)
+        address = await DatabaseRepository.fetch_by_query(Address, query={"id": address_id}, one_or_none=True)
         if not address:
             return None
 
@@ -39,12 +39,20 @@ class AddressDomain:
     async def add_address(
         user_id: str, address_line_1: str, address_line_2: str, city: str, postal_code: str = None, country: str = None,
     ) -> "AddressDomain":
-        new_address = await UserRepository.add_address(user_id, address_line_1, address_line_2, city, postal_code, country)
+        new_address = Address(
+            user_id=user_id,
+            address_line_1=address_line_1,
+            address_line_2=address_line_2,
+            city=city,
+            postal_code=postal_code,
+            country=country,
+        )
+        new_address = await DatabaseRepository.insert(new_address)
         return AddressDomain._from_address(new_address)
 
     @staticmethod
     async def delete_address(address_id: str) -> bool:
-        await UserRepository.delete_address(address_id)
+        await DatabaseRepository.delete_by_query(Address, query={"id": address_id})
 
     @staticmethod
     def _from_address(address: Address) -> "AddressDomain":
@@ -61,18 +69,12 @@ class AddressDomain:
             updated_at=address.updated_at.astimezone(tz) if address.updated_at else None,
         )
 
-    async def modify_fields(self, update_data) -> str:
-        new_address = await UserRepository.update_address(self.address_id, update_data)
-        for key in update_data.keys():
-            value = getattr(new_address, key)
-            setattr(self, key, value)
-
     async def set_as_default(self) -> bool:
-        await UserRepository.update_address(self.address_id, {"is_default": True})
+        await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields={"is_default": True})
         self.is_default = True
 
     async def unset_as_default(self) -> bool:
-        await UserRepository.update_address(self.address_id, {"is_default": False})
+        await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields={"is_default": False})
         self.is_default = False
 
     def get_info(self) -> Dict[str, Any]:

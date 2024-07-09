@@ -1,9 +1,11 @@
 import asyncio
 from typing import Any
-from data_access.repository.session import SessionRepository
-from data_access.repository.user import UserRepository
-from data_access.connection.db import DatabaseDataAccess
-from data_access.connection.cache import CacheDataAccess
+
+from data_access.repository.cache_repository import CacheRepository
+from data_access.repository.db_repository import DatabaseRepository
+
+from data_access.resources.db import DatabaseDataAccess
+from data_access.resources.cache import CacheDataAccess
 from config.db import PostgresConfig
 from config.cache import RedisConfig
 from data_access import get_logger
@@ -14,8 +16,8 @@ async def setup() -> None:
     DatabaseDataAccess.initialize(db_config)
     CacheDataAccess.initialize(cache_config)
     
-    UserRepository.initialize(db_config)
-    SessionRepository.initialize(cache_config)
+    DatabaseRepository.initialize(db_config)
+    CacheRepository.initialize(cache_config)
 
     db_da = await DatabaseDataAccess.get_instance()
     cache_da = await CacheDataAccess.get_instance()
@@ -25,11 +27,6 @@ async def setup() -> None:
     logger.info("Connected to cache")
     await db_da.connect()
     logger.info("Connected to database")
-
-    unverified_users = await UserRepository.delete_unverified_users()
-    await SessionRepository.delete_users_data(unverified_users)
-    
-    logger.info(f"Deleted unverified users with ids: {unverified_users}")
 
 async def teardown() -> None:
     db_da = await DatabaseDataAccess.get_instance()

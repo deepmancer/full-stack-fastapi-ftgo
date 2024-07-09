@@ -85,9 +85,9 @@ class AuthenticationCodeError(DomainError):
         super().__init__(base_message, message)
 
 class WrongAuthenticationCodeError(DomainError):
-    def __call__(self, user_id: str, auth_code: str, actual_auth_code: str, message: Optional[str] = None):
+    def __init__(self, user_id: str, auth_code: str, actual_auth_code: str, message: Optional[str] = None):
         base_message = f"Authentication code {auth_code} does not match actual code {actual_auth_code} for User with ID {user_id}"
-        return super().__call__(base_message, message)
+        return super().__init__(base_message, message)
 
 class AddressNotFoundError(DomainError):
     def __init__(self, address_id: str, message: Optional[str] = None):

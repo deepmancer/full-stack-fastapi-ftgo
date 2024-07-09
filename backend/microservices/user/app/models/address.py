@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, func
 from uuid import uuid4
 from sqlalchemy.orm import relationship
-from data_access.models.base import Base
+from models.base import Base
 from config.timezone import tz
 
 class Address(Base):

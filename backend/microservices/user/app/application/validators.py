@@ -8,6 +8,7 @@ from application.exceptions import (
 )
 
 def validate_uuid(user_id: str):
+    return user_id
     try:
         if not user_id:
             raise Exception
@@ -46,9 +47,8 @@ def validate_phone_number(phone_number: str):
         elif phone_number.startswith("98"):
             phone_number = phone_number[2:]
             
-        # 09 or 9
-        elif phone_number.startswith("09"):
-            phone_number = phone_number[2]
+        if phone_number.startswith("09"):
+            phone_number = phone_number[1:]
         elif phone_number.startswith("9"):
             pass
         else:
