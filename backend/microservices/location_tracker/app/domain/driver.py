@@ -15,7 +15,9 @@ class DriverDomain:
 
     async def add_locations(self, locations: List[LocationSchema]):
         if self.status == Status.OFFLINE.value:
-            await self.change_status(Status.ONLINE.value)
+            await DriverLocationHandler.delete_driver_locations(self.driver_id)
+            await StatusRepository.set_driver_status(self.driver_id, status=Status.ONLINE.value)
+            self.status = Status.ONLINE.value
             locations_to_persist = sorted(locations, key=lambda x: -1 * x.timestamp)[:MAXIMUM_LOCATION_TO_STORE_PER_DRIVER]
         else:
             current_locations = await DriverLocationHandler.load_driver_locations(self.driver_id)

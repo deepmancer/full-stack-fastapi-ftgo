@@ -3,9 +3,6 @@ from data_access.connection.cache import CacheDataAccess
 from config.cache import RedisConfig
 
 class SessionRepository:
-    AUTH_CODE_PREFIX = "auth_"
-    SESSION_TOKEN_PREFIX = "token_"
-
     data_access: Optional[CacheDataAccess] = None
 
     @classmethod
@@ -13,15 +10,7 @@ class SessionRepository:
         cls.data_access = CacheDataAccess(cache_config)
 
     @classmethod
-    def create_auth_key(cls, key: str) -> str:
-        return f"{cls.AUTH_CODE_PREFIX}{key}"
-
-    @classmethod
-    def create_token_key(cls, key: str) -> str:
-        return f"{cls.SESSION_TOKEN_PREFIX}{key}"
-  
-    @classmethod
-    async def cache_auth_code(cls, user_id: str, auth_code: str, ttl: int):
+    async def cache_(cls, hexa: str, auth_code: str, ttl: int):
         key = cls.create_auth_key(user_id)
         await cls.data_access.set(key, auth_code, ttl)
 
