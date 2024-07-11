@@ -1,85 +1,265 @@
-from pydantic import BaseModel, Field, field_validator, ConfigDict, ValidationError
-from config.enums import Roles
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional, List
-from application.validators import validate_timestamp, validate_speed, validate_accuracy, validate_uuid, validate_status
+from application.validators import (
+    validate_uuid, validate_email, validate_phone_number,
+    validate_password
+)
+from config.enums import OrderStatus
 
 
-class BaseSchema(BaseModel):    
+class BaseSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, populate_by_name=True)
 
-class LocationSchema(BaseSchema):
-    latitude: float = Field(..., ge=-90, le=90)
-    longitude: float = Field(..., ge=-180, le=180)
-    timestamp: float = Field(..., ge=0)
-    accuracy: Optional[float] = Field(None, ge=0)
-    speed: Optional[float] = Field(None, ge=0)
-    bearing: Optional[float] = Field(None, ge=0, le=360)
 
-    @field_validator('timestamp', mode='before')
-    def validate_timestamp_field(cls, value):
-        return validate_timestamp(value)
-        
-    @field_validator('speed', mode='before')
-    def validate_speed_field(cls, value):
-        return validate_speed(value)
-    
-    @field_validator('accuracy', mode='before')
-    def validate_accuracy_field(cls, value):
-        return validate_accuracy(value)
+class RegisterRestaurantRequest(BaseSchema):
+    name: str = Field(..., min_length=3, max_length=50)
+    owner_name: str = Field(..., min_length=3, max_length=50)
+    address: str = Field(..., min_length=10, max_length=100)
+    phone_number: str = Field(..., min_length=10, max_length=14)
+    email: Optional[str] = Field(None, max_length=50)
+    password: str = Field(..., min_length=8, max_length=30)
 
-class DriverLocationSchema(BaseSchema):
-    driver_id: str = Field(..., min_length=1, max_length=36)
-    location: LocationSchema = Field(...)
-    timestamp: float = Field(..., ge=0)
-    
-    @field_validator('driver_id', mode='before')
-    def validate_driver_id_field(cls, value):
+    @field_validator('phone_number', mode='before')
+    def validate_phone_number_field(cls, value):
+        return validate_phone_number(value)
+
+    @field_validator('email', mode='before')
+    def validate_email_field(cls, value):
+        return validate_email(value)
+
+    @field_validator('password', mode='before')
+    def validate_password_field(cls, value):
+        return validate_password(value)
+
+
+class RegisterRestaurantResponse(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
         return validate_uuid(value)
-    
-    @field_validator('timestamp', mode='before')
-    def validate_timestamp_field(cls, value):
-        return validate_timestamp(value)
 
-class SubmitLocationRequest(BaseSchema):
-    driver_id: str = Field(..., min_length=1, max_length=36)
-    location: List[LocationSchem] = Field(...)
-    timestamp: float = Field(..., ge=0)
-    
-    @field_validator('driver_id', mode='before')
-    def validate_driver_id_field(cls, value):
+
+class AddMenuItemRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+    name: str = Field(..., min_length=1, max_length=50)
+    description: Optional[str] = Field(None, max_length=200)
+    price: float = Field(..., gt=0)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
         return validate_uuid(value)
-    
-    @field_validator('timestamp', mode='before')
-    def validate_timestamp_field(cls, value):
-        return validate_timestamp(value)
 
-class SubmitLocationResponse(BaseSchema):
-    success: bool = Field(...)
 
-class ChangeStatusRequest(BaseSchema):
-    driver_id: str = Field(..., min_length=1, max_length=36)
-    status: str = Field(..., min_length=1, max_length=10)
-    timestamp: float = Field(..., ge=0)
-    
-    @field_validator('driver_id', mode='before')
-    def validate_driver_id_field(cls, value):
+class AddMenuItemResponse(BaseSchema):
+    menu_item_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('menu_item_id', mode='before')
+    def validate_menu_item_id_field(cls, value):
         return validate_uuid(value)
-    
-    @field_validator('timestamp', mode='before')
-    def validate_timestamp_field(cls, value):
-        return validate_timestamp(value)
-    
-    @field_validator('status', mode='before')
-    def validate_status_field(cls, value):
-        return validate_status(value)
 
-class ChangeStatusResponse(BaseSchema):
-    success: bool = Field(...)
 
-class GetNearestDriversRequest(BaseSchema):
-    location: LocationSchema = Field(...)
-    radius: int = Field(..., ge=0)
-    max_count: int = Field(..., ge=0)
+class UpdateMenuItemRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+    menu_item_id: str = Field(..., min_length=1, max_length=36)
+    name: Optional[str] = Field(None, min_length=1, max_length=50)
+    description: Optional[str] = Field(None, max_length=200)
+    price: Optional[float] = Field(None, gt=0)
 
-class GetNearestDriversResponse(BaseSchema):
-    driver_locations: List[DriverLocationSchema] = Field(...)
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('menu_item_id', mode='before')
+    def validate_menu_item_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class UpdateMenuItemResponse(BaseSchema):
+    menu_item_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('menu_item_id', mode='before')
+    def validate_menu_item_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class DeleteMenuItemRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+    menu_item_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('menu_item_id', mode='before')
+    def validate_menu_item_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class DeleteMenuItemResponse(BaseSchema):
+    menu_item_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('menu_item_id', mode='before')
+    def validate_menu_item_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class GetMenuRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class MenuItemSchema(BaseSchema):
+    menu_item_id: str = Field(..., min_length=1, max_length=36)
+    name: str = Field(..., min_length=1, max_length=50)
+    description: Optional[str] = Field(None, max_length=200)
+    price: float = Field(..., gt=0)
+
+    @field_validator('menu_item_id', mode='before')
+    def validate_menu_item_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class GetMenuResponse(BaseSchema):
+    menu_items: List[MenuItemSchema]
+
+
+class ReceiveOrderRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+    customer_id: str = Field(..., min_length=1, max_length=36)
+    order_items: List[str] = Field(..., min_length=1)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('customer_id', mode='before')
+    def validate_customer_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('order_items', mode='before')
+    def validate_order_items_field(cls, value):
+        return [validate_uuid(item) for item in value]
+
+
+class ReceiveOrderResponse(BaseSchema):
+    order_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('order_id', mode='before')
+    def validate_order_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class UpdateOrderStatusRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+    order_id: str = Field(..., min_length=1, max_length=36)
+    status: OrderStatus = Field(...)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('order_id', mode='before')
+    def validate_order_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class UpdateOrderStatusResponse(BaseSchema):
+    order_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('order_id', mode='before')
+    def validate_order_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class GetOrdersRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class OrderSchema(BaseSchema):
+    order_id: str = Field(..., min_length=1, max_length=36)
+    customer_id: str = Field(..., min_length=1, max_length=36)
+    order_items: List[str] = Field(..., min_length=1)
+    status: OrderStatus = Field(...)
+
+    @field_validator('order_id', mode='before')
+    def validate_order_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('customer_id', mode='before')
+    def validate_customer_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class GetOrdersResponse(BaseSchema):
+    orders: List[OrderSchema]
+
+
+class GetRestaurantInfoRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+
+class GetRestaurantInfoResponse(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+    name: str = Field(..., min_length=3, max_length=50)
+    owner_name: str = Field(..., min_length=3, max_length=50)
+    address: str = Field(..., min_length=10, max_length=100)
+    phone_number: str = Field(..., min_length=10, max_length=14)
+    email: Optional[str] = Field(None, max_length=50)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('phone_number', mode='before')
+    def validate_phone_number_field(cls, value):
+        return validate_phone_number(value)
+
+    @field_validator('email', mode='before')
+    def validate_email_field(cls, value):
+        return validate_email(value)
+
+
+class UpdateRestaurantInfoRequest(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+    name: Optional[str] = Field(None, min_length=3, max_length=50)
+    owner_name: Optional[str] = Field(None, min_length=3, max_length=50)
+    address: Optional[str] = Field(None, min_length=10, max_length=100)
+    phone_number: Optional[str] = Field(None, min_length=10, max_length=14)
+    email: Optional[str] = Field(None, max_length=50)
+    password: Optional[str] = Field(None, min_length=8, max_length=30)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)
+
+    @field_validator('phone_number', mode='before')
+    def validate_phone_number_field(cls, value):
+        return validate_phone_number(value)
+
+    @field_validator('email', mode='before')
+    def validate_email_field(cls, value):
+        return validate_email(value)
+
+    @field_validator('password', mode='before')
+    def validate_password_field(cls, value):
+        return validate_password(value)
+
+
+class UpdateRestaurantInfoResponse(BaseSchema):
+    restaurant_id: str = Field(..., min_length=1, max_length=36)
+
+    @field_validator('restaurant_id', mode='before')
+    def validate_restaurant_id_field(cls, value):
+        return validate_uuid(value)

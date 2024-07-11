@@ -1,21 +1,12 @@
-import enum
+from enum import Enum
 
-class Status(enum.Enum):
-    ONLINE = "online"
-    OFFLINE = "offline"
+class OrderStatus(str, Enum):
+    PENDING = "PENDING"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
 
-class Roles(enum.Enum):
-    CUSTOMER = "customer"
-    ADMIN = "admin"
-    SUPPLIER = "supplier"
-    DRIVER = "driver"
-
-class Gender(enum.Enum):
-    MALE = 'male'
-    FEMALE = 'female'
-    UNKNOWN = 'unknown'
-    
-class LayerNames(enum.Enum):
-    APP = "app"
-    DOMAIN = "domain"
-    DATA_ACCESS = "data"
+class Role(str, Enum):
+    ADMIN = "ADMIN"
+    USER = "USER"
+    RESTAURANT_OWNER = "RESTAURANT_OWNER"

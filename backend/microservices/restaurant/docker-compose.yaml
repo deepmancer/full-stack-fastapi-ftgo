@@ -62,9 +62,9 @@ services:
       - postgresql
       - redis
     ports:
-      - "5021:5021"
+      - "5050:5050"
     expose:
-      - 5021
+      - 5050
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 

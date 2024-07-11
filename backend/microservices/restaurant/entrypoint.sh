@@ -10,4 +10,4 @@ echo "Database is ready, running migrations..."
 alembic upgrade head
 
 echo "Starting the application..."
-exec uvicorn app.main:app --reload --host 0.0.0.0 --port 5021
+exec uvicorn app.main:app --reload --host 0.0.0.0 --port 5050

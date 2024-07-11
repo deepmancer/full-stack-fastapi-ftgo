@@ -1,29 +1,27 @@
 from typing import Optional
-import json
 from config.exceptions import ApplicationError
 
-
-class TooOldTimestampError(ApplicationError):
-    def __init__(self, timestamp_date, message: Optional[str] = None,):
-        base_message = f"Timestamp with date {timestamp_date} is too old"
-        super().__init__(base_message, message)
-   
-class AbnormalSpeedError(ApplicationError):
-    def __init__(self, speed, message: Optional[str] = None,):
-        base_message = f"Speed {speed} is too high"
+class RestaurantNotFoundError(ApplicationError):
+    def __init__(self, restaurant_id: str, message: Optional[str] = None):
+        base_message = f"Restaurant with ID {restaurant_id} not found"
         super().__init__(base_message, message)
 
-class NoisyLocationError(ApplicationError):
-    def __init__(self, accuracy, message: Optional[str] = None,):
-        base_message = f"Accuracy {accuracy} is too high"
+class DuplicateRestaurantError(ApplicationError):
+    def __init__(self, restaurant_name: str, message: Optional[str] = None):
+        base_message = f"Restaurant with name {restaurant_name} already exists"
         super().__init__(base_message, message)
 
-class StatusValueError(ApplicationError):
-    def __init__(self, status: str, message: Optional[str] = None):
-        base_message = f"Status of {status} is invalid"
+class InvalidRestaurantEmailError(ApplicationError):
+    def __init__(self, email: str, message: Optional[str] = None):
+        base_message = f"Email {email} is not in the correct format"
         super().__init__(base_message, message)
 
-class InvalidUserUUDDError(ApplicationError):
-    def __init__(self, user_id: str, message: Optional[str] = None):
-        base_message = f"User id {user_id} is not a valid UUID (v4)"
+class InvalidRestaurantPhoneNumberError(ApplicationError):
+    def __init__(self, phone_number: str, message: Optional[str] = None):
+        base_message = f"Phone number {phone_number} is not in the correct format"
+        super().__init__(base_message, message)
+
+class InvalidRestaurantUUIDError(ApplicationError):
+    def __init__(self, restaurant_id: str, message: Optional[str] = None):
+        base_message = f"Restaurant ID {restaurant_id} is not a valid UUID"
         super().__init__(base_message, message)

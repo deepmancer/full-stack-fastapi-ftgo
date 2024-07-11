@@ -5,7 +5,7 @@ FROM python:3.9-slim
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Set the server port
-EXPOSE 5021
+EXPOSE 5050
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

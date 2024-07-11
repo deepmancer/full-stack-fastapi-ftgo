@@ -48,7 +48,7 @@ if __name__ == "__main__":
     init_logging()
   
     host = os.getenv("SERVICE_HOST", "127.0.0.1")
-    port = int(os.getenv("SERVICE_PORT", 5021))
+    port = int(os.getenv("SERVICE_PORT", 5050))
     debug = os.getenv("DEBUG", "True").lower() in ["true", "1", "t"]
 
     uvicorn.run(
