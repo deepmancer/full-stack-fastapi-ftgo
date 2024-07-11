@@ -26,7 +26,7 @@ COPY . /location_service
 WORKDIR /location_service
 
 # Set the PYTHONPATH environment variable
-ENV PYTHONPATH=/location_service/app
+ENV PYTHONPATH=/location_service/src
 
 # Copy the Alembic configuration file
 COPY alembic.ini /location_service/alembic.ini
