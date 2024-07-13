@@ -38,7 +38,7 @@ async def login(request: LoginRequest):
     try:
         user = await UserDomain.load(phone_number=request.phone_number, role=request.role)
         await user.login(request.password)
-        return LoginResponse(user_id=user_id, success=True)
+        return LoginResponse(user_id=user.user_id, success=True)
     except Exception as e:
         get_logger().error(f"Error occurred while logging the user in: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))

@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, field_validator, ConfigDict, ValidationError
 
 from ftgo_utils.enums import Roles, Gender
-from ftgo_utils.validators import validate_phone_number, validate_enum_value
+from ftgo_utils.validation import validate_phone_number, validate_enum_value
 
 
 class BaseSchema(BaseModel):    

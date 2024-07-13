@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from ftgo_utils.enums import Gender, Roles
-from ftgo_utils.uuid import uuid4
+from ftgo_utils.uuid_gen import uuid4
 
 from models.base import Base
 

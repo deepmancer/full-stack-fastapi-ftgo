@@ -78,8 +78,8 @@ class UserDomain:
             if role != utils.enums.Roles.CUSTOMER.value and national_id is None:
                 raise MissingNationalIDError(role=role)
 
-            user_id = utils.uuid.uuid4()
-            hashed_password = utils.hash.hash_value(password)
+            user_id = utils.uuid_gen.uuid4()
+            hashed_password = utils.hash_utils.hash_value(password)
 
             new_profile = Profile(
                 id=user_id,
@@ -121,7 +121,7 @@ class UserDomain:
 
             if stored_auth_code and stored_auth_code == auth_code:
                 verified_profile = (await DatabaseRepository.update_by_query(
-                    Profile, query={"id": user_id}, update_fields={"verified_at": utils.time.utcnow()}
+                    Profile, query={"id": user_id}, update_fields={"verified_at": utils.utc_time.now()}
                 ))[0]
                 user.verified_at = verified_profile.verified_at
                 user.updated_at = verified_profile.updated_at
@@ -138,22 +138,19 @@ class UserDomain:
             if not self.is_verified():
                 raise UserNotVerifiedError(user_id=self.user_id)
 
-            if not PasswordHandler.verify_password(password, self.hashed_password):
+            if not utils.hash_utils.verify(password, self.hashed_password):
                 raise WrongPasswordError(user_id=self.user_id, entered_password=password)
 
-            await DatabaseRepository.update_by_query(Profile, query={"id": self.user_id}, update_fields={"last_login_time": utils.time.utcnow()})
+            await DatabaseRepository.update_by_query(Profile, query={"id": self.user_id}, update_fields={"last_login_time": utils.utc_time.now()})
             return
         except Exception as e:
             get_logger().error(str(e),user_id=self.user_id, role=self.role)
-            raise ProfileLoginError(phone_number=phone_number, role=role) from e
+            raise ProfileLoginError(phone_number=self.phone_number, role=role) from e
 
     async def delete_account(self) -> bool:
         try:
-            await asyncio.gather([
-                DatabaseRepository.delete_by_query(Address, query={"user_id": self.user_id}),
-                DatabaseRepository.delete_by_query(VehicleInfo, query={"user_id": self.user_id}),
-                CacheRepository.delete(self.user_id)
-            ])
+            await DatabaseRepository.delete_by_query(Profile, query={"id": self.user_id})
+            await CacheRepository.delete(self.user_id)
             return
         except Exception as e:
             get_logger().error(str(e), user_id=self.user_id)
@@ -309,7 +306,7 @@ class UserDomain:
             national_id=profile.national_id,
             gender=profile.gender,
             role=profile.role,
-            created_at=profile.created_at.astimezone(utils.time.timezone) if profile.created_at else None,
-            updated_at=profile.updated_at.astimezone(utils.time.timezone) if profile.updated_at else None,
-            verified_at=profile.verified_at.astimezone(utils.time.timezone) if profile.verified_at else None,
+            created_at=profile.created_at.astimezone(utils.utc_time.timezone) if profile.created_at else None,
+            updated_at=profile.updated_at.astimezone(utils.utc_time.timezone) if profile.updated_at else None,
+            verified_at=profile.verified_at.astimezone(utils.utc_time.timezone) if profile.verified_at else None,
         )

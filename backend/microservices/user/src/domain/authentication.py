@@ -2,11 +2,12 @@ import pyotp
 
 from config import AccountVerificationConfig
 
+auth_config = AccountVerificationConfig.load()
 class Authenticator:
     _otp = pyotp.TOTP(
         pyotp.random_base32(),
-        digits=AccountVerificationConfig.auth_code_digits_cnt,
-        interval=AccountVerificationConfig.auth_code_ttl_sec,
+        digits=auth_config.auth_code_digits_cnt,
+        interval=auth_config.auth_code_ttl_sec,
     )
 
     @staticmethod

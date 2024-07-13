@@ -2,7 +2,7 @@ from logging.config import fileConfig
 from loguru import logger
 import sys
 import os
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, pool, text
 from sqlalchemy import pool
 from alembic import context
 from decouple import config as decouple_config
@@ -20,7 +20,6 @@ fileConfig(alembic_config.config_file_name)
 # add your model's MetaData object here
 # for 'autogenerate' support
 from config.db import PostgresConfig  # Ensure correct import
-PostgresConfig.load()
 from models.base import Base
 from models import Profile, VehicleInfo, Address
 target_metadata = Base.metadata
@@ -29,6 +28,11 @@ def get_url():
     db_config = PostgresConfig()
     logger.debug(f"database url: {db_config.sync_url}")
     return db_config.sync_url
+
+def drop_all_tables(connection):
+    connection.execute(text("DROP SCHEMA public CASCADE;"))
+    connection.execute(text("CREATE SCHEMA public;"))
+    logger.debug("All tables dropped and public schema recreated.")
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -64,7 +68,7 @@ def run_migrations_online():
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
-
+        # drop_all_tables(connection)
         with context.begin_transaction():
             context.run_migrations()
 

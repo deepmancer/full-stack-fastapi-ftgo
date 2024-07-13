@@ -18,7 +18,8 @@ RUN pip install --upgrade pip
 
 # Copy requirements.txt before other files to leverage Docker cache
 COPY ./requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install --force-reinstall -r /tmp/requirements.txt
+RUN pip install --force-reinstall git+https://github.com/alirezaheidari-cs/ftgo_utils.git
 
 # Copy the application code to the container
 COPY . /user_service

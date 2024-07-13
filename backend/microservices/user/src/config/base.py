@@ -1,36 +1,35 @@
 import os
 from typing import Any, Type
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from decouple import Config, RepositoryEnv, config
+from collections import ChainMap
 
-from dotenv import load_dotenv, find_dotenv
+class BaseConfig():
+    @classmethod
+    def load_environment(cls):
+        common_env_path = ".env"
+        env = os.getenv("ENVIRONMENT", "test")
+        env_specific_path = f".env.{env}"
 
-class BaseConfig(BaseSettings):
-    environment: str = Field(default_factory=lambda: os.getenv("ENVIRONMENT", "dev"))
+        if not os.path.exists(common_env_path):
+            raise FileNotFoundError(f"Common environment file {common_env_path} not found.")
 
-    @staticmethod
-    def load_common_env():
-        common_env = find_dotenv(".env")
-        if common_env:
-            load_dotenv(common_env)
-        else:
-            raise FileNotFoundError("Common environment file .env not found.")
-
-    @staticmethod
-    def load_env_specific():
-        env = os.getenv("ENVIRONMENT", "development")
-        env_file = f".env.{env}"
-        specific_env = find_dotenv(env_file)
-        if specific_env:
-            load_dotenv(specific_env, override=True)
-        else:
-            raise FileNotFoundError(f"Environment-specific file {env_file} not found.")
+        if not os.path.exists(env_specific_path):
+            raise FileNotFoundError(f"Environment-specific file {env_specific_path} not found.")
+        common_env_params = RepositoryEnv(common_env_path)
+        env_specific_params = RepositoryEnv(env_specific_path)
+        merged_params = {**common_env_params.data, **env_specific_params.data}
+        # for the key-value pairs in the merged_params, set the environment variables
+        for key, value in merged_params.items():
+            os.environ[key] = value
 
     @classmethod
     def load(cls):
-        cls.load_common_env()
-        cls.load_env_specific()
+        cls.load_environment()
         return cls()
 
 def env_var(field_name: str, default: Any, cast_type: Type = str) -> Any:
-    return Field(default_factory=lambda: cast_type(os.getenv(field_name, default)))
+    return config(field_name, default=default, cast=cast_type)
+
+BaseConfig.load_environment()
+

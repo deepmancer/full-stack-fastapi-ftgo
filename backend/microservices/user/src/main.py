@@ -30,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router=user_profile_router, prefix=service_config.api_prefix)
+app.include_router(router=profile_router, prefix=service_config.api_prefix)
 app.include_router(router=address_router, prefix=service_config.api_prefix)
 app.include_router(router=vehicle_router, prefix=service_config.api_prefix)
 
@@ -56,5 +56,5 @@ if __name__ == "__main__":
         host=service_config.service_host,
         port=service_config.service_port,
         reload=True,
-        log_level="debug" if service_config.debug else "info",
+        log_level=service_config.log_level,
     )

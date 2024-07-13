@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional, Union
 
-from ftgo_utils.redis import AsyncRedis
+from ftgo_utils.redis_connector import AsyncRedis
 
 from config.cache import RedisConfig
 from data_access.exceptions import *

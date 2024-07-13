@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 
-from ftgo_utils.uuid import uuid4
+from ftgo_utils.uuid_gen import uuid4
 
 from models.base import Base
 

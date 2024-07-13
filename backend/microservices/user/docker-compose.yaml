@@ -43,7 +43,7 @@ services:
     env_file:
       - .env
     environment:
-      ENVIRONMENT: ${ENVIRONMENT}
+      ENVIRONMENT: dev
       DEBUG: ${DEBUG}
       DB_TIMEOUT: ${DB_TIMEOUT}
       DB_POOL_SIZE: ${DB_POOL_SIZE}

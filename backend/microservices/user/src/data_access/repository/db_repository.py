@@ -2,12 +2,12 @@ from typing import Optional, List, Dict, Type
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
-from ftgo_utils.postgres import AsyncPostgres
+from ftgo_utils.postgres_connector import AsyncPostgres
 
 from config.db import PostgresConfig
 from models.base import Base
 from data_access.repository.base import BaseRepository
-
+from data_access.exceptions import *
 
 class DatabaseRepository(BaseRepository):
     data_access: Optional[AsyncPostgres] = None

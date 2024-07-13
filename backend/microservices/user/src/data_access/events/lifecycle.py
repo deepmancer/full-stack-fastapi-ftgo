@@ -9,8 +9,8 @@ from config.cache import RedisConfig
 from data_access import get_logger
 
 async def setup() -> None:
-    db_config = PostgresConfig()
-    cache_config = RedisConfig()
+    db_config = PostgresConfig.load()
+    cache_config = RedisConfig.load()
     logger = get_logger()
     await CacheRepository.initialize(cache_config)
     logger.info("Connected to cache")

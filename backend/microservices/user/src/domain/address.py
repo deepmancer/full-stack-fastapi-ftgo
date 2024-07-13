@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict, Any
 
-from ftgo_utils.time import timezone as tz
+from ftgo_utils.utc_time import timezone as tz
 
 from data_access.repository import DatabaseRepository
 from models.address import Address
