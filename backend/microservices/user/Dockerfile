@@ -3,13 +3,14 @@ FROM python:3.9-slim
 
 # Set environment variables
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV ENVIRONMENT=dev
 
 # Set the server port
 EXPOSE 5020
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    netcat-openbsd \
+    netcat-openbsd git \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install Python dependencies

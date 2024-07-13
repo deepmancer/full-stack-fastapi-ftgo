@@ -1,5 +1,5 @@
-from config.enums import LayerNames
-from utils.logger import LoggerFactory
+from config import LayerNames
+from ftgo_utils.logger import get_logger as _get_logger
 
 def get_logger():
-    return LoggerFactory.get_logger(layer_name=LayerNames.APP.value)
+    return _get_logger(LayerNames.APP.value)

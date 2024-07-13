@@ -1,6 +1,7 @@
 from typing import Optional
 import json
-from config.exceptions import DataAccessError
+
+from config import DataAccessError
 
 
 class DatabaseConnectionError(DataAccessError):

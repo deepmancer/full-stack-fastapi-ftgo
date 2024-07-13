@@ -1,21 +1,25 @@
-import os
+import logging
+
 import fastapi
 import uvicorn
-
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exception_handlers import (
     http_exception_handler,
     request_validation_exception_handler,
 )
 from fastapi.exceptions import RequestValidationError
-from config.exceptions import ApplicationError
-from application.routes.profile import router as user_profile_router
-from application.routes.address import router as address_router
 
-from config.logger import init_logging
-from utils.logger import LoggerFactory
-from config.enums import LayerNames
+from config import ApplicationError
+from application.routes import address_router, profile_router, vehicle_router
+
+from ftgo_utils.logger import init_logging, get_logger
+
+from config import LayerNames
+from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
+
+# Load the configuration
+service_config = ServiceConfig.load()
 
 app = fastapi.FastAPI()
 app.add_middleware(
@@ -26,13 +30,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router=user_profile_router, prefix=os.getenv("API_PREFIX", ""))
-app.include_router(router=address_router, prefix=os.getenv("API_PREFIX", ""))
+app.include_router(router=user_profile_router, prefix=service_config.api_prefix)
+app.include_router(router=address_router, prefix=service_config.api_prefix)
+app.include_router(router=vehicle_router, prefix=service_config.api_prefix)
 
 @app.on_event("startup")
 async def startup_event():
     await setup()
-    init_logging()
+    init_logging(level=service_config.log_level)
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -40,21 +45,16 @@ async def shutdown_event():
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
-    LoggerFactory.get_logger(LayerNames.APP.value).error(f"{exc}")
+    get_logger(LayerNames.APP.value).error(f"{exc}")
     return await request_validation_exception_handler(request, exc)
 
-
 if __name__ == "__main__":
-    init_logging()
+    init_logging(level=service_config.log_level)
   
-    host = os.getenv("SERVICE_HOST", "127.0.0.1")
-    port = int(os.getenv("SERVICE_PORT", 5020))
-    debug = os.getenv("DEBUG", "True").lower() in ["true", "1", "t"]
-
     uvicorn.run(
         "main:app",
-        host=host,
-        port=port,
+        host=service_config.service_host,
+        port=service_config.service_port,
         reload=True,
-        log_level="debug" if debug else "info",
+        log_level="debug" if service_config.debug else "info",
     )

@@ -1,7 +1,10 @@
 from typing import Optional, List, Dict, Any
-from data_access.repository.db_repository import DatabaseRepository
+
+from ftgo_utils.time import timezone as tz
+
+from data_access.repository import DatabaseRepository
 from models.address import Address
-from config.timezone import tz
+
 class AddressDomain:
     def __init__(
         self,

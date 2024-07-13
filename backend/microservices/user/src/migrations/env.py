@@ -20,9 +20,9 @@ fileConfig(alembic_config.config_file_name)
 # add your model's MetaData object here
 # for 'autogenerate' support
 from config.db import PostgresConfig  # Ensure correct import
+PostgresConfig.load()
 from models.base import Base
-from models.profile import Profile
-from models.address import Address
+from models import Profile, VehicleInfo, Address
 target_metadata = Base.metadata
 
 def get_url():

@@ -2,8 +2,16 @@ import os
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from application import get_logger
-from application.schema import *
+from routes import get_logger
+from schemas.auth.account import (
+    RegisterRequest, RegisterResponse,
+    AuthenticateAccountRequest, AuthenticateAccountResponse,
+    LoginRequest, LoginResponse,
+    DeleteProfileRequest, DeleteProfileResponse,
+    DeleteAllAddressesRequest, DeleteAllAddressesResponse,
+    LogoutRequest, LogoutResponse,
+    GetUserInfoRequest, GetUserInfoResponse,
+)
 from domain.user import UserDomain
 
 router = APIRouter(prefix="/profile", tags=["user_profile"])
@@ -28,7 +36,7 @@ async def register(request: RegisterRequest):
 async def verify_account(request: AuthenticateAccountRequest):
     try:
         user_id = await UserDomain.verify_account(request.user_id, request.auth_code.strip())
-        return AuthenticateAccountResponse(user_id=user_id, success=True)
+        return AuthenticateAccountResponse(user_id=user_id)
     except Exception as e:
         get_logger().error(f"Error occurred while verifying the account: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
@@ -36,25 +44,33 @@ async def verify_account(request: AuthenticateAccountRequest):
 @router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     try:
-        user = await UserDomain.load(phone_number=request.phone_number, role=request.role)
-        await user.login(request.password)
-        return LoginResponse(user_id=user_id, success=True)
+        user_id, access_token = await UserDomain.login(request.phone_number, request.password, request.role)
+        return LoginResponse(user_id=user_id, access_token=access_token)
     except Exception as e:
         get_logger().error(f"Error occurred while logging the user in: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
 # logout api
+@router.post("/logout", response_model=LogoutResponse)
+async def logout(request: LogoutRequest):
+    try:
+        user = await UserDomain.load(request.user_id, request.access_token)
+        await user.logout()
+        return LogoutResponse(user_id=user.user_id)
+    except Exception as e:
+        get_logger().error(f"Error occurred while logging the user out: {e}", request=request)
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
+
 @router.get("/user_info", response_model=GetUserInfoResponse)
 async def get_info(request: GetUserInfoRequest):
     try:
-        user = await UserDomain.load(request.user_id)
+        user = await UserDomain.load(request.user_id, request.access_token)
         user_info = user.get_info()
         return GetUserInfoResponse(
-            user_id=user_info["user_id"],
+            user_id=user.user_id,
             first_name=user_info["first_name"],
             last_name=user_info["last_name"],
             phone_number=user_info["phone_number"],
-            hashed_password=user_info["hashed_password"],
             gender=user_info["gender"],
             role=user_info["role"],
         )
@@ -65,9 +81,9 @@ async def get_info(request: GetUserInfoRequest):
 @router.delete("/delete", response_model=DeleteProfileResponse)
 async def delete_account(request: DeleteProfileRequest):
     try:
-        user = await UserDomain.load(request.user_id)
+        user = await UserDomain.load(request.user_id, request.access_token)
         await user.delete_account()
-        return DeleteProfileResponse(user_id=user.user_id, success=True)
+        return DeleteProfileResponse(user_id=user.user_id)
     except Exception as e:
         get_logger().error(f"Error occurred while deleting the account: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))

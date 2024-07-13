@@ -2,17 +2,24 @@ from typing import Optional, List, Dict, Type
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
 
+from ftgo_utils.postgres import AsyncPostgres
+
 from config.db import PostgresConfig
-from data_access.resources.db import DatabaseDataAccess
 from models.base import Base
+from data_access.repository.base import BaseRepository
 
 
-class DatabaseRepository:
-    data_access: Optional[DatabaseDataAccess] = None
+class DatabaseRepository(BaseRepository):
+    data_access: Optional[AsyncPostgres] = None
 
     @classmethod
-    def initialize(cls, db_config: PostgresConfig):
-        cls.data_access = DatabaseDataAccess(db_config)
+    async def initialize(cls, db_config: PostgresConfig):
+        cls.data_access = AsyncPostgres(
+            url=db_config.async_url,
+            echo=db_config.enable_echo_log,
+            expire_on_commit=db_config.enable_expire_on_commit,
+        )
+        await cls.data_access.connect()
 
     @classmethod
     async def fetch_by_query(cls, model: Type[Base], query: Dict[str, str], one_or_none: bool = False):

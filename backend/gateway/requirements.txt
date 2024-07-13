@@ -41,3 +41,4 @@ fastapi-cache2
 authx==0.1.1
 fastapi_users
 python-jose[cryptography]
+git+https://github.com/alirezaheidari-cs/ftgo_utils.git

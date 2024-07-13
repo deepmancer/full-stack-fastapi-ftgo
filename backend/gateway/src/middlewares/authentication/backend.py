@@ -10,7 +10,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 
 from data_access.repository.cache_repository import CacheRepository
 from utils.jwt_token import JWTTokenHandler
-from schemas.authentication.user import UserSchema
+from schemas.auth.user import UserSchema
 from config.auth import AuthConfig
 
 class JWTAuthenticationBackend(AuthenticationBackend):

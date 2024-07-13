@@ -1,19 +1,21 @@
 import json
-from typing import Optional, List, Union
-from data_access.resources.cache import CacheDataAccess
+from typing import List, Optional, Union
+
+from ftgo_utils.redis import AsyncRedis
+
 from config.cache import RedisConfig
+from data_access.exceptions import *
+from data_access.repository.base import BaseRepository
 
-from data_access.exceptions import (
-    CacheDeleteError, CacheInsertError, CacheFetchError, CacheExpireError, CacheBatchOperationError, CacheFlushError,
-)
 
-class CacheRepository:
-    data_access: Optional[CacheDataAccess] = None
+class CacheRepository(BaseRepository):
+    data_access: Optional[AsyncRedis] = None
     group: str = ""
 
     @classmethod
-    def initialize(cls, cache_config: RedisConfig):
-        cls.data_access = CacheDataAccess(cache_config)
+    async def initialize(cls, cache_config: RedisConfig):
+        cls.data_access = AsyncRedis(cache_config.url)
+        await cls.data_access.connect()
 
     @classmethod
     def get_cache(cls, group: str = ""):

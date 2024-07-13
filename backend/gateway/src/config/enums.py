@@ -13,7 +13,7 @@ class Gender(enum.Enum):
     UNKNOWN = 'unknown'
     
 class LayerNames(enum.Enum):
-    APP = "app"
+    GATEWAY = "gateway"
     DATA_ACCESS = "data"
     EVENT = "event"
 

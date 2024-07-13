@@ -1,49 +1,14 @@
+import asyncio
 from typing import Any, Dict, List, Optional
-from uuid import uuid4
 
-from config.access_token import ACCESS_TOKEN_TTL_SEC
-from config.auth import AUTH_CODE_TTL_SECONDS
-from config.cache import RedisConfig
-from config.db import PostgresConfig
-from config.timezone import tz
-from utils.time import utcnow
-from models.profile import Profile
-from models.address import Address
-from data_access.repository.cache_repository import CacheRepository
-from data_access.repository.db_repository import DatabaseRepository
-
+from data_access.repository import CacheRepository, DatabaseRepository
 from domain.address import AddressDomain
 from domain.authentication import Authenticator
-from domain.authorization import TokenHandler
-from domain.password import PasswordHandler
-from domain.uuid_generator import UUIDGenerator
-
+from domain.exceptions import *
 from domain import get_logger
-from domain.exceptions import (
-    AccountExistsError,
-    AddAddressError,
-    AddressNotFoundError,
-    AuthenticationCodeError,
-    DefaultAddressDeletionError,
-    DeleteAddressError,
-    GetAddressError,
-    GetAddressesError,
-    GetAddressInfoError,
-    InvalidTokenWithUserIdError,
-    PasswordHashingError,
-    ProfileDeletionError,
-    ProfileLoginError,
-    ProfileLogoutError,
-    ProfileRegistrationError,
-    ProfileVerificationError,
-    SetDefaultAddressError,
-    UnverifiedSessionError,
-    UserAlreadyVerifiedError,
-    UserNotFoundError,
-    UserNotVerifiedError,
-    WrongAuthenticationCodeError,
-    WrongPasswordError,
-)
+from models import Address, Profile, VehicleInfo
+
+import ftgo_utils as utils
 
 class UserDomain:
     def __init__(
@@ -73,27 +38,27 @@ class UserDomain:
 
         self.addresses = None
 
-    @staticmethod
-    async def load(user_id: str, access_token: str):
+    @classmethod
+    async def load(cls, user_id: Optional[str] = None, phone_number: Optional[str] = None, role: Optional[str] = None) -> "UserDomain":
+        query_dict = {}
+        if user_id:
+            query_dict["id"] = user_id
+        if phone_number:
+            query_dict["phone_number"] = phone_number
+        if role:
+            query_dict["role"] = role
         try:
-            user_profile = await DatabaseRepository.fetch_by_query(Profile, query={"id": user_id}, one_or_none=True)
+            user_profile = await DatabaseRepository.fetch_by_query(Profile, query=query_dict, one_or_none=True)
             if not user_profile:
-                raise UserNotFoundError(dict(user_id=user_id))
+                raise UserNotFoundError(query_dict)
 
             user = UserDomain._from_profile(user_profile)
             if not user.is_verified():
-                raise UserNotVerifiedError(user_id=user_id)
-
-            access_token = await user._get_access_token()
-            if not access_token:
-                raise UnverifiedSessionError(user_id=user_id)
-
-            if not TokenHandler.validate_token(user.user_id, user._get_secret(), access_token):
-                raise InvalidTokenWithUserIdError(user_id=user_id, token=access_token)
+                raise UserNotVerifiedError(user_id=user.user_id)
 
             return user
         except Exception as e:
-            get_logger().error(str(e), user_id=user_id, access_token=access_token)
+            get_logger().error(str(e), query=query_dict)
             raise e
 
     @staticmethod
@@ -110,8 +75,11 @@ class UserDomain:
             if current_records:
                 raise AccountExistsError(phone_number=phone_number, role=role)
 
-            user_id = UUIDGenerator.generate()
-            hashed_password = PasswordHandler.hash_password(password)
+            if role != utils.enums.Roles.CUSTOMER.value and national_id is None:
+                raise MissingNationalIDError(role=role)
+
+            user_id = utils.uuid.uuid4()
+            hashed_password = utils.hash.hash_value(password)
 
             new_profile = Profile(
                 id=user_id,
@@ -153,7 +121,7 @@ class UserDomain:
 
             if stored_auth_code and stored_auth_code == auth_code:
                 verified_profile = (await DatabaseRepository.update_by_query(
-                    Profile, query={"id": user_id}, update_fields={"verified_at": utcnow()}
+                    Profile, query={"id": user_id}, update_fields={"verified_at": utils.time.utcnow()}
                 ))[0]
                 user.verified_at = verified_profile.verified_at
                 user.updated_at = verified_profile.updated_at
@@ -165,57 +133,42 @@ class UserDomain:
             get_logger().error(str(e), user_id=user_id, auth_code=auth_code)
             raise ProfileVerificationError(user_id, auth_code) from e
 
-    @staticmethod
-    async def login(phone_number, password, role):
+    async def login(self, password):
         try:
-            profile = await DatabaseRepository.fetch_by_query(Profile, query={"phone_number": phone_number, "role": role}, one_or_none=True)
-            if not profile:
-                raise UserNotFoundError(dict(phone_number=phone_number, role=role))
-            user = UserDomain._from_profile(profile)
+            if not self.is_verified():
+                raise UserNotVerifiedError(user_id=self.user_id)
 
-            if not user.is_verified():
-                raise UserNotVerifiedError(user_id=user.user_id)
+            if not PasswordHandler.verify_password(password, self.hashed_password):
+                raise WrongPasswordError(user_id=self.user_id, entered_password=password)
 
-        
-            if not PasswordHandler.verify_password(password, user.hashed_password):
-                raise WrongPasswordError()
-
-            access_token = await user._get_access_token()
-
-            if access_token:
-                return user.user_id, access_token
-
-            access_token = await user._generate_session_token()
-            return user.user_id, access_token
+            await DatabaseRepository.update_by_query(Profile, query={"id": self.user_id}, update_fields={"last_login_time": utils.time.utcnow()})
+            return
         except Exception as e:
-            get_logger().error(str(e), phone_number=phone_number, role=role)
+            get_logger().error(str(e),user_id=self.user_id, role=self.role)
             raise ProfileLoginError(phone_number=phone_number, role=role) from e
 
     async def delete_account(self) -> bool:
         try:
-            await DatabaseRepository.delete_by_query(Profile, query={"id": self.user_id})
-            await CacheRepository.get_cache('token').delete(self.user_id)
-            await CacheRepository.get_cache('auth').delete(self.user_id)
-
+            await asyncio.gather([
+                DatabaseRepository.delete_by_query(Address, query={"user_id": self.user_id}),
+                DatabaseRepository.delete_by_query(VehicleInfo, query={"user_id": self.user_id}),
+                CacheRepository.delete(self.user_id)
+            ])
+            return
         except Exception as e:
             get_logger().error(str(e), user_id=self.user_id)
             raise ProfileDeletionError(user_id=self.user_id) from e
 
     def get_info(self) -> Dict[str, Any]:
         return dict(
+            user_id=self.user_id,
             first_name=self.first_name,
             last_name=self.last_name,
             phone_number=self.phone_number,
+            hashed_password=self.hashed_password,
             gender=self.gender,
             role=self.role,
         )
-
-    async def logout(self):
-        try:
-            await CacheRepository.get_cache('token').delete(self.user_id)
-        except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id)
-            raise ProfileLogoutError(user_id=self.user_id) from e
 
     async def add_address(self, address_line_1: str, address_line_2: str, city: str, postal_code: str = None, country: str = None) -> str:
         try:
@@ -332,26 +285,15 @@ class UserDomain:
         return f"{self.phone_number}{self.role}"
 
     async def _get_auth_code(self):
-        auth_code = await CacheRepository.get_cache('auth').get(self.user_id)
+        auth_code = await CacheRepository.get(self.user_id)
         if auth_code and Authenticator.verify_auth_code(auth_code):
             return str(auth_code)
         return None
 
-    async def _get_access_token(self):
-        access_token = await CacheRepository.get_cache('token').get(self.user_id)
-        if access_token and TokenHandler.validate_token(self.user_id, self._get_secret(), access_token):
-            return str(access_token)
-        return None
-
     async def _generate_auth_code(self) -> str:
         auth_code, ttl = Authenticator.create_auth_code(self.user_id)
-        await CacheRepository.get_cache('auth').set(self.user_id, auth_code, ttl)
+        await CacheRepository.set(self.user_id, auth_code, ttl)
         return auth_code
-
-    async def _generate_session_token(self) -> str:
-        access_token, ttl = TokenHandler.generate_token(self.user_id, self._get_secret())
-        await CacheRepository.get_cache('token').set(self.user_id, access_token, ttl)
-        return access_token
 
     @staticmethod
     def _from_profile(profile: Profile):
@@ -367,7 +309,7 @@ class UserDomain:
             national_id=profile.national_id,
             gender=profile.gender,
             role=profile.role,
-            created_at=profile.created_at.astimezone(tz) if profile.created_at else None,
-            updated_at=profile.updated_at.astimezone(tz) if profile.updated_at else None,
-            verified_at=profile.verified_at.astimezone(tz) if profile.verified_at else None,
+            created_at=profile.created_at.astimezone(utils.time.timezone) if profile.created_at else None,
+            updated_at=profile.updated_at.astimezone(utils.time.timezone) if profile.updated_at else None,
+            verified_at=profile.verified_at.astimezone(utils.time.timezone) if profile.verified_at else None,
         )

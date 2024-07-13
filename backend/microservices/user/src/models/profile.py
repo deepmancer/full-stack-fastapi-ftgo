@@ -1,15 +1,16 @@
-from uuid import uuid4
-from models.base import Base
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from config.timezone import tz
-from config.enums import Gender, Roles
+
+from ftgo_utils.enums import Gender, Roles
+from ftgo_utils.uuid import uuid4
+
+from models.base import Base
 
 class Profile(Base):
     __tablename__ = "user_profile"
 
-    id = Column(String, primary_key=True, default=lambda: uuid4().hex)
+    id = Column(String, primary_key=True, default=lambda: uuid4())
     phone_number = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
     national_id = Column(String, nullable=True)
@@ -21,5 +22,7 @@ class Profile(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     verified_at = Column(DateTime(timezone=True), nullable=True)
+    last_login_time = Column(DateTime(timezone=True), nullable=True)
 
     addresses = relationship("Address", back_populates="profile", cascade="all, delete-orphan")
+    vehicle_info = relationship("VehicleInfo", back_populates="driver", cascade="all, delete-orphan")

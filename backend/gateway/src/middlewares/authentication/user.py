@@ -1,5 +1,5 @@
 from starlette.authentication import BaseUser
-from schemas.authentication.user import UserSchema
+from schemas.auth.user import UserSchema
 
 class FastAPIUser(BaseUser):
     def __init__(self, user: UserSchema):

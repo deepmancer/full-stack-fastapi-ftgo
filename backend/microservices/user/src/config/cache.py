@@ -1,13 +1,12 @@
-from config.base import BaseConfig
-from decouple import config as de_config
+from config.base import BaseConfig, env_var
 
 class RedisConfig(BaseConfig):
-    container_name: str = de_config("CACHE_CONTAINER_NAME", default="user_cache")
+    container_name: str = env_var("CACHE_CONTAINER_NAME", "user_cache")
 
-    host: str = de_config("REDIS_HOST")
-    port: int = de_config("REDIS_PORT", cast=int)
-    db: int = de_config("REDIS_DB", default=0, cast=int)
-    default_ttl: int = de_config("REDIS_DEFAULT_TTL", default=120, cast=int)
+    host: str = env_var("REDIS_HOST", "localhost")
+    port: int = env_var("REDIS_PORT", 6379, int)
+    db: int = env_var("REDIS_DB", 0, int)
+    default_ttl: int = env_var("REDIS_DEFAULT_TTL", 120, int)
 
     @property
     def url(self) -> str:

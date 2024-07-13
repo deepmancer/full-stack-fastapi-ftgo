@@ -1,23 +1,19 @@
-from config.base import BaseConfig
+from config.base import BaseConfig, env_var
 from decouple import config as de_config
 
 class PostgresConfig(BaseConfig):
-    container_name: str = de_config("DB_CONTAINER_NAME", default="user_db")
+    container_name: str = env_var("DB_CONTAINER_NAME", "user_db")
 
-    host: str = de_config("POSTGRES_HOST")
-    port: int = de_config("POSTGRES_PORT", cast=int)
-    db: str = de_config("POSTGRES_DB")
-    user: str = de_config("POSTGRES_USERNAME")
-    password: str = de_config("POSTGRES_PASSWORD")
-    db_schema: str = de_config("POSTGRES_SCHEMA", default="postgresql", cast=str)
+    host: str = env_var("POSTGRES_HOST", "localhost")
+    port: int = env_var("POSTGRES_PORT", 5432, int)
+    db: str = env_var("POSTGRES_DB", "database")
+    user: str = env_var("POSTGRES_USERNAME", "postgres")
+    password: str = env_var("POSTGRES_PASSWORD", "mypassword")
+    db_schema: str = env_var("POSTGRES_SCHEMA", "postgresql")
 
-    enable_echo_log: bool = de_config("ENABLE_DB_ECHO_LOG", default=False, cast=bool)
-    enable_force_rollback: bool = de_config("ENABLE_DB_FORCE_ROLLBACK", default=False, cast=bool)
-    enable_expire_on_commit: bool = de_config("ENABLE_DB_EXPIRE_ON_COMMIT", default=False, cast=bool)
-
-    @property
-    def local_url(self) -> str:
-        return f"{self.db_schema}://{self.user}:{self.password}@localhost:{self.port}/{self.db}"
+    enable_echo_log: bool = env_var("ENABLE_DB_ECHO_LOG", False, bool)
+    enable_force_rollback: bool = env_var("ENABLE_DB_FORCE_ROLLBACK", False, bool)
+    enable_expire_on_commit: bool = env_var("ENABLE_DB_EXPIRE_ON_COMMIT", False, bool)
 
     @property
     def sync_url(self) -> str:

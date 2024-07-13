@@ -6,7 +6,7 @@ from config.auth import AuthConfig
 from data_access.repository.cache_repository import CacheRepository
 from utils.jwt_token import JWTTokenHandler
 from middlewares.authentication.backend import JWTAuthenticationBackend
-from schemas.authentication.user import UserSchema
+from schemas.auth.user import UserSchema
 
 
 def init_app(app: FastAPI, auth_config: Optional[AuthConfig] = None, cache_repository: Optional[CacheRepository] = None):
