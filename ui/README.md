@@ -1,4 +1,4 @@
-# FRGO
+# FTGO
 
 ## Project setup
 ```
