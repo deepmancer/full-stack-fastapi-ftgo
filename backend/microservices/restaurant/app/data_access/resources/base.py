@@ -1,5 +1,6 @@
 import asyncio
 from typing import Optional, Any
+from data_access import get_logger
 
 class BaseDataAccess:
     _config = None
@@ -17,6 +18,10 @@ class BaseDataAccess:
     async def disconnect(self, *args, **kwargs) -> None:
         """Terminate the connection."""
         raise NotImplementedError()
+
+    @property
+    def logger(self):
+        return get_logger()
 
     @classmethod
     def initialize(cls, config: Any) -> "BaseDataAccess":
