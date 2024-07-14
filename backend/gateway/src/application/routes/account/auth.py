@@ -12,7 +12,7 @@ from schemas.auth.account import (
     LogoutRequest, LogoutResponse,
     GetUserInfoRequest, GetUserInfoResponse,
 )
-from domain.user import UserDomain
+from services.user import UserService
 
 router = APIRouter(prefix="/profile", tags=["user_profile"])
 

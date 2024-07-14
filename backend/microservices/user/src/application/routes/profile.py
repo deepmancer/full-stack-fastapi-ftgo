@@ -3,7 +3,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from application import get_logger
-from application.schema import *
+from backend.microservices.user.src.application.routes_schema import *
 from domain.user import UserDomain
 
 router = APIRouter(prefix="/profile", tags=["user_profile"])
@@ -70,4 +70,16 @@ async def delete_account(request: DeleteProfileRequest):
         return DeleteProfileResponse(user_id=user.user_id, success=True)
     except Exception as e:
         get_logger().error(f"Error occurred while deleting the account: {e}", request=request)
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
+
+
+# a post api for updating user profile fields
+@router.post("/update", response_model=UpdateProfileResponse)
+async def update_profile(request: UpdateProfileRequest):
+    try:
+        user = await UserDomain.load(request.user_id)
+        updated_fields = await user.update_profile_information(request.updated_fields)
+        return UpdateProfileResponse(user_id=user.user_id, updated_fields=updated_fields, success=True)
+    except Exception as e:
+        get_logger().error(f"Error occurred while updating the user profile: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))

@@ -1,6 +1,5 @@
 import os
 from typing import Any, Type
-from pydantic import Field
 from decouple import Config, RepositoryEnv, config
 from collections import ChainMap
 
@@ -19,7 +18,6 @@ class BaseConfig():
         common_env_params = RepositoryEnv(common_env_path)
         env_specific_params = RepositoryEnv(env_specific_path)
         merged_params = {**common_env_params.data, **env_specific_params.data}
-        # for the key-value pairs in the merged_params, set the environment variables
         for key, value in merged_params.items():
             os.environ[key] = value
 

@@ -49,7 +49,6 @@ async def validation_exception_handler(request, exc):
     return await request_validation_exception_handler(request, exc)
 
 if __name__ == "__main__":
-    init_logging(level=service_config.log_level)
   
     uvicorn.run(
         "main:app",

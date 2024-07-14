@@ -9,7 +9,7 @@ from fastapi.exception_handlers import (
 from fastapi.exceptions import RequestValidationError
 
 from application import get_logger
-from application.schema import *
+from backend.microservices.user.src.application.routes_schema import *
 from domain.user import UserDomain
 
 router = APIRouter(prefix="/address", tags=["address"])
@@ -72,4 +72,17 @@ async def get_all_addresses(request: AllAddressesRequest):
         return AllAddressesResponse(addresses=addresses)
     except Exception as e:
         get_logger().error(f"Error occurred while getting all addresses: {e}", request=request)
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
+
+# write a post api for updating address fields
+@router.post("/update", response_model=AddressResponse)
+async def update_address(request: UpdateAddressRequest):
+    try:
+        user = await UserDomain.load(request.user_id)
+        await user.update_address(
+            request.address_id, request.address_line_1, request.address_line_2, request.city, request.postal_code, request.country
+        )
+        return AddressResponse(success=True, **address_info)
+    except Exception as e:
+        get_logger().error(f"Error occurred while updating address: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))

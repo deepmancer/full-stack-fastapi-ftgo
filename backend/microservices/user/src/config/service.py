@@ -2,6 +2,7 @@ import logging
 from config.base import BaseConfig, env_var
 
 class ServiceConfig(BaseConfig):
+    environment: str = env_var('ENVIRONMENT', 'test')
     api_prefix: str = env_var('API_PREFIX', '/user')
     service_host: str = env_var('SERVICE_HOST', '127.0.0.1')
     service_port: int = env_var('SERVICE_PORT', 5020, int)

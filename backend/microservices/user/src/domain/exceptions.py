@@ -8,6 +8,11 @@ class AddressNotFoundError(DomainError):
         base_message = f"Address with ID {address_id} not found"
         super().__init__(base_message, message)
 
+class UpdateAddressError(DomainError):
+    def __init__(self, user_id: str, address_id: str, update_fields: dict, message: Optional[str] = None):
+        extra_message = f" for {json.dumps(update_fields)}" if update_fields else ""
+        base_message = f"Address update failed for user with ID {user_id} and address with ID {address_id}{extra_message}"
+        super().__init__(base_message, message)
 class UnkownError(DomainError):
     def __init__(self, message: Optional[str] = None):
         base_message = f"An unknown error occurred"
@@ -16,6 +21,11 @@ class ProfileRegistrationError(DomainError):
     def __init__(self,  message: Optional[str] = None, **kwargs):
         extra_message = f" for {json.dumps(kwargs)}" if kwargs else ""
         base_message = f"Profile registration failed{extra_message}"
+        super().__init__(base_message, message)
+
+class ProfileUpdateError(DomainError):
+    def __init__(self, user_id: str, updated_fields: dict, message: Optional[str] = None):
+        base_message = f"Profile update failed for user with ID {user_id} and fields {json.dumps(updated_fields)}"
         super().__init__(base_message, message)
 
 class ProfileLoginError(DomainError):
@@ -119,8 +129,9 @@ class DeleteAddressError(DomainError):
         super().__init__(base_message, message)
 
 class SetDefaultAddressError(DomainError):
-    def __init__(self, user_id: str, address_id: str, message: Optional[str] = None):
-        base_message = f"Failed to set default address with ID {address_id} for user with ID {user_id}"
+    def __init__(self, user_id: str, set_default: bool, address_id: str, message: Optional[str] = None):
+        set_str = "set" if set_default else "unset"
+        base_message = f"Failed to {set_str} default address with ID {address_id} for user with ID {user_id}"
         super().__init__(base_message, message)
 
 class VehicleRegisterError(DomainError):

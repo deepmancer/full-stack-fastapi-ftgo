@@ -18,20 +18,20 @@ RUN pip install --upgrade pip
 
 # Copy requirements.txt before other files to leverage Docker cache
 COPY ./requirements.txt /tmp/requirements.txt
-RUN pip install --force-reinstall -r /tmp/requirements.txt
-RUN pip install --force-reinstall git+https://github.com/alirezaheidari-cs/ftgo_utils.git
+RUN pip install -r /tmp/requirements.txt
+RUN pip install --upgrade git+https://github.com/alirezaheidari-cs/ftgo_utils.git
 
 # Copy the application code to the container
-COPY . /user_service
+COPY . /user
 
 # Set the working directory
-WORKDIR /user_service
+WORKDIR /user
 
 # Set the PYTHONPATH environment variable
-ENV PYTHONPATH=/user_service/src
+ENV PYTHONPATH=/user/src
 
 # Copy the Alembic configuration file
-COPY alembic.ini /user_service/alembic.ini
+COPY alembic.ini /user/alembic.ini
 
 # Copy the entry point script
 COPY ./entrypoint.sh /entrypoint.sh
