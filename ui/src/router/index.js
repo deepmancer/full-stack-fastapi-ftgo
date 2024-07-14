@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import SignUp from '../views/SignUp.vue'
 import SignIn from '../views/SignIn.vue'
 import CustomerMainPage from '../views/CustomerMainPage.vue'
-
+import ChangeUserInfo from "../views/ChangeUserInfo.vue";
 
 Vue.use(VueRouter)
 
@@ -11,6 +11,11 @@ const routes = [{
         path: '/CustomerMainPage',
         name: 'CustomerMainPage',
         component: CustomerMainPage
+    },
+    {
+        path: '/ChangeUserInfo',
+        name: 'ChangeUserInfo',
+        component: ChangeUserInfo
     },
     {
         path: '/',
