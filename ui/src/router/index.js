@@ -8,12 +8,12 @@ import CustomerMainPage from '../views/CustomerMainPage.vue'
 Vue.use(VueRouter)
 
 const routes = [{
-        path: '/',
+        path: '/CustomerMainPage',
         name: 'CustomerMainPage',
         component: CustomerMainPage
     },
     {
-        path: '/SignUp',
+        path: '/',
         name: 'SignUp',
         component: SignUp
     },
