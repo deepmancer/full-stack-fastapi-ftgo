@@ -71,7 +71,7 @@ export default {
 	methods:{
 		signin(){
 			this.loading = true;
-			let api = "http://79.127.54.112:5000/User/SignIn";
+			let api = "http://localhost:5020/User/SignIn";
 			if (this.email == ""){
 				const data = {
 					PhoneNumber: this.phone,
