@@ -34,7 +34,7 @@ ENV PYTHONPATH=/user_service/src
 COPY alembic.ini /user_service/alembic.ini
 
 # Copy the entry point script
-COPY ./entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Command to run the entry point script
