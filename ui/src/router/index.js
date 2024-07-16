@@ -3,6 +3,8 @@ import VueRouter from 'vue-router'
 import SignUp from '../views/SignUp.vue'
 import SignIn from '../views/SignIn.vue'
 import CustomerMainPage from '../views/CustomerMainPage.vue'
+import DeliveryMainPage from '../views/DeliveryMainPage.vue'
+import SupplierMainPage from '../views/SupplierMainPage.vue'
 
 
 Vue.use(VueRouter)
@@ -13,6 +15,15 @@ const routes = [{
         component: CustomerMainPage
     },
     {
+        path: '/DeliveryMain',
+        name: 'DeliveryMainPage',
+        component: DeliveryMainPage
+    },
+    {
+        path: '/SupplierMain',
+        name: 'SupplierMainPage',
+        component: SupplierMainPage
+    },{
         path: '/SignUp',
         name: 'SignUp',
         component: SignUp
