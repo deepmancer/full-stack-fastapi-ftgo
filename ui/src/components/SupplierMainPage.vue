@@ -104,8 +104,8 @@ export default {
     navigateToOrders() {
       this.$router.push({ name: 'orders' });
     },
-    navigateToFood(restaurantId) {
-      this.$router.push({ name: 'RestaurantDetail', params: { id: restaurantId } });
+    navigateToFood(foodId) {
+      this.$router.push({ name: 'FoodDetail', params: { id: foodId } });
     }
   }
 };
