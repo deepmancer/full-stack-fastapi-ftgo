@@ -1,5 +1,5 @@
 <template>
-  <div class="restaurant-main-page" style="background-image: url('/images/UserMainPage-image.jpg');">
+  <div class="restaurant-main-page" style="background-image: url('/images/background.jpg');">
     <b-container>
       <div class="restaurant-main-page">
         <b-container>
@@ -10,8 +10,13 @@
               </b-button>
             </b-col>
             <b-col>
-              <b-button variant="primary" @click="navigateToShoppingCart">
-                سفارشات
+              <b-button variant="primary" @click="navigateToSupplierActiveOrders">
+                سفارشات درحال پردازش
+              </b-button>
+            </b-col>
+            <b-col>
+              <b-button variant="primary" @click="navigateToSupplierOrdersHistory">
+                تاریخچه سفارشات
               </b-button>
             </b-col>
           </b-row>
@@ -54,7 +59,7 @@ export default {
   data() {
     return {
       menu: [
-        {
+      {
           id: 1,
           logo: '/images/McDonalds.png',
           name: 'کباب',
@@ -98,11 +103,18 @@ export default {
     };
   },
   methods: {
+    async fetchMenu() {
+      const response = await this.$axios.get('/resturant/menu');
+      this.menu = response.data;
+    },
     navigateToEditSupplierInfo() {
       this.$router.push({ name: 'EditSupplierInfo' });
     },
-    navigateToOrders() {
-      this.$router.push({ name: 'orders' });
+    navigateToSupplierOrdersHistory() {
+      this.$router.push({ name: 'SupplierOrdersHistory' });
+    },
+    navigateToSupplierActiveOrders() {
+      this.$router.push({ name: 'SupplierActiveOrders' });
     },
     navigateToFood(foodId) {
       this.$router.push({ name: 'FoodDetail', params: { id: foodId } });
