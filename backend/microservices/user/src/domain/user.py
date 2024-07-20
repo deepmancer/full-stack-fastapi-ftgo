@@ -217,15 +217,17 @@ class UserDomain:
 
     async def delete_address(self, address_id: str) -> bool:
         try:
-            address = await self.get_address(address_id)
-            if not address:
-                raise AddressNotFoundError(address_id=address_id)
-            
-            if address.is_default:
-                raise DefaultAddressDeletionError(address_id=address_id)
-            
-            await AddressDomain.delete_address(address_id)
-            return address_id
+            # address = await self.get_address(address_id)
+            # if not address:
+            #     raise AddressNotFoundError(address_id=address_id)
+            #
+            # if address.is_default:
+            #     raise DefaultAddressDeletionError(address_id=address_id)
+            await DatabaseRepository.delete_by_query(Address, query={"id": address_id})
+            # await CacheRepository.delete(self.user_id)
+            return
+            # await AddressDomain.delete_address(address_id)
+            # return address_id
         except Exception as e:
             get_logger().error(str(e), user_id=self.user_id, address_id=address_id)
             raise DeleteAddressError(user_id=self.user_id, address_id=address_id) from e
@@ -242,7 +244,7 @@ class UserDomain:
             default_address = next((address for address in self.addresses if address.is_default), None)
             if default_address is not None and default_address.address_id != address_id:
                 await default_address.unset_as_default()
-            await address.set_as_default()
+            await address.set_as_default(address_id=address_id)
             return address_id
         except Exception as e:
             get_logger().error(str(e), user_id=self.user_id, address_id=address_id)

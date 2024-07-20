@@ -28,11 +28,11 @@ async def add_address(request: AddAddressRequest):
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
     
 @router.delete("/delete", response_model=DeleteAddressResponse)
-async def delete_address(request: DeleteAddressRequest):
+async def delete_address(user_id: str, address_id: str):
     try:
-        user = await UserDomain.load(request.user_id)
-        await user.delete_address(request.address_id)
-        return DeleteAddressResponse(address_id=request.address_id, success=True)
+        user = await UserDomain.load(user_id)
+        await user.delete_address(address_id)
+        return DeleteAddressResponse(address_id=address_id, success=True)
     except Exception as e:
         get_logger().error(f"Error occurred while deleting address: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
@@ -48,11 +48,12 @@ async def set_address_as_default(request: SetPreferredAddressRequest):
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
 @router.get("/get_info", response_model=AddressInfoResponse)
-async def get_address_info(request: AddressInfoRequest):
+async def get_address_info(user_id: str, address_id: str):
     try:
-        user = await UserDomain.load(request.user_id)
-        address = await user.get_address_info(request.address_id)
+        user = await UserDomain.load(user_id)
+        address = await user.get_address_info(address_id)
         return AddressInfoResponse(
+            address_id=address.address_id,
             is_default=address.is_default,
             address_line_1=address.address_line_1,
             address_line_2=address.address_line_2,
@@ -60,14 +61,14 @@ async def get_address_info(request: AddressInfoRequest):
             postal_code=address.postal_code,
             country=address.country,
         )
-    except:
+    except Exception as e:
         get_logger().error(f"Error occurred while getting address info: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
     
 @router.get("/get_all_info", response_model=AllAddressesResponse)
-async def get_all_addresses(request: AllAddressesRequest):
+async def get_all_addresses(user_id: str):
     try:
-        user = await UserDomain.load(request.user_id)
+        user = await UserDomain.load(user_id)
         addresses = await user.get_addresses_info()
         return AllAddressesResponse(addresses=addresses)
     except Exception as e:

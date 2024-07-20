@@ -21,12 +21,12 @@
           <b-list-group-item>
             <strong>تلفن:</strong> {{ userInfo.phone_number }}
           </b-list-group-item>
-          <b-list-group-item>
-            <strong>جنسیت:</strong> {{ userInfo.gender }}
-          </b-list-group-item>
         </b-list-group>
         <div class="text-right mt-3">
           <b-button variant="danger" @click="confirmDeleteAccount">حذف حساب کاربری من</b-button>
+        </div>
+        <div class="text-right mt-3">
+          <b-button @click="backToUserPage">برگشت</b-button>
         </div>
       </b-card>
 
@@ -36,11 +36,13 @@
           <b-list-group-item v-for="address in addresses" :key="address.address_id">
             <div class="d-flex justify-content-between align-items-center">
               <div>
+                <div><strong>ایدی</strong> {{ address.address_id }}</div>
                 <div><strong>آدرس 1:</strong> {{ address.address_line_1 }}</div>
                 <div><strong>آدرس 2:</strong> {{ address.address_line_2 }}</div>
                 <div><strong>شهر:</strong> {{ address.city }}</div>
                 <div><strong>کد پستی:</strong> {{ address.postal_code }}</div>
                 <div><strong>کشور:</strong> {{ address.country }}</div>
+                <div><strong>پیش‌فرض:</strong> {{ address.is_default ? "بله" : "خیر" }}</div>
               </div>
               <div>
                 <b-button variant="secondary" @click="setPreferredAddress(address.address_id)">
@@ -85,7 +87,7 @@ import axios from 'axios';
 import { mapGetters } from 'vuex';
 
 export default {
-  name: 'CustomerChangeInfoComp', // Ensure the name matches the component registration
+  name: 'CustomerChangeInfoComp',
   data() {
     return {
       userInfo: {},
@@ -122,7 +124,9 @@ export default {
     },
     async fetchAddresses() {
       try {
-        const response = await axios.get(`http://localhost:5020/user/address/get_all_info?user_id=${this.userId}`);
+        const response = await axios.get(`http://localhost:5020/user/address/get_all_info`, {
+          params: { user_id: this.userId }
+        });
         this.addresses = response.data.addresses;
       } catch (error) {
         console.error('Error fetching addresses:', error);
@@ -141,7 +145,7 @@ export default {
           postal_code: '',
           country: ''
         };
-        this.fetchAddresses(); // Refresh addresses
+        this.fetchAddresses();
       } catch (error) {
         console.error('Error adding address:', error);
       }
@@ -151,7 +155,7 @@ export default {
         await axios.delete('http://localhost:5020/user/address/delete', {
           data: { user_id: this.userId, address_id: addressId }
         });
-        this.fetchAddresses(); // Refresh addresses
+        this.fetchAddresses();
       } catch (error) {
         console.error('Error deleting address:', error);
       }
@@ -162,7 +166,7 @@ export default {
           user_id: this.userId,
           address_id: addressId
         });
-        this.fetchAddresses(); // Refresh addresses
+        this.fetchAddresses();
       } catch (error) {
         console.error('Error setting preferred address:', error);
       }
@@ -180,14 +184,16 @@ export default {
     async deleteAccount() {
       try {
         await axios.delete('http://localhost:5020/user/profile/delete', {
-          data: { user_id: this.userId }
+          data: {user_id: this.userId}
         });
-        // Optionally, redirect to a logout or home page
-        this.$router.push('/signin');
+
       } catch (error) {
         console.error('Error deleting user account:', error);
       }
-    }
+    },
+    async backToUserPage() {
+      this.$router.push('/CustomerMainPage');
+    },
   }
 };
 </script>
@@ -196,6 +202,7 @@ export default {
 .customer-change-info {
   padding: 20px;
 }
+
 .user-id-box {
   margin-top: 20px;
   text-align: center;

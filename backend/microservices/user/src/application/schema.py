@@ -77,6 +77,7 @@ class AddressInfoRequest(BaseSchema):
     address_id: str = Field(..., min_length=1, max_length=36)
 
 class AddressInfoResponse(BaseSchema):
+    address_id: str
     address_line_1: str = Field(..., min_length=1, max_length=100)
     address_line_2: str = Field(..., max_length=100)
     city: str = Field(..., min_length=1, max_length=50)
@@ -103,12 +104,12 @@ class AddressResponse(BaseSchema):
     address_id: Optional[str] = Field(None, min_length=1, max_length=36)
 
 class DeleteAddressRequest(BaseSchema):
-    user_id: str = Field(..., min_length=1, max_length=36)
-    address_id: str = Field(..., min_length=1, max_length=36)
+    user_id: str
+    address_id: str
 
 class DeleteAddressResponse(BaseSchema):
-    success: bool = Field(...)
-    address_id: str = Field(..., min_length=1, max_length=36)
+    success: bool
+    address_id: str
 
 class SetPreferredAddressRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)

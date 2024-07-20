@@ -72,8 +72,19 @@ class AddressDomain:
             updated_at=address.updated_at.astimezone(tz) if address.updated_at else None,
         )
 
-    async def set_as_default(self) -> bool:
-        await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields={"is_default": True})
+    async def set_as_default(self, address_id: str) -> bool:
+        # await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields={"is_default": True})
+        await DatabaseRepository.update_by_query(
+            Address,
+            query={"user_id": self.user_id, "is_default": True},
+            update_fields={"is_default": False}
+        )
+        # Set new default address
+        await DatabaseRepository.update_by_query(
+            Address,
+            query={"id": address_id},
+            update_fields={"is_default": True}
+        )
         self.is_default = True
 
     async def unset_as_default(self) -> bool:
@@ -82,6 +93,7 @@ class AddressDomain:
 
     def get_info(self) -> Dict[str, Any]:
         return dict(
+            address_id=self.address_id,
             is_default=self.is_default,
             address_line_1=self.address_line_1,
             address_line_2=self.address_line_2,
