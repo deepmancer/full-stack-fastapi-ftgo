@@ -55,14 +55,14 @@ class LoginResponse(BaseSchema):
 class GetUserInfoRequest(BaseSchema):
     user_id: str = Field(..., min_length=1, max_length=36)
 
-class GetUserInfoResponse(BaseSchema):
-    user_id: str = Field(..., min_length=1, max_length=36)
-    first_name: str = Field(..., min_length=1, max_length=50)
-    last_name: str = Field(..., min_length=1, max_length=50)
-    hashed_password: str = Field(..., min_length=1, max_length=128)
-    phone_number: str = Field(..., min_length=1, max_length=15)
-    gender: str = Field(..., min_length=1, max_length=10)
-    role: str = Field(..., min_length=1, max_length=50)
+class GetUserInfoResponse(BaseModel):
+    user_id: str
+    first_name: str
+    last_name: str
+    phone_number: str
+    hashed_password: str
+    gender: Optional[str]
+    role: str
 
     @field_validator('phone_number', mode='before')
     def validate_phone_number_field(cls, value):

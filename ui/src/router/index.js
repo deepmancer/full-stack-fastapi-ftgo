@@ -3,8 +3,7 @@ import VueRouter from 'vue-router'
 import SignUp from '../views/SignUp.vue'
 import SignIn from '../views/SignIn.vue'
 import CustomerMainPage from '../views/CustomerMainPage.vue'
-import ChangeUserInfo from "../views/ChangeUserInfo.vue";
-
+import CustomerChangeInfo from '../views/CustomerChangeInfo.vue'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -13,17 +12,17 @@ const routes = [{
         component: CustomerMainPage
     },
     {
-        path: '/ChangeUserInfo',
-        name: 'ChangeUserInfo',
-        component: ChangeUserInfo
+        path: '/CustomerChangeInfo',
+        name: 'CustomerChangeInfo',
+        component: CustomerChangeInfo
     },
     {
-        path: '/',
+        path: '/SignUp',
         name: 'SignUp',
         component: SignUp
     },
     {
-        path: '/SignIn',
+        path: '/',
         name: 'SignIn',
         component: SignIn
     },

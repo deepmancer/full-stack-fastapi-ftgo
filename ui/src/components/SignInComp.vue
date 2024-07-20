@@ -48,7 +48,7 @@
                     </div>
                     <div class="signup-image">
                         <figure><img src="../../images/signin-image.jpg" alt="sign up image"></figure>
-                        <router-link class="signup-image-link" to="/">من که حساب کاربری ندارم :(</router-link>
+                        <router-link class="signup-image-link" to="/SignUp">من که حساب کاربری ندارم :(</router-link>
                     </div>
                 </div>
             </div>
@@ -63,6 +63,7 @@ import VueAxios from "vue-axios";
 Vue.use(VueAxios, axios);
 import { BVToastPlugin } from "bootstrap-vue";
 Vue.use(BVToastPlugin);
+import { mapActions } from 'vuex';
 
 export default {
     data() {
@@ -82,6 +83,7 @@ export default {
         }
     },
     methods: {
+        ...mapActions(['updateUserId']),
         signin() {
             this.loading = true;
             let api = "http://localhost:5020/user/profile/login";
@@ -94,6 +96,7 @@ export default {
                 .then(response => {
                     localStorage.removeItem('token');
                     localStorage.setItem('token', response.data.user_id);
+                    this.updateUserId(response.data.user_id);  // Store the user ID in Vuex
                     this.phone = '';
                     this.password = '';
                     this.loading = false;

@@ -43,11 +43,10 @@ async def login(request: LoginRequest):
         get_logger().error(f"Error occurred while logging the user in: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
-# logout api
-@router.get("/user_info", response_model=GetUserInfoResponse)
+@router.post("/user_info", response_model=GetUserInfoResponse)
 async def get_info(request: GetUserInfoRequest):
     try:
-        user = await UserDomain.load(request.user_id)
+        user = await UserDomain.load(user_id=request.user_id)
         user_info = user.get_info()
         return GetUserInfoResponse(
             user_id=user_info["user_id"],
@@ -61,6 +60,7 @@ async def get_info(request: GetUserInfoRequest):
     except Exception as e:
         get_logger().error(f"Error occurred while getting the user info: {e}", request=request)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
+# logout api
 
 @router.delete("/delete", response_model=DeleteProfileResponse)
 async def delete_account(request: DeleteProfileRequest):
