@@ -94,7 +94,7 @@ export default {
       menu: [
         {
           id: 1,
-          logo: '/images/McDonalds.png',
+          logo: '/images/kebab.png',
           name: 'کباب',
           price: '200,000',
           score: 4.5,
@@ -102,7 +102,7 @@ export default {
         },
         {
           id: 2,
-          logo: '/images/McDonalds.png',
+          logo: '/images/kebab.png',
           name: 'کباب',
           price: '200,000',
           score: 4.2,
@@ -110,7 +110,7 @@ export default {
         },
         {
           id: 3,
-          logo: '/images/McDonalds.png',
+          logo: '/images/kebab.png',
           name: 'کباب',
           price: '200,000',
           score: 4.0,
@@ -118,7 +118,7 @@ export default {
         },
         {
           id: 4,
-          logo: '/images/McDonalds.png',
+          logo: '/images/kebab.png',
           name: 'کباب',
           price: '200,000',
           score: 3.8,
@@ -126,7 +126,7 @@ export default {
         },
         {
           id: 5,
-          logo: '/images/McDonalds.png',
+          logo: '/images/kebab.png',
           name: 'کباب',
           price: '200,000',
           score: 3.5,
