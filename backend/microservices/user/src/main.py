@@ -1,59 +1,27 @@
-import logging
+import asyncio
+import uvloop
+from ftgo_utils.logger import init_logging
 
-import fastapi
-import uvicorn
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
-from fastapi.exceptions import RequestValidationError
-
-from config import ApplicationError
-from application.routes import address_router, profile_router, vehicle_router
-
-from ftgo_utils.logger import init_logging, get_logger
-
-from config import LayerNames
 from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
+from events import EventManager
 
-# Load the configuration
-service_config = ServiceConfig.load()
-
-app = fastapi.FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(router=profile_router, prefix=service_config.api_prefix)
-app.include_router(router=address_router, prefix=service_config.api_prefix)
-app.include_router(router=vehicle_router, prefix=service_config.api_prefix)
-
-@app.on_event("startup")
-async def startup_event():
-    await setup()
+async def main():
+    service_config = ServiceConfig.load()
     init_logging(level=service_config.log_level)
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    await teardown()
+    await setup()
+    event_manager = await EventManager.create(loop=asyncio.get_event_loop())
+    await event_manager.define_events()
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    get_logger(LayerNames.APP.value).error(f"{exc}")
-    return await request_validation_exception_handler(request, exc)
+    await asyncio.Future()
 
-if __name__ == "__main__":
-  
-    uvicorn.run(
-        "main:app",
-        host=service_config.service_host,
-        port=service_config.service_port,
-        reload=True,
-        log_level=service_config.log_level,
-    )
+if __name__ == '__main__':
+    uvloop.install()
+    loop = asyncio.get_event_loop()
+
+    try:
+        loop.run_until_complete(main())
+    finally:
+        loop.run_until_complete(teardown())
+        loop.close()

@@ -21,7 +21,7 @@ class AuthenticateAccountResponse(BaseSchema):
     success: bool = Field(...)
     user_id: str = uuid_field()
 
-class LoginRequest(BaseSchema, PhoneNumberMixin, RoleMixin):
+class LoginRequest(PhoneNumberMixin, RoleMixin):
     password: str = Field(..., min_length=8, max_length=128)
 
 class LoginResponse(BaseSchema):

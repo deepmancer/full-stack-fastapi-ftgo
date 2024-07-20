@@ -4,10 +4,21 @@ from decouple import Config, RepositoryEnv, config
 from collections import ChainMap
 
 class BaseConfig():
+    env = os.getenv("ENVIRONMENT", "test")
+    
+    @classmethod
+    def load_environment(cls):
+        env = config("ENVIRONMENT", default=cls.env)
+        cls.env = env
+        return cls.env
+
     @classmethod
     def load_environment(cls):
         common_env_path = ".env"
+
         env = os.getenv("ENVIRONMENT", "test")
+        cls.env = env
+        
         env_specific_path = f".env.{env}"
 
         if not os.path.exists(common_env_path):
@@ -26,8 +37,5 @@ class BaseConfig():
         cls.load_environment()
         return cls()
 
-def env_var(field_name: str, default: Any, cast_type: Type = str) -> Any:
+def env_var(field_name: str, default: Any = None, cast_type: Type = str) -> Any:
     return config(field_name, default=default, cast=cast_type)
-
-BaseConfig.load_environment()
-

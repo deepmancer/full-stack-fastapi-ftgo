@@ -1,0 +1,5 @@
+version: "3.8"
+
+include:
+  - ./microservices/user/compose.yaml
+  - ./infra/compose.yaml

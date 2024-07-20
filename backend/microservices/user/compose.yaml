@@ -19,6 +19,8 @@ services:
     volumes:
       - user_postgres_data:/var/lib/postgresql/data
     command: ["postgres", "-c", "port=5438"]
+    networks:
+      - backend_network
   redis:
     image: redis:6.2-alpine
     restart: always
@@ -34,8 +36,9 @@ services:
     volumes:
       - user_redis_data:/data
     command: ["redis-server", "--port", "6235"]
-
-  backend:
+    networks:
+      - backend_network
+  user_service:
     build:
       context: .
       dockerfile: Dockerfile
@@ -67,6 +70,13 @@ services:
       - 5020
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
+    external: true
 
 volumes:
   user_postgres_data:

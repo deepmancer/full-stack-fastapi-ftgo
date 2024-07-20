@@ -4,7 +4,6 @@ asyncio
 asyncpg
 black
 docker
-fastapi
 greenlet
 loguru
 mypy
@@ -19,7 +18,7 @@ SQLAlchemy==2.0.0b3
 sqlalchemy
 pytz
 trio
-uvicorn
 uvloop
-starlette
+aiomisc
 git+https://github.com/alirezaheidari-cs/ftgo_utils.git
+git+https://github.com/alirezaheidari-cs/rabbitmq_rpc.git

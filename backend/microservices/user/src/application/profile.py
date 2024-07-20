@@ -3,7 +3,7 @@ from typing import Dict
 from application.interfaces.profile import *
 from domain.user import UserDomain
 
-class UserService:
+class ProfileService:
 
     @staticmethod
     async def register(request: RegisterRequest) -> RegisterResponse:
@@ -37,7 +37,6 @@ class UserService:
             first_name=user_info["first_name"],
             last_name=user_info["last_name"],
             phone_number=user_info["phone_number"],
-            hashed_password=user_info["hashed_password"],
             gender=user_info["gender"],
             role=user_info["role"],
         )
@@ -59,3 +58,17 @@ class UserService:
         user = await UserDomain.load(request.user_id)
         user_info = await user.update_profile_information(request.dict(exclude={"user_id"}))
         return UpdateProfileResponse(success=True, **user_info)
+
+    @staticmethod
+    async def get_user_info_with_credentials(request: GetUserWithCredentialsRequest) -> GetUserWithCredentialsResponse:
+        user = await UserDomain.load(request.user_id)
+        user_info = user.get_info()
+        return GetUserInfoResponse(
+            user_id=user_info["user_id"],
+            first_name=user_info["first_name"],
+            last_name=user_info["last_name"],
+            phone_number=user_info["phone_number"],
+            hashed_password=user_info["hashed_password"],
+            gender=user_info["gender"],
+            role=user_info["role"],
+        )
