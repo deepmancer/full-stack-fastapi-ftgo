@@ -27,7 +27,7 @@
                 <b-list-group-item
                   v-for="food in menu"
                   :key="food.id"
-                  @click="navigateToFood(food.id)"
+                  @click="openFoodModal(food)"
                   class="d-flex align-items-center restaurant-item"
                 >
                   <div class="restaurant-info d-flex align-items-center justify-content-between w-100">
@@ -51,6 +51,39 @@
         </b-container>
       </div>
     </b-container>
+
+    <b-modal
+      v-if="selectedFood"
+      @hide="clearSelectedFood"
+      id="food-modal"
+      title="جزئیات غذا"
+      size="lg"
+      ok-title="ذخیره"
+      ok-variant="success"
+      cancel-title="لغو"
+      cancel-variant="danger"
+      @ok="updateFood"
+    >
+      <div class="d-block">
+        <img :src="selectedFood.logo" alt="Logo" class="restaurant-logo mb-3" />
+        <b-form @submit.prevent="updateFood">
+          <b-form-group label="نام" label-for="food-name">
+            <b-form-input id="food-name" v-model="selectedFood.name" required></b-form-input>
+          </b-form-group>
+          <b-form-group label="قیمت" label-for="food-price">
+            <b-form-input id="food-price" v-model="selectedFood.price" required></b-form-input>
+          </b-form-group>
+          <b-form-group label="وضعیت" label-for="food-status">
+            <b-form-select id="food-status" v-model="selectedFood.status" :options="statusOptions" required></b-form-select>
+          </b-form-group>
+        </b-form>
+      </div>
+
+      <template #modal-footer="{ ok, cancel }">
+        <b-button variant="danger" @click="cancel">لغو</b-button>
+        <b-button variant="success" @click="ok">ذخیره</b-button>
+      </template>
+    </b-modal>
   </div>
 </template>
 
@@ -59,7 +92,7 @@ export default {
   data() {
     return {
       menu: [
-      {
+        {
           id: 1,
           logo: '/images/McDonalds.png',
           name: 'کباب',
@@ -98,7 +131,12 @@ export default {
           price: '200,000',
           score: 3.5,
           status: 'موجود'
-        },
+        }
+      ],
+      selectedFood: null,
+      statusOptions: [
+        { value: 'موجود', text: 'موجود' },
+        { value: 'ناموجود', text: 'ناموجود' }
       ]
     };
   },
@@ -116,8 +154,21 @@ export default {
     navigateToSupplierActiveOrders() {
       this.$router.push({ name: 'SupplierActiveOrders' });
     },
-    navigateToFood(foodId) {
-      this.$router.push({ name: 'FoodDetail', params: { id: foodId } });
+    openFoodModal(food) {
+      this.selectedFood = { ...food };
+      this.$bvModal.show('food-modal');
+    },
+    clearSelectedFood() {
+      this.selectedFood = null;
+    },
+    async updateFood() {
+      try {
+        await this.$axios.put(`/resturant/menu/${this.selectedFood.id}`, this.selectedFood);
+        this.$bvModal.hide('food-modal');
+        this.fetchMenu(); // refresh menu list
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 };
@@ -125,6 +176,7 @@ export default {
 
 <style scoped>
 .restaurant-main-page {
+  height: 100vh;
   padding: 20px;
   background-size: cover;
   background-attachment: fixed;
