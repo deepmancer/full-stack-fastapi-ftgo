@@ -1,0 +1,35 @@
+{
+    "name": "FTGO",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+        "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
+        "lint": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.5.2",
+        "@fortawesome/fontawesome-svg-core": "^6.4.0",
+        "@fortawesome/free-solid-svg-icons": "^6.4.0",
+        "@fortawesome/vue-fontawesome": "^2.0.10",
+        "aws-sdk": "^2.1430.0",
+        "bootstrap": "^4.5.3",
+        "bootstrap-vue": "^2.23.1",
+        "core-js": "^3.6.5",
+        "vue": "^2.7.14",
+        "vue-axios": "^3.5.2",
+        "vue-router": "^3.2.0",
+        "vuex": "^3.6.2"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "~4.5.15",
+        "@vue/cli-plugin-eslint": "~4.5.15",
+        "@vue/cli-plugin-router": "~4.5.15",
+        "@vue/cli-plugin-vuex": "~4.5.15",
+        "@vue/cli-service": "~4.5.15",
+        "babel-eslint": "^10.1.0",
+        "eslint": "^6.7.2",
+        "eslint-plugin-vue": "^6.2.2",
+        "vue-template-compiler": "^2.6.11"
+    }
+}
