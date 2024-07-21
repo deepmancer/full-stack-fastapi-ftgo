@@ -7,7 +7,7 @@ class PostgresConfig(BaseConfig):
     host: str = de_config("POSTGRES_HOST")
     port: int = de_config("POSTGRES_PORT", cast=int)
     db: str = de_config("POSTGRES_DB")
-    user: str = de_config("POSTGRES_USERNAME")
+    user: str = de_config("POSTGRES_USER")
     password: str = de_config("POSTGRES_PASSWORD")
     db_schema: str = de_config("POSTGRES_SCHEMA", default="postgresql", cast=str)
 

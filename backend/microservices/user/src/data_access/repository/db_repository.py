@@ -91,3 +91,7 @@ class DatabaseRepository(BaseRepository):
             except Exception as e:
                 await session.rollback()
                 raise DatabaseDeleteError(query) from e
+
+    @classmethod
+    async def terminate(cls):
+        await cls.data_access.disconnect()

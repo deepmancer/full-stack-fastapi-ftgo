@@ -21,6 +21,7 @@ async def setup() -> None:
         await connection.run_sync(Base.metadata.create_all)
 
     logger.info("Tables created")
+    
 async def teardown() -> None:
     logger = get_logger()
     await CacheRepository.terminate()

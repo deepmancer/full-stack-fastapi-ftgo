@@ -12,8 +12,7 @@ from config.exceptions import ApplicationError
 from application.routes.driver import router as driver
 from application.routes.tracker import router as tracker
 
-from config.logger import init_logging
-from utils.logger import LoggerFactory
+from ftgo_utils.logger import init_logging, get_logger
 from config.enums import LayerNames
 from data_access.events.lifecycle import setup, teardown
 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator, ConfigDict, ValidationError
-from config.enums import Roles
+from ftgo_utils.enums import Roles
 from typing import Optional, List
 from application.validators import validate_timestamp, validate_speed, validate_accuracy, validate_uuid, validate_status
 

@@ -1,24 +1,47 @@
+from ftgo_utils import class_property
+
 from config.base import BaseConfig, env_var
-from decouple import config as de_config
 
 class PostgresConfig(BaseConfig):
-    container_name: str = env_var("DB_CONTAINER_NAME", "user_db")
+    @class_property
+    def host(cls):
+        return env_var("POSTGRES_HOST", "localhost")
 
-    host: str = env_var("POSTGRES_HOST", "localhost")
-    port: int = env_var("POSTGRES_PORT", 5432, int)
-    db: str = env_var("POSTGRES_DB", "database")
-    user: str = env_var("POSTGRES_USERNAME", "postgres")
-    password: str = env_var("POSTGRES_PASSWORD", "mypassword")
-    db_schema: str = env_var("POSTGRES_SCHEMA", "postgresql")
+    @class_property
+    def port(cls):
+        return env_var("POSTGRES_PORT", 5438, int)
 
-    enable_echo_log: bool = env_var("ENABLE_DB_ECHO_LOG", False, bool)
-    enable_force_rollback: bool = env_var("ENABLE_DB_FORCE_ROLLBACK", False, bool)
-    enable_expire_on_commit: bool = env_var("ENABLE_DB_EXPIRE_ON_COMMIT", False, bool)
+    @class_property
+    def db(cls):
+        return env_var("POSTGRES_DB", "database")
 
-    @property
-    def sync_url(self) -> str:
-        return f"{self.db_schema}://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
-    
-    @property
-    def async_url(self) -> str:
-        return f"{self.db_schema}+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
+    @class_property
+    def user(cls):
+        return env_var("POSTGRES_USER", "postgres")
+
+    @class_property
+    def password(cls):
+        print('fuckkkkkkkkkkkk')
+        print(env_var("POSTGRES_PASSWORD", "mypassword"))
+        print(env_var("POSTGRES_PASSWORD", "mypassword"))
+        return env_var("POSTGRES_PASSWORD", "mypassword")
+
+    @class_property
+    def enable_echo_log(cls):
+        return env_var("ENABLE_DB_ECHO_LOG", False, bool)
+
+    @class_property
+    def enable_force_rollback(cls):
+        return env_var("ENABLE_DB_FORCE_ROLLBACK", False, bool)
+
+    @class_property
+    def enable_expire_on_commit(cls):
+        return env_var("ENABLE_DB_EXPIRE_ON_COMMIT", False, bool)
+
+    @class_property
+    def sync_url(cls) -> str:
+        return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.db}"
+
+    @class_property
+    def async_url(cls) -> str:
+        return f"postgresql+asyncpg://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.db}"

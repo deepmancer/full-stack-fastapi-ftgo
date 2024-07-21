@@ -4,7 +4,8 @@ from ftgo_utils.logger import init_logging
 
 from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
-from events import EventManager
+from data_access.broker import EventManager
+from events import register_events
 
 async def main():
     service_config = ServiceConfig.load()
@@ -12,7 +13,7 @@ async def main():
 
     await setup()
     event_manager = await EventManager.create(loop=asyncio.get_event_loop())
-    await event_manager.define_events()
+    await register_events(event_manager)
 
     await asyncio.Future()
 

@@ -2,20 +2,39 @@ from typing import Dict
 
 from application.interfaces.profile import *
 from domain.user import UserDomain
-
+from ftgo_utils.logger import get_logger
 class ProfileService:
 
     @staticmethod
-    async def register(request: RegisterRequest) -> RegisterResponse:
-        user_id, auth_code = await UserDomain.register(
-            first_name=request.first_name,
-            last_name=request.last_name,
-            phone_number=request.phone_number,
-            password=request.password,
-            role=request.role,
-            national_id=request.national_id,
-        )
-        return RegisterResponse(user_id=user_id, auth_code=auth_code)
+    async def register(
+        *,
+        first_name: str,
+        last_name: str,
+        phone_number: str,
+        password: str,
+        role: str,
+        national_id: str = None,
+        ) -> Dict:
+        try:
+            user_id, auth_code = await UserDomain.register(
+                first_name=request.first_name,
+                last_name=request.last_name,
+                phone_number=request.phone_number,
+                password=request.password,
+                role=request.role,
+                national_id=request.national_id,
+            )
+            return {
+                "status": "success",
+                "user_id": user_id,
+                "auth_code": auth_code,
+            }
+        except Exception as e:
+            get_logger().error(f"Error in registering user: {e}")
+            return {
+                "status": "failed",
+                "error": str(e),
+            }
 
     @staticmethod
     async def verify_account(request: AuthenticateAccountRequest) -> AuthenticateAccountResponse:

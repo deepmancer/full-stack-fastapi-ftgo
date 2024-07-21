@@ -1,14 +1,21 @@
-from config.base import BaseConfig
-from decouple import config as de_config
+from ftgo_utils import class_property
+
+from config.base import BaseConfig, env_var
 
 class RedisConfig(BaseConfig):
-    container_name: str = de_config("CACHE_CONTAINER_NAME", default="gateway_cache")
+    @class_property
+    def host(cls):
+        return env_var("REDIS_HOST", "localhost")
+    @class_property
+    def port(cls):
+        return env_var("REDIS_PORT", 6940, int)
+    @class_property
+    def db(cls):
+        return env_var("REDIS_DB", 0, int)
+    @class_property
+    def default_ttl(cls):
+        return env_var("REDIS_DEFAULT_TTL", 600, int)
 
-    host: str = de_config("REDIS_HOST")
-    port: int = de_config("REDIS_PORT", cast=int)
-    db: int = de_config("REDIS_DB", default=0, cast=int)
-    default_ttl: int = de_config("REDIS_DEFAULT_TTL", default=None, cast=int)
-
-    @property
-    def url(self) -> str:
-        return f"redis://{self.host}:{self.port}/{self.db}"
+    @class_property
+    def url(cls) -> str:
+        return f"redis://{cls.host}:{cls.port}/{cls.db}"

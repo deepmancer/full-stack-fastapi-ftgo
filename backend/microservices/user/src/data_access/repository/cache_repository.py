@@ -93,3 +93,7 @@ class CacheRepository(BaseRepository):
                 await session.flushdb()
         except Exception as e:
             raise CacheFlushError() from e
+
+    @classmethod
+    async def terminate(cls):
+        await cls.data_access.disconnect()

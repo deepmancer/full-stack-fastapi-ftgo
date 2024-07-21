@@ -19,6 +19,5 @@ sqlalchemy
 pytz
 trio
 uvloop
-aiomisc
 git+https://github.com/alirezaheidari-cs/ftgo_utils.git
 git+https://github.com/alirezaheidari-cs/rabbitmq_rpc.git

@@ -5,9 +5,6 @@ FROM python:3.9-slim
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV ENVIRONMENT=dev
 
-# Set the server port
-EXPOSE 5020
-
 # Upgrade pip and install Python dependencies
 RUN apt-get update && apt-get install -y git
 

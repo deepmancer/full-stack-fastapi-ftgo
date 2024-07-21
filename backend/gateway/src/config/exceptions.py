@@ -31,7 +31,7 @@ class EventCallError(BaseError):
         super().__init__(self.construct_message(message, context_message))
 
     def get_layer(self) -> str:
-        return LayerNames.EVENT.value
+        return LayerNames.MESSAGE_BUS.value
 
 class DataAccessError(BaseError):
     def __init__(self, message: str, context_message: Optional[str] = None):
