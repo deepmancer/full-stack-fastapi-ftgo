@@ -3,13 +3,14 @@ FROM python:3.9-slim
 
 # Set environment variables
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV ENVIRONMENT=dev
 
 # Set the server port
-EXPOSE 5050
+EXPOSE 5021
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    netcat-openbsd \
+    netcat-openbsd git \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install Python dependencies
@@ -17,22 +18,23 @@ RUN pip install --upgrade pip
 
 # Copy requirements.txt before other files to leverage Docker cache
 COPY ./requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install --force-reinstall -r /tmp/requirements.txt
+RUN pip install --force-reinstall git+https://github.com/alirezaheidari-cs/ftgo_utils.git
 
 # Copy the application code to the container
-COPY . /location_service
+COPY . /restaurant_service
 
 # Set the working directory
-WORKDIR /location_service
+WORKDIR /restaurant_service
 
 # Set the PYTHONPATH environment variable
-ENV PYTHONPATH=/location_service/app
+ENV PYTHONPATH=/restaurant_service/src
 
 # Copy the Alembic configuration file
-COPY alembic.ini /location_service/alembic.ini
+COPY alembic.ini /restaurant_service/alembic.ini
 
 # Copy the entry point script
-COPY ./entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Command to run the entry point script

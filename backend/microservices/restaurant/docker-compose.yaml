@@ -8,17 +8,17 @@ services:
       - .env
     environment:
       POSTGRES_HOST: postgresql
-      POSTGRES_PORT: 5384
+      POSTGRES_PORT: 5438
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     expose:
-      - 5384
+      - 5438
     ports:
-      - "5384:5384"
+      - "5438:5438"
     volumes:
-      - location_postgres_data:/var/lib/postgresql/data
-    command: ["postgres", "-c", "port=5384"]
+      - restaurant_postgres_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "port=5438"]
   redis:
     image: redis:6.2-alpine
     restart: always
@@ -28,12 +28,12 @@ services:
     environment:
       REDIS_DB: ${REDIS_DB}
     expose:
-      - 6236
+      - 6235
     ports:
-      - "6236:6236"
+      - "6235:6235"
     volumes:
-      - location_redis_data:/data
-    command: ["redis-server", "--port", "6236"]
+      - restaurant_redis_data:/data
+    command: ["redis-server", "--port", "6235"]
 
   backend:
     build:
@@ -43,7 +43,7 @@ services:
     env_file:
       - .env
     environment:
-      ENVIRONMENT: ${ENVIRONMENT}
+      ENVIRONMENT: dev
       DEBUG: ${DEBUG}
       DB_TIMEOUT: ${DB_TIMEOUT}
       DB_POOL_SIZE: ${DB_POOL_SIZE}
@@ -62,12 +62,12 @@ services:
       - postgresql
       - redis
     ports:
-      - "5050:5050"
+      - "5021:5021"
     expose:
-      - 5050
+      - 5021
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
-  location_postgres_data:
-  location_redis_data:
+  restaurant_postgres_data:
+  restaurant_redis_data:
