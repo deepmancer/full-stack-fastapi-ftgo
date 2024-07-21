@@ -48,7 +48,7 @@
                     </div>
                     <div class="signup-image">
                         <figure><img src="../../images/signin-image.jpg" alt="sign up image"></figure>
-                        <router-link class="signup-image-link" to="/singup">من که حساب کاربری ندارم :(</router-link>
+                        <router-link class="signup-image-link" to="/SignUp">من که حساب کاربری ندارم :(</router-link>
                     </div>
                 </div>
             </div>

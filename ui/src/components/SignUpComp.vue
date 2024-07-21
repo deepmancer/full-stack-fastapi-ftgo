@@ -110,7 +110,7 @@ export default {
                 .then(response => {
                     console.log(response);
                     this.loading = false;
-                    this.$router.push('/signin');
+                    this.$router.push('/');
                 }).catch((e) => {
                 console.log(e);
                 this.$bvToast.toast(e.response.data.message, {

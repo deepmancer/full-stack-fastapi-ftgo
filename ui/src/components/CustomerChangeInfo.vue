@@ -179,12 +179,13 @@ export default {
     async confirmDeleteAccount() {
       if (confirm('آیا از حذف حساب کاربری خود اطمینان دارید؟')) {
         this.deleteAccount();
+        this.$router.push('/');
       }
     },
     async deleteAccount() {
       try {
         await axios.delete('http://localhost:5020/user/profile/delete', {
-          data: {user_id: this.userId}
+          data: { user_id: this.userId }
         });
 
       } catch (error) {
@@ -202,7 +203,6 @@ export default {
 .customer-change-info {
   padding: 20px;
 }
-
 .user-id-box {
   margin-top: 20px;
   text-align: center;
