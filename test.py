@@ -1,25 +1,28 @@
-from  rabbitmq_rpc import RPCClient, RabbitMQConfig
 import asyncio
+from rabbitmq_rpc import RPCClient
+
 
 async def main():
-    rab = RabbitMQConfig(
-        host='rabbitmq',
-        user='rabbitmq_user',
-        password='rabbitmq_password',
-        ssl_connection=False,
-        port=5672,
-    )
-
-    cl = await RPCClient.create(config=rab)
-    data = {
+    data  = {
         "first_name": "Alireza",
         "last_name": "Heidari",
-        "phone_number": "09435364283",
+        "phone_number": "09435264283",
         "password": "1#FDFKqaz2wsx",
-        "role": "driver",
+        "role": "customer",
         "national_id": "242342"
     }
-    result = await cl.call('user.profile.create', data)
+    rpc_client = await RPCClient.create(
+        host='localhost',
+        port=5920,
+        user='rabbitmq_user',
+        password='rabbitmq_password',
+        vhost='/',
+        ssl=False,
+    )
+    
+    result = await rpc_client.call('user.profile.create', data=data)
     print(result)
     
-asyncio.run(main())
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())

@@ -31,5 +31,6 @@ uvicorn
 uvloop
 starlette
 fastapi-versioning
-git+https://github.com/alirezaheidari-cs/ftgo_utils.git
-git+https://github.com/alirezaheidari-cs/rabbitmq_rpc.git
+git+https://github.com/alirezaheidari-cs/ftgo-utils.git
+git+https://github.com/alirezaheidari-cs/aredis-client.git
+git+https://github.com/alirezaheidari-cs/rabbitmq-rpc.git

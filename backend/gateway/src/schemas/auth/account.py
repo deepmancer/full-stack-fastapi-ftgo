@@ -17,7 +17,6 @@ class AuthenticateAccountRequest(BaseSchema):
     auth_code: str = Field(..., min_length=1, max_length=10)
 
 class AuthenticateAccountResponse(BaseSchema):
-    success: bool = Field(...)
     user_id: str = uuid_field()
 
 class LoginRequest(PhoneNumberMixin, RoleMixin):
@@ -25,7 +24,6 @@ class LoginRequest(PhoneNumberMixin, RoleMixin):
 
 class LoginResponse(BaseSchema):
     user_id: str = uuid_field()
-    success: bool = Field(...)
 
 class GetUserInfoRequest(BaseSchema):
     user_id: str = uuid_field()
@@ -37,14 +35,12 @@ class DeleteProfileRequest(BaseSchema):
     user_id: str = uuid_field()
 
 class DeleteProfileResponse(BaseSchema):
-    success: bool = Field(...)
     user_id: str = uuid_field()
 
 class LogoutRequest(BaseSchema):
     user_id: str = uuid_field()
 
 class LogoutResponse(BaseSchema):
-    success: bool = Field(...)
     user_id: str = uuid_field()
 
 class ChangePasswordRequest(BaseSchema):
@@ -53,7 +49,6 @@ class ChangePasswordRequest(BaseSchema):
     new_password: str = Field(..., min_length=8, max_length=30)
 
 class ChangePasswordResponse(BaseSchema):
-    success: bool = Field(...)
     user_id: str = uuid_field()
 
 class UpdateProfileRequest(BaseSchema):
@@ -63,8 +58,7 @@ class UpdateProfileRequest(BaseSchema):
     gender: Optional[str] = Field(None, min_length=1, max_length=10)
 
 class UpdateProfileResponse(UserMixin):
-    success: bool = Field(...)
-
+    pass
 class GetUserWithCredentialsRequest(BaseSchema):
     user_id: str = uuid_field()
     

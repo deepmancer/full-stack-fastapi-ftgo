@@ -15,8 +15,6 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt /tmp/requirements.txt
 
 RUN pip install -r /tmp/requirements.txt
-RUN pip install --upgrade git+https://github.com/alirezaheidari-cs/ftgo_utils.git
-RUN pip install --force-reinstall --no-cache-dir --upgrade git+https://github.com/alirezaheidari-cs/rabbitmq_rpc.git
 
 # Copy the application code to the container
 COPY . /user

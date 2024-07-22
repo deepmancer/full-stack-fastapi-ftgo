@@ -75,7 +75,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             raise AuthenticationError(f"Authentication error: {str(e)}")
 
     async def generate_token(self, user: UserSchema) -> str:
-        payload = {"sub": user.user_id, "role": user.role, "scope": user.scope}
+        payload = {"sub": user.user_id, "role": user.role}
         access_token_expires = timedelta(minutes=self.config.access_token_expire_minutes)
         token = encode(
             payload=payload,

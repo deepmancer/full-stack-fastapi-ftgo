@@ -26,7 +26,7 @@ async def register(request: RegisterRequest):
         }
         response = await UserService.create_profile(data)
         if response.get('status') == 'error':
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=response.get('message', 'Unknown error occurred'))
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=response.get('error_message', 'Unknown error occurred'))
         return RegisterResponse(user_id=response["user_id"], auth_code=response["auth_code"])
     except Exception as e:
         logger.error(f"Error occurred while registering user: {e}", exc_info=True)
@@ -41,7 +41,7 @@ async def verify_account(request: AuthenticateAccountRequest):
         }
         response = await UserService.verify_account(data)
         if response.get('status') == 'error':
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.get('message', 'Unknown error occurred'))
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.get('error_message', 'Unknown error occurred'))
         return AuthenticateAccountResponse(user_id=response["user_id"])
     except Exception as e:
         logger.error(f"Error occurred while verifying the account: {e}", exc_info=True)
@@ -57,8 +57,10 @@ async def login(request: LoginRequest):
         }
         response = await UserService.login(data)
         if response.get('status') == 'error':
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.get('message', 'Unknown error occurred'))
-        return LoginResponse(user_id=response["user_id"], access_token=response["access_token"])
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.get('error_message', 'Unknown error occurred'))
+        
+        
+
     except Exception as e:
         logger.error(f"Error occurred while logging the user in: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
