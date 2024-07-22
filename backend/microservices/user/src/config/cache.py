@@ -1,21 +1,24 @@
-from ftgo_utils import class_property
-
 from config.base import BaseConfig, env_var
 
 class RedisConfig(BaseConfig):
-    @class_property
-    def host(cls):
-        return env_var("REDIS_HOST", "localhost")
-    @class_property
-    def port(cls):
-        return env_var("REDIS_PORT", 6235, int)
-    @class_property
-    def db(cls):
-        return env_var("REDIS_DB", 0, int)
-    @class_property
-    def default_ttl(cls):
-        return env_var("REDIS_DEFAULT_TTL", 120, int)
-
-    @class_property
-    def url(cls) -> str:
-        return f"redis://{cls.host}:{cls.port}/{cls.db}"
+    def __init__(
+        self,
+        host: str = None,
+        port: int = None,
+        db: int = None,
+        default_ttl: int = None,
+    ):
+        if host is None:
+            config = self.load()
+            self.host = config.host
+            self.port = config.port
+            self.db = config.db
+            self.default_ttl = config.default_ttl
+        else:
+            self.host = host
+            self.port = port
+            self.db = db
+            self.default_ttl = default_ttl
+   
+    def url(self) -> str:
+        return f"redis://{self.host}:{self.port}/{self.db}"

@@ -1,93 +1,137 @@
-from typing import Dict
+from typing import Dict, Any
 
-from application.interfaces.profile import *
 from domain.user import UserDomain
-from ftgo_utils.logger import get_logger
+
 class ProfileService:
+    """
+    Service class for managing user profiles.
+    """
 
     @staticmethod
     async def register(
-        *,
         first_name: str,
         last_name: str,
         phone_number: str,
         password: str,
         role: str,
         national_id: str = None,
-        ) -> Dict:
-        try:
-            user_id, auth_code = await UserDomain.register(
-                first_name=request.first_name,
-                last_name=request.last_name,
-                phone_number=request.phone_number,
-                password=request.password,
-                role=request.role,
-                national_id=request.national_id,
-            )
-            return {
-                "status": "success",
-                "user_id": user_id,
-                "auth_code": auth_code,
-            }
-        except Exception as e:
-            get_logger().error(f"Error in registering user: {e}")
-            return {
-                "status": "failed",
-                "error": str(e),
-            }
+    ) -> Dict[str, Any]:
+        """
+        Registers a new user.
 
-    @staticmethod
-    async def verify_account(request: AuthenticateAccountRequest) -> AuthenticateAccountResponse:
-        user_id = await UserDomain.verify_account(request.user_id, request.auth_code.strip())
-        return AuthenticateAccountResponse(user_id=user_id, success=True)
-
-    @staticmethod
-    async def login(request: LoginRequest) -> LoginResponse:
-        user = await UserDomain.load(phone_number=request.phone_number, role=request.role)
-        await user.login(request.password)
-        return LoginResponse(user_id=user.user_id, success=True)
-
-    @staticmethod
-    async def get_info(request: GetUserInfoRequest) -> GetUserInfoResponse:
-        user = await UserDomain.load(request.user_id)
-        user_info = user.get_info()
-        return GetUserInfoResponse(
-            user_id=user_info["user_id"],
-            first_name=user_info["first_name"],
-            last_name=user_info["last_name"],
-            phone_number=user_info["phone_number"],
-            gender=user_info["gender"],
-            role=user_info["role"],
+        :param first_name: First name of the user.
+        :param last_name: Last name of the user.
+        :param phone_number: Phone number of the user.
+        :param password: Password for the user account.
+        :param role: Role of the user.
+        :param national_id: (Optional) National ID of the user.
+        :return: Dictionary containing user ID and authentication code.
+        """
+        user_id, auth_code = await UserDomain.register(
+            first_name=first_name,
+            last_name=last_name,
+            phone_number=phone_number,
+            password=password,
+            role=role,
+            national_id=national_id,
         )
+        return {
+            "user_id": user_id,
+            "auth_code": auth_code,
+        }
 
     @staticmethod
-    async def delete_account(request: DeleteProfileRequest) -> DeleteProfileResponse:
-        user = await UserDomain.load(request.user_id)
+    async def verify_account(user_id: str, auth_code: str) -> Dict[str, str]:
+        """
+        Verifies a user account using an authentication code.
+
+        :param user_id: ID of the user.
+        :param auth_code: Authentication code for verification.
+        :return: Dictionary containing verified user ID.
+        """
+        verified_user_id = await UserDomain.verify_account(user_id, auth_code.strip())
+        return {
+            "user_id": verified_user_id,
+        }
+
+    @staticmethod
+    async def login(phone_number: str, password: str, role: str) -> Dict[str, str]:
+        """
+        Logs in a user.
+
+        :param phone_number: Phone number of the user.
+        :param password: Password of the user.
+        :param role: Role of the user.
+        :return: Dictionary containing user ID.
+        """
+        user = await UserDomain.load(phone_number=phone_number, role=role)
+        await user.login(password)
+        return {
+            "user_id": user.user_id,
+        }
+
+    @staticmethod
+    async def get_info(user_id: str) -> Dict[str, Any]:
+        """
+        Retrieves user information.
+
+        :param user_id: ID of the user.
+        :return: Dictionary containing user information.
+        """
+        user = await UserDomain.load(user_id=user_id)
+        return user.get_info()
+
+    @staticmethod
+    async def delete_account(user_id: str) -> Dict[str, str]:
+        """
+        Deletes a user account.
+
+        :param user_id: ID of the user.
+        :return: Dictionary containing user ID.
+        """
+        user = await UserDomain.load(user_id=user_id)
         await user.delete_account()
-        return DeleteProfileResponse(user_id=user.user_id, success=True)
+        return {
+            "user_id": user.user_id,
+        }
 
     @staticmethod
-    async def logout(request: LogoutRequest) -> LogoutResponse:
-        user = await UserDomain.load(request.user_id)
+    async def logout(user_id: str) -> Dict[str, str]:
+        """
+        Logs out a user.
+
+        :param user_id: ID of the user.
+        :return: Dictionary containing user ID.
+        """
+        user = await UserDomain.load(user_id=user_id)
         await user.logout()
-        return LogoutResponse(user_id=user.user_id, success=True)
+        return {
+            "user_id": user.user_id,
+        }
 
     @staticmethod
-    async def update_profile(request: UpdateProfileRequest) -> UpdateProfileResponse:
-        user = await UserDomain.load(request.user_id)
-        user_info = await user.update_profile_information(request.dict(exclude={"user_id"}))
-        return UpdateProfileResponse(success=True, **user_info)
+    async def update_profile(user_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Updates user profile information.
+
+        :param user_id: ID of the user.
+        :param update_data: Dictionary containing the updated profile information.
+        :return: Dictionary containing updated user information.
+        """
+        user = await UserDomain.load(user_id=user_id)
+        return await user.update_profile_information(update_data)
 
     @staticmethod
-    async def get_user_info_with_credentials(request: GetUserWithCredentialsRequest) -> GetUserWithCredentialsResponse:
-        user = await UserDomain.load(request.user_id)
+    async def get_user_info_with_credentials(user_id: str) -> Dict[str, Any]:
+        """
+        Retrieves user information along with credentials.
+
+        :param user_id: ID of the user.
+        :return: Dictionary containing hashed password and user information.
+        """
+        user = await UserDomain.load(user_id=user_id)
         user_info = user.get_info()
-        return GetUserInfoResponse(
-            user_id=user_info["user_id"],
-            first_name=user_info["first_name"],
-            last_name=user_info["last_name"],
-            phone_number=user_info["phone_number"],
-            hashed_password=user_info["hashed_password"],
-            gender=user_info["gender"],
-            role=user_info["role"],
-        )
+        return {
+            "hashed_password": user.hashed_password,
+            **user_info,
+        }

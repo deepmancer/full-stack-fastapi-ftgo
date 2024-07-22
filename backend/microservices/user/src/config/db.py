@@ -1,47 +1,52 @@
-from ftgo_utils import class_property
-
 from config.base import BaseConfig, env_var
 
 class PostgresConfig(BaseConfig):
-    @class_property
-    def host(cls):
-        return env_var("POSTGRES_HOST", "localhost")
+    def __init__(
+        self,
+        host: str = None,
+        port: int = None,
+        db: str = None,
+        user: str = None,
+        password: str = None,
+        enable_echo_log: bool = None,
+        enable_force_rollback: bool = None,
+        enable_expire_on_commit: bool = None,
+    ):
+        if host is None:
+            config = self.load()
+            self.host = config.host
+            self.port = config.port
+            self.db = config.db
+            self.user = config.user
+            self.password = config.password
+            self.enable_echo_log = config.enable_echo_log
+            self.enable_force_rollback = config.enable_force_rollback
+            self.enable_expire_on_commit = config.enable_expire_on_commit
+        else:
+            self.host = host
+            self.port = port
+            self.db = db
+            self.user = user
+            self.password = password
+            self.enable_echo_log = enable_echo_log
+            self.enable_force_rollback = enable_force_rollback
+            self.enable_expire_on_commit = enable_expire_on_commit
+        
+    @classmethod
+    def load(cls):
+        return cls(
+            host=env_var("POSTGRES_HOST", default="localhost"),
+            port=env_var("POSTGRES_PORT", default=5432, cast_type=int),
+            db=env_var("POSTGRES_DB", default="database"),
+            user=env_var("POSTGRES_USER", default="postgres"),
+            password=env_var("POSTGRES_PASSWORD", default="mypassword"),
+            enable_echo_log=env_var("ENABLE_DB_ECHO_LOG", default=False, cast_type=lambda s: isinstance(s, str) and s.lower() in ['true', '1']),
+            enable_force_rollback=env_var("ENABLE_DB_FORCE_ROLLBACK", default=False, cast_type=lambda s:  isinstance(s, str) and s.lower() in ['true', '1']),
+            enable_expire_on_commit=env_var("ENABLE_DB_EXPIRE_ON_COMMIT", default=False, cast_type=lambda s:  isinstance(s, str) and s.lower() in ['true', '1'])
+        )
 
-    @class_property
-    def port(cls):
-        return env_var("POSTGRES_PORT", 5438, int)
+    def sync_url(self) -> str:
+        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
-    @class_property
-    def db(cls):
-        return env_var("POSTGRES_DB", "database")
-
-    @class_property
-    def user(cls):
-        return env_var("POSTGRES_USER", "postgres")
-
-    @class_property
-    def password(cls):
-        print('fuckkkkkkkkkkkk')
-        print(env_var("POSTGRES_PASSWORD", "mypassword"))
-        print(env_var("POSTGRES_PASSWORD", "mypassword"))
-        return env_var("POSTGRES_PASSWORD", "mypassword")
-
-    @class_property
-    def enable_echo_log(cls):
-        return env_var("ENABLE_DB_ECHO_LOG", False, bool)
-
-    @class_property
-    def enable_force_rollback(cls):
-        return env_var("ENABLE_DB_FORCE_ROLLBACK", False, bool)
-
-    @class_property
-    def enable_expire_on_commit(cls):
-        return env_var("ENABLE_DB_EXPIRE_ON_COMMIT", False, bool)
-
-    @class_property
-    def sync_url(cls) -> str:
-        return f"postgresql://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.db}"
-
-    @class_property
-    def async_url(cls) -> str:
-        return f"postgresql+asyncpg://{cls.user}:{cls.password}@{cls.host}:{cls.port}/{cls.db}"
+    def async_url(self) -> str:
+        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"

@@ -1,12 +1,13 @@
 import asyncio
 from ftgo_utils.logger import get_logger
-from rabbitmq_rpc import RPCClient, RabbitMQConfig
-from data_access.broker import EventManager
+
+from data_access.broker import RPCBroker
 from application import VehicleService, AddressService, ProfileService
+from application.middleware import event_middleware
 from config import BaseConfig, LayerNames, env_var
 
-async def register_events(event_manager: EventManager):
-    rpc_client = await event_manager.rpc_client()
+async def register_events(rpc_broker: RPCBroker):
+    rpc_client = rpc_broker.get_client()
     events_handlers = {
         'user.profile.create': ProfileService.register,
         'user.address.add_address': AddressService.add_address,
@@ -27,8 +28,9 @@ async def register_events(event_manager: EventManager):
         'user.driver.vehicle.get_info': VehicleService.get_vehicle_info,
     }
 
-    for event, handler in events_handlers.items():
+    for event, _handler in events_handlers.items():
         try:
+            handler = event_middleware(_handler)
             await rpc_client.register_event(event=event, handler=handler)
             rpc_client.logger.info(f"Registered event '{event}' with handler '{handler.__name__}'")
         except Exception as e:

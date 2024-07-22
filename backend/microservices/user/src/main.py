@@ -4,7 +4,7 @@ from ftgo_utils.logger import init_logging
 
 from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
-from data_access.broker import EventManager
+from data_access.broker import RPCBroker
 from events import register_events
 
 async def main():
@@ -12,8 +12,10 @@ async def main():
     init_logging(level=service_config.log_level)
 
     await setup()
-    event_manager = await EventManager.create(loop=asyncio.get_event_loop())
-    await register_events(event_manager)
+    await RPCBroker.initialize(loop=asyncio.get_event_loop())
+    
+    rpc_broker = RPCBroker.get_instance()
+    await register_events(rpc_broker=rpc_broker)
 
     await asyncio.Future()
 

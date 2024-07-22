@@ -21,7 +21,7 @@ class DriverDomain(UserDomain):
             return DriverDomain.vehicle_dict(vehicle_info)
         except Exception as e:
             get_logger().error(f"Error while registering vehicle for user {self.user_id}: {e}")
-            raise VehicleRegisterError(user_id=self.user_id, message=str(e))
+            raise e
     
     async def get_vehicle_info(self) -> Dict[str, str]:
         try:
@@ -29,7 +29,7 @@ class DriverDomain(UserDomain):
             return DriverDomain.vehicle_dict(vehicle_info)
         except Exception as e:
             get_logger().error(f"Error while fetching vehicle for user {self.user_id}: {e}")
-            raise VehicleNotFoundError(user_id=self.user_id, message=str(e))
+            raise e
 
     @staticmethod
     def vehicle_dict(vehicle: VehicleInfo):

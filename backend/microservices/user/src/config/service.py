@@ -1,18 +1,26 @@
 import logging
 
-from ftgo_utils import class_property
-
-from config.base import BaseConfig, env_var
+from config import BaseConfig, env_var
 
 class ServiceConfig(BaseConfig):
-    @class_property
-    def environment(cls):
-        return env_var('ENVIRONMENT', 'test')
-
-    @class_property
-    def log_level_name(cls):
-        return env_var('LOG_LEVEL', 'INFO')
-    
-    @class_property
-    def log_level(cls) -> int:
-        return logging._nameToLevel.get(cls.log_level_name, logging.DEBUG)
+    def __init__(
+        self,
+        environment: str = None,
+        log_level_name: str = None,
+    ):
+        if environment is None or log_level_name is None:
+            config = self.load()
+            self.environment = config.environment
+            self.log_level_name = config.log_level_name
+            self.log_level = config.log_level
+        else:
+            self.environment = environment
+            self.log_level_name = log_level_name
+            self.log_level = logging._nameToLevel.get(log_level_name, logging.DEBUG)
+        
+    @classmethod
+    def load(cls):
+        return cls(
+            environment=env_var('ENVIRONMENT', default='test'),
+            log_level_name=env_var('LOG_LEVEL', default='INFO')
+        )

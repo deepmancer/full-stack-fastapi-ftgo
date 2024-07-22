@@ -54,11 +54,11 @@ class UserDomain:
 
             user = UserDomain._from_profile(user_profile)
             if not user.is_verified():
-                raise UserNotVerifiedError(user_id=user.user_id)
+                raise UserNotVerifiedError(user_id=user_id)
 
             return user
         except Exception as e:
-            get_logger().error(str(e), query=query_dict)
+            get_logger().error(f"Error loading user with query {query_dict}: {str(e)}")
             raise e
 
     @staticmethod
@@ -98,10 +98,9 @@ class UserDomain:
             get_logger().info(f"User with user_id: {user_id} and phone_number: {phone_number} was created successfully")
     
             return user_id, auth_code
-    
         except Exception as e:
-            get_logger().error(str(e), phone_number=phone_number, role=role)
-            raise ProfileRegistrationError() from e
+            get_logger().error(f"Error registering user with phone_number {phone_number} and role {role}: {str(e)}")
+            raise e
        
     @staticmethod
     async def verify_account(user_id: str, auth_code: str):
@@ -130,8 +129,8 @@ class UserDomain:
 
             return user_id
         except Exception as e:
-            get_logger().error(str(e), user_id=user_id, auth_code=auth_code)
-            raise ProfileVerificationError(user_id, auth_code) from e
+            get_logger().error(f"Error authenticating user with id {user_id} and auth code {auth_code}: {str(e)}")
+            raise e
 
     async def login(self, password):
         try:
@@ -144,16 +143,16 @@ class UserDomain:
             await DatabaseRepository.update_by_query(Profile, query={"id": self.user_id}, update_fields={"last_login_time": utils.utc_time.now()})
             return
         except Exception as e:
-            get_logger().error(str(e),user_id=self.user_id, role=self.role)
-            raise ProfileLoginError(phone_number=self.phone_number, role=role) from e
+            get_logger().error(f"Error logging in user with id {self.user_id} and role {self.role}: {str(e)}")
+            raise e
 
     async def logout(self):
         try:
             await CacheRepository.delete(self.user_id)
             return
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id)
-            raise ProfileLogoutError(user_id=self.user_id) from e
+            get_logger().error(f"Error logging out user with id {self.user_id}: {str(e)}")
+            raise e
 
     async def delete_account(self) -> bool:
         try:
@@ -161,8 +160,8 @@ class UserDomain:
             await CacheRepository.delete(self.user_id)
             return
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id)
-            raise ProfileDeletionError(user_id=self.user_id) from e
+            get_logger().error(f"Error deleting account for user with id {self.user_id}: {str(e)}")
+            raise e
 
     async def update_profile_information(self, update_fields: Dict[str, Optional[str]]):
         try:
@@ -185,19 +184,19 @@ class UserDomain:
             self._update_from_profile(updated_profile[0])
             return self.get_info()
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, update_fields=update_fields)
-            raise ProfileUpdateError(user_id=self.user_id, update_fields=update_fields) from e
+            get_logger().error(f"Error updating profile for user with id {self.user_id}: {str(e)}, update_fields: {update_fields}")
+            raise e
 
     async def update_address_information(self, address_id: str, update_fields: Dict[str, Optional[str]]):
         try:
             address = await self.get_address(address_id)
             if not address:
                 raise AddressNotFoundError(address_id=address_id)
-            await address.update_address(updated_address)
+            await address.update_address(update_fields)
             return address.get_info()
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, address_id=address_id, update_fields=update_fields)
-            raise UpdateAddressError(user_id=self.user_id, address_id=address_id, update_fields=update_fields) from e
+            get_logger().error(f"Error updating address for user with id {self.user_id} and address_id {address_id}: {str(e)}, update_fields: {update_fields}")
+            raise e
 
     async def get_default_address(self):
         try:
@@ -207,8 +206,8 @@ class UserDomain:
             default_address = next((address for address in self.addresses if address.is_default), None)
             return default_address.get_info() if default_address else None
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id)
-            raise GetDefaultAddressError(user_id=self.user_id) from e
+            get_logger().error(f"Error getting default address for user with id {self.user_id}: {str(e)}")
+            raise e
 
     def get_info(self) -> Dict[str, Any]:
         return dict(
@@ -230,8 +229,8 @@ class UserDomain:
             
             return address.get_info()
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, address_line_1=address_line_1, address_line_2=address_line_2)
-            raise AddAddressError(user_id=self.user_id) from e
+            get_logger().error(f"Error adding address for user with id {self.user_id}: {str(e)}, address_line_1: {address_line_1}, address_line_2: {address_line_2}")
+            raise e
 
     async def get_address_info(self, address_id: str) -> Dict[str, Any]:
         try:
@@ -241,8 +240,8 @@ class UserDomain:
             
             return address.get_info()
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, address_id=address_id)
-            raise GetAddressInfoError(user_id=self.user_id, address_id=address_id) from e
+            get_logger().error(f"Error getting address info for user with id {self.user_id} and address_id {address_id}: {str(e)}")
+            raise e
     
     async def get_addresses_info(self) -> List[Dict[str, Any]]:
         try:
@@ -251,8 +250,8 @@ class UserDomain:
             
             return [address.get_info() for address in self.addresses]
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id)
-            raise GetAddressesError(user_id=self.user_id) from e
+            get_logger().error(f"Error getting addresses info for user with id {self.user_id}: {str(e)}")
+            raise e
 
     async def get_address(self, address_id: str) -> Optional[AddressDomain]:
         try:
@@ -265,8 +264,8 @@ class UserDomain:
 
             return address
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, address_id=address_id)
-            raise GetAddressError(user_id=self.user_id, address_id=address_id) from e
+            get_logger().error(f"Error getting address for user with id {self.user_id} and address_id {address_id}: {str(e)}")
+            raise e
 
     async def delete_address(self, address_id: str) -> bool:
         try:
@@ -280,8 +279,8 @@ class UserDomain:
             await AddressDomain.delete_address(address_id)
             return address_id
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, address_id=address_id)
-            raise DeleteAddressError(user_id=self.user_id, address_id=address_id) from e
+            get_logger().error(f"Error deleting address for user with id {self.user_id} and address_id {address_id}: {str(e)}")
+            raise e
 
     async def set_address_as_default(self, address_id: str) -> bool:
         try:
@@ -298,8 +297,8 @@ class UserDomain:
             await address.set_as_default()
             return address_id
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, address_id=address_id)
-            raise SetDefaultAddressError(user_id=self.user_id, set_default=True, address_id=address_id) from e
+            get_logger().error(f"Error setting address as default for user with id {self.user_id} and address_id {address_id}: {str(e)}")
+            raise e
 
     async def unset_address_as_default(self, address_id: str) -> bool:
         try:
@@ -312,8 +311,8 @@ class UserDomain:
 
             await address.unset_as_default()
         except Exception as e:
-            get_logger().error(str(e), user_id=self.user_id, address_id=address_id)
-            raise SetDefaultAddressError(user_id=self.user_id, set_default=False, address_id=address_id) from e
+            get_logger().error(f"Error unsetting address as default for user with id {self.user_id} and address_id {address_id}: {str(e)}")
+            raise e
       
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -335,7 +334,7 @@ class UserDomain:
 
     async def load_addresses(self) -> List[AddressDomain]:
         if self.addresses is None:
-            addresses = await DatabaseRepository.fetch_by_query(Address, query={"user_id": self.user_id})
+            addresses = await DatabaseRepository.fetch_by_query(Address, query={"id": self.user_id})
             self.addresses = [AddressDomain._from_address(address) for address in addresses]
         return self.addresses
 
