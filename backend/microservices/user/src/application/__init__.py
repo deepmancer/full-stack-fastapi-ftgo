@@ -6,4 +6,4 @@ from application.address import AddressService
 from application.profile import ProfileService
 
 def get_logger():
-    return _get_logger(LayerNames.APP.value, ServiceConfig.environment)
+    return _get_logger(LayerNames.APP.value, ServiceConfig.load_environment())

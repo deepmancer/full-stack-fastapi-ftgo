@@ -5,15 +5,14 @@ from aredis_client import AsyncRedis
 
 from config.cache import RedisConfig
 from data_access.exceptions import *
-from data_access.repository.base import BaseRepository
 
-
-class CacheRepository(BaseRepository):
+class CacheRepository:
     data_access: Optional[AsyncRedis] = None
     group: str = ""
 
     @classmethod
-    async def initialize(cls, cache_config: RedisConfig):
+    async def initialize(cls):
+        cache_config = RedisConfig.load()
         cls.data_access = await AsyncRedis.create(
             host=cache_config.host,
             port=cache_config.port,

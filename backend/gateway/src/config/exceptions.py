@@ -26,7 +26,7 @@ class ApplicationError(BaseError):
     def get_layer(self) -> str:
         return LayerNames.APP.value
 
-class EventCallError(BaseError):
+class MessageBusError(BaseError):
     def __init__(self, message: str, context_message: Optional[str] = None):
         super().__init__(self.construct_message(message, context_message))
 

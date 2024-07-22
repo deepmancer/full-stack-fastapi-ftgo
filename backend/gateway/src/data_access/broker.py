@@ -1,9 +1,10 @@
 import asyncio
 
-from ftgo_utils.logger import get_logger
 from rabbitmq_rpc import RPCClient
 
-from config import BaseConfig, LayerNames, env_var
+from data_access import get_logger
+from config.broker import BrokerConfig
+from config import LayerNames
 
 class RPCBroker:
     _instance: 'RPCBroker' = None
@@ -16,20 +17,17 @@ class RPCBroker:
         if cls._instance is not None:
             return
 
-        BaseConfig.load()
-        logger = get_logger(
-            layer_name=LayerNames.MESSAGE_BUS.value,
-            environment=BaseConfig.load_environment()
-        )
+        broker_config = BrokerConfig.load()
+        logger = get_logger(layer_name=LayerNames.MESSAGE_BUS.value)
 
         try:
             rpc_client = await RPCClient.create(
-                host=env_var("RABBITMQ_HOST"),
-                port=env_var("RABBITMQ_PORT", default=5672, cast_type=int),
-                user=env_var("RABBITMQ_USER"),
-                password=env_var("RABBITMQ_PASS"),
-                vhost=env_var("RABBITMQ_VHOST", default="/"),
-                ssl=env_var("RABBITMQ_SSL_CONNECTION", default=False, cast_type=lambda s: s.lower() in ['true', '1']),
+                host=broker_config.host,
+                port=broker_config.port,
+                user=broker_config.user,
+                password=broker_config.password,
+                vhost=broker_config.vhost,
+                ssl=broker_config.ssl,
                 logger=logger,
             )
             if loop is not None:
@@ -48,4 +46,6 @@ class RPCBroker:
 
     @classmethod
     def get_client(cls) -> RPCClient:
-        return cls._rpc_client
+        if cls._instance is None:
+            raise Exception("RPCBroker has not been initialized. Call 'initialize' first.")
+        return cls._instance._rpc_client

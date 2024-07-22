@@ -36,7 +36,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):
             cache_repository = CacheRepository()
         
         if auth_config is None:
-            auth_config = AuthConfig()
+            auth_config = AuthConfig.load()
         
         auth_backend = JWTAuthenticationBackend(cache=cache_repository, config=auth_config)
         return dict(

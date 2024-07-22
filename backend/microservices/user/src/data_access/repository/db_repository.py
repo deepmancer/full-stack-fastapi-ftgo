@@ -18,7 +18,7 @@ class DatabaseRepository(BaseRepository):
         cls.data_access = await AsyncPostgres.create(
             host=db_config.host,
             port=db_config.port,
-            database=db_config.database,
+            database=db_config.db,
             user=db_config.user,
             password=db_config.password,
             echo=db_config.enable_echo_log,

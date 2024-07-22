@@ -36,17 +36,19 @@ class PostgresConfig(BaseConfig):
     def load(cls):
         return cls(
             host=env_var("POSTGRES_HOST", default="localhost"),
-            port=env_var("POSTGRES_PORT", default=5432, cast_type=int),
-            db=env_var("POSTGRES_DB", default="database"),
-            user=env_var("POSTGRES_USER", default="postgres"),
-            password=env_var("POSTGRES_PASSWORD", default="mypassword"),
+            port=env_var("POSTGRES_PORT", default=5438, cast_type=int),
+            db=env_var("POSTGRES_DB", default="user_database"),
+            user=env_var("POSTGRES_USER", default="user_user"),
+            password=env_var("POSTGRES_PASSWORD", default="user_password"),
             enable_echo_log=env_var("ENABLE_DB_ECHO_LOG", default=False, cast_type=lambda s: isinstance(s, str) and s.lower() in ['true', '1']),
             enable_force_rollback=env_var("ENABLE_DB_FORCE_ROLLBACK", default=False, cast_type=lambda s:  isinstance(s, str) and s.lower() in ['true', '1']),
             enable_expire_on_commit=env_var("ENABLE_DB_EXPIRE_ON_COMMIT", default=False, cast_type=lambda s:  isinstance(s, str) and s.lower() in ['true', '1'])
         )
 
+    @property
     def sync_url(self) -> str:
         return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
+    @property
     def async_url(self) -> str:
         return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"

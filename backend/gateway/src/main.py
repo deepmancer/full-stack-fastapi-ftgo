@@ -1,34 +1,30 @@
+import asyncio
 import logging
 
 import fastapi
 import uvicorn
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
-from fastapi.exceptions import RequestValidationError
 
 from config import ApplicationError
 
 from ftgo_utils.logger import init_logging, get_logger
 
+from application import app
 from config import LayerNames
 from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
-
-from application import app
+from data_access.broker import RPCBroker
 
 service_config = ServiceConfig.load()
 
-@app.on_event("startup")
-async def startup_event():
+async def lifespan(app: fastapi.FastAPI):
     await setup()
-    init_logging(level=service_config.log_level)
+    await RPCBroker.initialize(loop=asyncio.get_event_loop())
 
-@app.on_event("shutdown")
-async def shutdown_event():
+    init_logging(level=service_config.log_level)
+    yield
     await teardown()
+
+app = fastapi.FastAPI(lifespan=lifespan)
 
 if __name__ == "__main__":
     uvicorn.run(

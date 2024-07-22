@@ -18,7 +18,7 @@ class RPCBroker:
             return
 
         broker_config = BrokerConfig.load()
-        logger = get_logger(layer_name=LayerNames.MESSAGE_BUS)
+        logger = get_logger(layer_name=LayerNames.MESSAGE_BUS.value)
 
         try:
             rpc_client = await RPCClient.create(
@@ -46,4 +46,6 @@ class RPCBroker:
 
     @classmethod
     def get_client(cls) -> RPCClient:
-        return cls._rpc_client
+        if cls._instance is None:
+            raise Exception("RPCBroker has not been initialized. Call 'initialize' first.")
+        return cls._instance._rpc_client

@@ -3,7 +3,7 @@ from typing import Dict
 from ftgo_utils.logger import get_logger
 
 from config import LayerNames, BaseConfig
-from data_access.broker import EventManager
+from data_access.broker import RPCBroker
 
 
 logger = get_logger(layer_name=LayerNames.MESSAGE_BUS.value, environment=BaseConfig.load_environment())
@@ -14,7 +14,7 @@ class Microservice:
     @classmethod
     async def _call_rpc(cls, event_name: str, data: Dict, **kwargs) -> Dict:
         try:
-            rpc_client = await EventManager.rpc_client()
+            rpc_client = await RPCBroker.get_client()
             response = await rpc_client.call(event_name, data=data, **kwargs)
             return response
         except Exception as e:
