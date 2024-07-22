@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "cweijan.vscode-redis-client",
+        "p1c2u.docker-compose",
+        "formulahendry.docker-extension-pack"
+    ]
+}

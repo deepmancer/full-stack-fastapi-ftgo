@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional, Union
 
-from ftgo_utils.redis_connector import AsyncRedis
+from aredis_client import AsyncRedis
 
 from config.cache import RedisConfig
 from data_access.exceptions import *
@@ -13,9 +13,13 @@ class CacheRepository(BaseRepository):
     group: str = ""
 
     @classmethod
-    async def initialize(cls, cache_config: RedisConfig):
-        cls.data_access = AsyncRedis(cache_config.url)
-        await cls.data_access.connect()
+    async def initialize(cls):
+        cache_config = RedisConfig.load()
+        cls.data_access = await AsyncRedis.create(
+            host=cache_config.host,
+            port=cache_config.port,
+            db=cache_config.db,
+        )
 
     @classmethod
     def get_cache(cls, group: str = ""):
@@ -93,3 +97,7 @@ class CacheRepository(BaseRepository):
                 await session.flushdb()
         except Exception as e:
             raise CacheFlushError() from e
+
+    @classmethod
+    async def terminate(cls):
+        await cls.data_access.disconnect()

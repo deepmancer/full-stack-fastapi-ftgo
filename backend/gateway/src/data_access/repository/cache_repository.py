@@ -1,28 +1,23 @@
 import json
-from typing import Optional, List, Union
-from data_access.resources.cache import CacheDataAccess
-from config.cache import RedisConfig
+from typing import List, Optional, Union
 
-from data_access.exceptions import (
-    CacheDeleteError, CacheInsertError, CacheFetchError, CacheExpireError, CacheBatchOperationError, CacheFlushError,
-)
+from aredis_client import AsyncRedis
+
+from config.cache import RedisConfig
+from data_access.exceptions import *
 
 class CacheRepository:
-    data_access: Optional[CacheDataAccess] = None
+    data_access: Optional[AsyncRedis] = None
     group: str = ""
 
-    def __init__(self, group: str = ""):
-        if not self.data_access:
-            raise ValueError("CacheRepository not initialized")
-        self.group = group
-
     @classmethod
-    def set_group(cls, group: str):
-        cls.group = group
-
-    @classmethod
-    def initialize(cls, cache_config: RedisConfig):
-        cls.data_access = CacheDataAccess(cache_config)
+    async def initialize(cls):
+        cache_config = RedisConfig.load()
+        cls.data_access = await AsyncRedis.create(
+            host=cache_config.host,
+            port=cache_config.port,
+            db=cache_config.db,
+        )
 
     @classmethod
     def get_cache(cls, group: str = ""):
@@ -34,7 +29,7 @@ class CacheRepository:
         return f"{cls.group}{key}"
 
     @classmethod
-    def _serialize_value(cls, value) -> str:
+    def _serialize_value(cls, value: Union[str, dict]) -> str:
         if isinstance(value, dict):
             return json.dumps(value)
         return value
@@ -100,3 +95,7 @@ class CacheRepository:
                 await session.flushdb()
         except Exception as e:
             raise CacheFlushError() from e
+
+    @classmethod
+    async def terminate(cls):
+        await cls.data_access.disconnect()
