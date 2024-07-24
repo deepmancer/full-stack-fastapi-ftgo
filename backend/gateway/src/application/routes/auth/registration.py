@@ -33,7 +33,6 @@ async def register(request: RegisterSchema):
 
 @router.post("/verify", response_model=UserIdVerifiedSchema)
 async def verify_account(request: AuthenticateAccountSchema):
-    response = None
     try:
         data = request.dict()
         response = await UserService.verify_account(data)
@@ -41,7 +40,6 @@ async def verify_account(request: AuthenticateAccountSchema):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.get('error_message', 'Account verification failed'))
         return UserIdVerifiedSchema(success=response["success"])
     except Exception as e:
-        logger.error(f"Error occurred while verifying the account: {response}", exc_info=True)
         logger.error(f"Error occurred while verifying the account: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
