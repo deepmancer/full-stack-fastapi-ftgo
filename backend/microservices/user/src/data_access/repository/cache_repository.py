@@ -14,11 +14,12 @@ class CacheRepository(BaseRepository):
 
     @classmethod
     async def initialize(cls):
-        cache_config = RedisConfig.load()
+        cache_config = RedisConfig()
         cls.data_access = await AsyncRedis.create(
             host=cache_config.host,
             port=cache_config.port,
             db=cache_config.db,
+            password=cache_config.password,
         )
 
     @classmethod

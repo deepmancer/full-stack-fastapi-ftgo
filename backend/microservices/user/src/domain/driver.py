@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional
 
 from data_access.repository import DatabaseRepository
 from domain.user import UserDomain
-
 from domain.exceptions import *
 from domain import get_logger
 from models import VehicleInfo

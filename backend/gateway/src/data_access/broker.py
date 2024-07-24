@@ -17,7 +17,7 @@ class RPCBroker:
         if cls._instance is not None:
             return
 
-        broker_config = BrokerConfig.load()
+        broker_config = BrokerConfig()
         logger = get_logger(layer_name=LayerNames.MESSAGE_BUS.value)
 
         try:
@@ -27,7 +27,6 @@ class RPCBroker:
                 user=broker_config.user,
                 password=broker_config.password,
                 vhost=broker_config.vhost,
-                ssl=broker_config.ssl,
                 logger=logger,
             )
             if loop is not None:
@@ -45,7 +44,13 @@ class RPCBroker:
         return cls._instance
 
     @classmethod
-    def get_client(cls) -> RPCClient:
+    async def get_client(cls) -> RPCClient:
         if cls._instance is None:
-            raise Exception("RPCBroker has not been initialized. Call 'initialize' first.")
+            cls.initialize(asyncio.get_event_loop())
         return cls._instance._rpc_client
+
+    @classmethod
+    async def close(cls) -> None:
+        if cls._instance is not None:
+            await cls._instance._rpc_client.close()
+            cls._instance = None

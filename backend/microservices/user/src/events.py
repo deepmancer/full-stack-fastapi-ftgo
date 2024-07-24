@@ -13,6 +13,7 @@ async def register_events(rpc_broker: RPCBroker):
         'user.address.add_address': AddressService.add_address,
         'user.driver.vehicle.register_vehicle': VehicleService.register_vehicle,
         'user.profile.verify_account': ProfileService.verify_account,
+        'user.profile.resend_auth_code': ProfileService.resend_auth_code,
         'user.profile.login': ProfileService.login,
         'user.profile.get_info': ProfileService.get_info,
         'user.profile.delete_account': ProfileService.delete_account,

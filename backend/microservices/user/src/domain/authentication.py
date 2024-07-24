@@ -2,7 +2,7 @@ import pyotp
 
 from config import AccountVerificationConfig
 
-auth_config = AccountVerificationConfig.load()
+auth_config = AccountVerificationConfig()
 class Authenticator:
     _otp = pyotp.TOTP(
         pyotp.random_base32(),

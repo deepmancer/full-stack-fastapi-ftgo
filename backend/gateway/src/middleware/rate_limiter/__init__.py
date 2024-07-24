@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from middlewares.rate_limiter.rate_limiter import (
+from middleware.rate_limiter.rate_limiter import (
     RateLimiter, _rate_limit_exceeded_handler, RateLimitExceeded,
 )
 

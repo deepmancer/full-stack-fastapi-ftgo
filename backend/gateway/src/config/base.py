@@ -1,52 +1,29 @@
 import os
-from typing import Any, Type, TypeVar
-from decouple import Config, RepositoryEnv, config
-from collections import ChainMap
+from typing import Any, Type, TypeVar, Callable
+from pydantic import BaseModel, Field
+from decouple import config, UndefinedValueError
 
 T = TypeVar('T')
 
-def env_var(field_name: str, default = None, cast_type = str) -> T:
+def env_var(field_name: str, default: Any = None, cast_type: Callable[[str], T] = str) -> T:
     try:
         value = config(field_name, default=default)
+        if value is None:
+            return default
         return cast_type(value)
-    except Exception:
+    except UndefinedValueError:
         return default
+    except (TypeError, ValueError) as e:
+        if cast_type is None:
+            raise ValueError(f"Failed to cast environment variable {field_name} to {str.__name__}") from e
+        else:
+            raise ValueError(f"Failed to cast environment variable {field_name} to {cast_type.__name__}") from e
 
 class BaseConfig():
     env = os.getenv("ENVIRONMENT", "test")
     
     @classmethod
     def load_environment(cls):
-        env = config("ENVIRONMENT", default=cls.env)
+        env = config("ENVIRONMENT", default='test')
         cls.env = env
         return cls.env
-
-    @classmethod
-    def load_var(cls, variable_name: str):
-        return os.getenv(variable_name, None)
-
-    @classmethod
-    def load_environment(cls):
-        common_env_path = ".env"
-
-        env = os.getenv("ENVIRONMENT", "test")
-        cls.env = env
-        
-        env_specific_path = f".env.{env}"
-
-        if not os.path.exists(common_env_path):
-            raise FileNotFoundError(f"Common environment file {common_env_path} not found.")
-        
-        common_env_params = RepositoryEnv(common_env_path)
-        if os.path.exists(env_specific_path):
-            env_specific_params = RepositoryEnv(env_specific_path).data
-        else:
-            env_specific_params = {}
-        merged_params = {**common_env_params.data, **env_specific_params}
-        for key, value in merged_params.items():
-            os.environ[key] = value
-
-    @classmethod
-    def load(cls):
-        cls.load_environment()
-        return cls()

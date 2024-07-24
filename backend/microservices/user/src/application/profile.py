@@ -1,5 +1,6 @@
 from typing import Dict, Any
-
+import json
+from application import get_logger
 from domain.user import UserDomain
 
 class ProfileService:
@@ -41,6 +42,21 @@ class ProfileService:
         }
 
     @staticmethod
+    async def resend_auth_code(user_id: str) -> Dict[str, Any]:
+        """
+        Resends the authentication code for a user.
+
+        :param user_id: ID of the user.
+        :return: Dictionary containing user ID and new authentication code.
+        """
+        user = await UserDomain.load(user_id=user_id, validate_verified=False)
+        auth_code = await user.resend_auth_code()
+        return {
+            "user_id": user_id,
+            "auth_code": auth_code,
+        }
+
+    @staticmethod
     async def verify_account(user_id: str, auth_code: str) -> Dict[str, str]:
         """
         Verifies a user account using an authentication code.
@@ -66,9 +82,7 @@ class ProfileService:
         """
         user = await UserDomain.load(phone_number=phone_number, role=role)
         await user.login(password)
-        return {
-            "user_id": user.user_id,
-        }
+        return user.get_info()
 
     @staticmethod
     async def get_info(user_id: str) -> Dict[str, Any]:

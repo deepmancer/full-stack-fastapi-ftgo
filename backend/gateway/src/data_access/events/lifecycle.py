@@ -7,10 +7,10 @@ from config.base import BaseConfig
 from data_access import get_logger
 
 async def setup() -> None:
-    BaseConfig.load()
+    BaseConfig()
     logger = get_logger()
     await CacheRepository.initialize()
-    logger.info("Connected to cache")
+    logger.info("Connected to Redis")
 
 async def teardown() -> None:
     logger = get_logger()

@@ -35,11 +35,17 @@ class UserDomain:
         self.updated_at = updated_at
         self.verified_at = verified_at
         self.role = role
-
+        self.national_id = national_id
         self.addresses = None
 
     @classmethod
-    async def load(cls, user_id: Optional[str] = None, phone_number: Optional[str] = None, role: Optional[str] = None) -> "UserDomain":
+    async def load(
+        cls,
+        user_id: Optional[str] = None,
+        phone_number: Optional[str] = None,
+        role: Optional[str] = None,
+        validate_verified: bool = True,
+    ) -> "UserDomain":
         query_dict = {}
         if user_id:
             query_dict["id"] = user_id
@@ -53,7 +59,7 @@ class UserDomain:
                 raise UserNotFoundError(query_dict)
 
             user = UserDomain._from_profile(user_profile)
-            if not user.is_verified():
+            if validate_verified and not user.is_verified():
                 raise UserNotVerifiedError(user_id=user_id)
 
             return user
@@ -93,7 +99,7 @@ class UserDomain:
             new_profile = await DatabaseRepository.insert(new_profile)
             
             user = UserDomain._from_profile(new_profile)
-            auth_code = await user._generate_auth_code()
+            auth_code = await user.generate_auth_code()
 
             get_logger().info(f"User with user_id: {user_id} and phone_number: {phone_number} was created successfully")
     
@@ -101,7 +107,7 @@ class UserDomain:
         except Exception as e:
             get_logger().error(f"Error registering user with phone_number {phone_number} and role {role}: {str(e)}")
             raise e
-       
+
     @staticmethod
     async def verify_account(user_id: str, auth_code: str):
         try:
@@ -130,6 +136,16 @@ class UserDomain:
             return user_id
         except Exception as e:
             get_logger().error(f"Error authenticating user with id {user_id} and auth code {auth_code}: {str(e)}")
+            raise e
+
+    async def resend_auth_code(self):
+        try:
+            if self.is_verified():
+                raise UserAlreadyVerifiedError(user_id=self.user_id)
+            auth_code = await self.generate_auth_code()
+            return auth_code
+        except Exception as e:
+            get_logger().error(f"Error resending auth code for user with id {self.user_id}: {str(e)}")
             raise e
 
     async def login(self, password):
@@ -210,14 +226,17 @@ class UserDomain:
             raise e
 
     def get_info(self) -> Dict[str, Any]:
-        return dict(
+        info_dict = dict(
             user_id=self.user_id,
             first_name=self.first_name,
             last_name=self.last_name,
             phone_number=self.phone_number,
+            hashed_password=self.hashed_password,
             gender=self.gender,
+            national_id=self.national_id,
             role=self.role,
         )
+        return {key: value for key, value in info_dict.items() if value is not None}
 
     async def add_address(self, address_line_1: str, address_line_2: str, city: str, postal_code: str = None, country: str = None) -> str:
         try:
@@ -331,9 +350,9 @@ class UserDomain:
             "role": self.role,
         }
 
+
     def is_verified(self) -> bool:
-        return True
-        # return self.verified_at is not None
+        return self.verified_at is not None
 
     async def load_addresses(self) -> List[AddressDomain]:
         if self.addresses is None:
@@ -356,7 +375,7 @@ class UserDomain:
             return str(auth_code)
         return None
 
-    async def _generate_auth_code(self) -> str:
+    async def generate_auth_code(self) -> str:
         auth_code, ttl = Authenticator.create_auth_code(self.user_id)
         await CacheRepository.set(self.user_id, auth_code, ttl)
         return auth_code

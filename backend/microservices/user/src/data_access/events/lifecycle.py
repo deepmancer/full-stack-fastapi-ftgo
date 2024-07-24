@@ -9,12 +9,12 @@ from config import BaseConfig
 from data_access import get_logger
 
 async def setup() -> None:
-    BaseConfig.load()
+    from config.db import PostgresConfig
     logger = get_logger()
     await CacheRepository.initialize()
-    logger.info("Connected to cache")
+    logger.info("Connected to Redis")
     await DatabaseRepository.initialize()
-    logger.info("Connected to database")
+    logger.info("Connected to Postgres")
     async with DatabaseRepository.data_access._async_engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
 

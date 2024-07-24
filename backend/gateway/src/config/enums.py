@@ -1,6 +1,7 @@
 import enum
 
-class LayerNames(enum.Enum):
+class LayerNames(str, enum.Enum):
     GATEWAY = "gateway"
-    DATA_ACCESS = "data"
+    DOMAIN = "domain"
+    DATA_ACCESS = "data_access"
     MESSAGE_BUS = "message_bus"

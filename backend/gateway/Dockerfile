@@ -7,7 +7,8 @@ ENV ENVIRONMENT=dev
 EXPOSE 8000
 
 # Upgrade pip and install Python dependencies
-RUN apt-get update && apt-get install -y git
+RUN apt-get update
+RUN apt-get install -y git
 
 # Upgrade pip
 RUN pip install --upgrade pip
@@ -15,7 +16,7 @@ RUN pip install --upgrade pip
 # Copy requirements.txt before other files to leverage Docker cache
 COPY ./requirements.txt /tmp/requirements.txt
 
-RUN pip install -r /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt --upgrade
 
 # Copy the application code to the container
 COPY . /gateway

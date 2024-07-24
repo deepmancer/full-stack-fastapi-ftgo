@@ -14,7 +14,7 @@ class DatabaseRepository(BaseRepository):
 
     @classmethod
     async def initialize(cls):
-        db_config = PostgresConfig.load()
+        db_config = PostgresConfig()
         cls.data_access = await AsyncPostgres.create(
             host=db_config.host,
             port=db_config.port,

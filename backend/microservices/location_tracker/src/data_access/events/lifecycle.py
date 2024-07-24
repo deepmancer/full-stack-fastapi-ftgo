@@ -22,9 +22,9 @@ async def setup() -> None:
 
     logger = get_logger()
     await cache_da.connect()
-    logger.info("Connected to cache")
+    logger.info("Connected to Redis")
     await db_da.connect()
-    logger.info("Connected to database")
+    logger.info("Connected to Postgres")
 
     unverified_users = await UserRepository.delete_unverified_users()
     await SessionRepository.delete_users_data(unverified_users)

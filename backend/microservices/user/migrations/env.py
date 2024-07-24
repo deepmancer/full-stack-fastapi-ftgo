@@ -13,7 +13,7 @@ import sys
 src_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../src")
 sys.path.append(src_dir)
 
-from config import PostgresConfig
+from config.db import PostgresConfig
 from models import Base
 
 # this is the Alembic Config object, which provides
@@ -102,6 +102,8 @@ async def run_migrations_online() -> None:
     await connectable.dispose()
 
 
+# print(PostgresConfig().host)
+# print(PostgresConfig().async_url)
 if context.is_offline_mode():
     run_migrations_offline()
 else:
