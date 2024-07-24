@@ -9,9 +9,12 @@ from datetime import timedelta
 from config import AuthConfig
 from data_access.repository import CacheRepository
 from ftgo_utils.jwt_auth import encode
-from backend.gateway.src.application.schemas.routes import (
-    ChangePasswordSchema, UpdateProfileSchema, UserWithCredentialsSchema
+
+from application.schemas.routes.registration import (
+    RegisterSchema, UserIdSchema, AuthenticateAccountSchema, UserIdVerifiedSchema,
+    AuthCodeSchema, LoginSchema, TokenSchema,
 )
+
 
 router = APIRouter(prefix='/auth', tags=["user_profile"])
 logger = get_logger()
@@ -28,14 +31,14 @@ async def register(request: RegisterSchema):
         logger.error(f"Error occurred while registering user: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
-@router.post("/verify", response_model=UserIdSchema)
+@router.post("/verify", response_model=UserIdVerifiedSchema)
 async def verify_account(request: AuthenticateAccountSchema):
     try:
         data = request.dict()
         response = await UserService.verify_account(data)
         if response.get('status') == ResponseStatus.ERROR.value:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.get('error_message', 'Account verification failed'))
-        return UserIdSchema(user_id=response["user_id"])
+        return UserIdVerifiedSchema(success=response["success"])
     except Exception as e:
         logger.error(f"Error occurred while verifying the account: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
@@ -47,7 +50,7 @@ async def resend_auth_code(request: UserIdSchema):
         response = await UserService.resend_auth_code(data)
         if response.get('status') == ResponseStatus.ERROR.value:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.get('error_message', 'Resending auth code failed'))
-        return AuthCodeSchema(user_id=response["user_id"], auth_code=response["auth_code"])
+        return AuthCodeSchema(auth_code=response["auth_code"])
     except Exception as e:
         logger.error(f"Error occurred while resending the auth code: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")

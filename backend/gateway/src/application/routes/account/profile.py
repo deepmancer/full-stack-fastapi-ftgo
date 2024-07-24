@@ -3,12 +3,10 @@ from fastapi import APIRouter, status, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from application import get_logger
-from backend.gateway.src.application.schemas.routes.registration import (
-    DeleteProfileRequest, DeleteProfileResponse,
-    LogoutRequest, LogoutResponse,
-    GetUserInfoRequest, GetUserInfoResponse,
+from application.schemas.routes.registration import (
+    LogoutResponse, GetUserInfoResponse, DeleteProfileResponse,
 )
-from schemas.user import UserSchema
+from application.schemas.user import UserSchema
 from ftgo_utils.enums import ResponseStatus
 from services.user import UserService
 
@@ -47,8 +45,6 @@ async def get_info(request: Request):
             first_name=response.get("first_name"),
             last_name=response.get("last_name"),
             phone_number=response.get("phone_number"),
-            gender=response.get("gender"),
-            role=response.get("role"),
             national_id=response.get("national_id"),
         )
     except Exception as e:
@@ -68,7 +64,7 @@ async def delete_account(request: Request):
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail=response.get('error_message', 'Account deletion failed')
             )
-        return DeleteProfileResponse(user_id=user.user_id)
+        return DeleteProfileResponse(success=True)
     except Exception as e:
         logger.error(f"Error occurred while deleting the account: {e}", exc_info=True)
         return JSONResponse(
