@@ -21,7 +21,7 @@ class AuthenticateAccountSchema(BaseModel):
     auth_code: str = Field(..., min_length=1, max_length=100)
 
 class UserIdVerifiedSchema(BaseModel):
-    success: bool = Field(...)
+    success: bool
 
 class AuthCodeSchema(BaseModel):
     auth_code: str = Field(..., min_length=1, max_length=100)
@@ -46,7 +46,7 @@ class GetUserInfoResponse(BaseModel):
 
 
 class DeleteProfileResponse(BaseModel):
-    success: bool = Field(...)
+    success: bool
 
 class ChangePasswordSchema(BaseModel):
     user_id: str = uuid_field()
