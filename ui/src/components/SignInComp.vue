@@ -4,8 +4,32 @@
             <div class="container">
                 <div class="signup-content">
                     <div class="signup-form">
-                        <h2 class="form-title">ورود</h2>
+                        <h2 class="form-title">ثبت‌نام</h2>
                         <form class="register-form" id="register-form">
+                            <b-input-group class="mt-3">
+                                <template #prepend>
+                                    <b-input-group-text>
+                                        <font-awesome-icon icon="fa-solid fa-user"/>
+                                    </b-input-group-text>
+                                </template>
+                                <b-form-input placeholder="نام" v-model="firstName"></b-form-input>
+                            </b-input-group>
+                            <b-input-group class="mt-3">
+                                <template #prepend>
+                                    <b-input-group-text>
+                                        <font-awesome-icon icon="fa-solid fa-user"/>
+                                    </b-input-group-text>
+                                </template>
+                                <b-form-input placeholder="نام‌خانوادگی" v-model="lastName"></b-form-input>
+                            </b-input-group>
+                            <b-input-group class="mt-3">
+                                <template #prepend>
+                                    <b-input-group-text>
+                                        <font-awesome-icon icon="fa-solid fa-id-card"/>
+                                    </b-input-group-text>
+                                </template>
+                                <b-form-input placeholder="کد ملی" v-model="nationalId"></b-form-input>
+                            </b-input-group>
                             <b-input-group class="mt-3">
                                 <template #prepend>
                                     <b-input-group-text>
@@ -25,30 +49,66 @@
                             <b-input-group class="mt-3">
                                 <b-form-select placeholder="نقش" v-model="userRole" :options="userRoles" class="w-100"></b-form-select>
                             </b-input-group>
-                            <div v-if="showVerificationCode" class="mt-3">
-                                <b-input-group>
+
+                            <!-- Conditional Fields -->
+                            <div v-if="userRole === 'courier'">
+                                <b-input-group class="mt-3">
                                     <template #prepend>
                                         <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-key"/>
+                                            <font-awesome-icon icon="fa-solid fa-car"/>
                                         </b-input-group-text>
                                     </template>
-                                    <b-form-input type="text" placeholder="کد تایید" v-model="verificationCode"></b-form-input>
+                                    <b-form-input placeholder="شماره پلاک" v-model="plateNumber"></b-form-input>
                                 </b-input-group>
-                                <b-button variant="secondary" class="mt-3" @click="verifyAccount">تایید</b-button>
                             </div>
+                            <div v-if="userRole === 'restaurant'">
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-store"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="نام رستوران" v-model="restaurantName"></b-form-input>
+                                </b-input-group>
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="آدرس رستوران" v-model="restaurantAddress"></b-form-input>
+                                </b-input-group>
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="شهر رستوران" v-model="restaurantCity"></b-form-input>
+                                </b-input-group>
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="کدپستی رستوران" v-model="postalCode"></b-form-input>
+                                </b-input-group>
+                            </div>
+
                             <div class="form-group form-button mt-5">
-                                <b-button variant="secondary" @click="signin">
+                                <b-button variant="secondary" @click="signup()">
                                     <b-spinner v-if="loading" label="Spinning"></b-spinner>
                                     <span v-else>
-                                        ورود
+                                    ثبت‌نام
                                     </span>
                                 </b-button>
                             </div>
                         </form>
                     </div>
                     <div class="signup-image">
-                        <figure><img src="../../images/signin-image.jpg" alt="sign up image"></figure>
-                        <router-link class="signup-image-link" to="/SignUp">من که حساب کاربری ندارم :(</router-link>
+                        <figure><img src="../../images/signup-image.jpg" alt="sign up image"></figure>
+                        <router-link class="signup-image-link" to="/">من حساب کاربری دارم</router-link>
                     </div>
                 </div>
             </div>
@@ -65,74 +125,74 @@ import { BVToastPlugin } from "bootstrap-vue";
 Vue.use(BVToastPlugin);
 import { mapActions } from 'vuex';
 
+
 export default {
     data() {
         return {
-            phone: "",
-            password: "",
+            firstName: '',
+            lastName: '',
+            phone: '',
+            nationalId: '',
+            password: '',
             userRole: 'customer',
+            plateNumber: '', // For couriers
+            restaurantName: '', // For restaurants
+            restaurantAddress: '', // For restaurants
+            restaurantCity: '', //For restaurants
+            postalCode: '', //For restaurants
             userRoles: [
                 { value: 'customer', text: 'مشتری' },
                 { value: 'courier', text: 'پیک' },
                 { value: 'restaurant', text: 'رستوران' }
             ],
-            loading: false,
-            showVerificationCode: false,
-            verificationCode: '',
-            userId: null,
-        }
+            loading: false
+        };
     },
     methods: {
-        ...mapActions(['updateUserId']),
-        signin() {
+        ...mapActions(['updateUserId', 'updateAuthCode']),
+        signup() {
             this.loading = true;
-            let api = "http://localhost:5020/user/profile/login";
+            let api = "http://localhost:8000/api/v1/auth/register";
             const data = {
+                first_name: this.firstName,
+                last_name: this.lastName,
                 phone_number: this.phone,
-                role: this.userRole,
                 password: this.password,
+                role: this.userRole,
+                national_id: this.nationalId,
             };
+            // if (this.userRole === 'restaurant') {
+            //     api = "http://localhost:5021/restaurant/restaurant/register";
+            //     const data = {
+            //     name: this.restaurantName,
+            //     address_line: this.restaurantAddress,
+            //     city: this.restaurantCity,
+            //     postal_code: this.postalCode,
+            //     holder_first_name: this.firstName,
+            //     holder_last_name: this.lastName,
+            //     holder_national_id: this.nationalId,
+            //     holder_phone_number: this.phone,
+            //     role: this.userRole,
+            //     password: this.password,
+            // };
+            // }
+
+
             Vue.axios.post(api, data)
                 .then(response => {
-                    localStorage.removeItem('token');
-                    localStorage.setItem('token', response.data.user_id);
-                    this.updateUserId(response.data.user_id);  // Store the user ID in Vuex
-                    this.phone = '';
-                    this.password = '';
+                    console.log(response);
+                    this.updateUserId(response.data.user_id);
+                    this.updateAuthCode(response.data.auth_code);
                     this.loading = false;
-                    this.$router.push('/CustomerMainPage');
-                })
-                .catch(e => {
-                    if (e.response && e.response.data.detail === "Account not verified") {
-                        this.showVerificationCode = true;
-                        this.userId = e.response.data.user_id; // Store the user ID for verification
-                    } else {
-                        console.log(e.response.data.detail);
-                        this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'پیام خطا', autoHideDelay: 5000, appendToast: true });
-                        this.phone = '';
-                        this.password = '';
-                        this.loading = false;
-                    }
-                });
-        },
-        verifyAccount() {
-            let api = "http://localhost:5020/user/profile/verify";
-            const data = {
-                user_id: this.userId,
-                auth_code: this.verificationCode,
-            };
-            Vue.axios.post(api, data)
-                .then(response => {
-                    if (response.data.success) {
-                        // Retry login after successful verification
-                        this.signin();
-                    } else {
-                        this.$bvToast.toast("Verification failed. Please try again.", { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
-                    }
-                })
-                .catch(e => {
-                    console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
+                    this.$router.push('/VerifyAccount');
+                }).catch((e) => {
+                    console.log(e);
+                    this.$bvToast.toast(e.response.data.message, {
+                        title: 'پیام خطا',
+                        autoHideDelay: 5000,
+                        appendToast: true
+                    });
+                    this.loading = false;
                 });
         }
     }
@@ -154,13 +214,30 @@ export default {
     display: -webkit-flex;
 }
 
-a {
-    color: black !important;
+a:focus,
+a:active,
+a:hover {
+    text-decoration: none;
+    outline: none;
+    transition: all 300ms ease 0s;
+    -moz-transition: all 300ms ease 0s;
+    -webkit-transition: all 300ms ease 0s;
+    -o-transition: all 300ms ease 0s;
+    -ms-transition: all 300ms ease 0s;
 }
 
-a:hover {
-    color: black !important;
-    text-decoration: none !important;
+.input-group-text {
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 5px !important;
+    border-bottom-right-radius: 5px !important;
+    border-bottom-left-radius: 0px !important;
+}
+
+.form-control {
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+    border-bottom-left-radius: 5px !important;
 }
 
 img {
@@ -213,20 +290,6 @@ body {
     -ms-border-radius: 20px;
 }
 
-.input-group-text {
-    border-top-left-radius: 0px !important;
-    border-top-right-radius: 5px !important;
-    border-bottom-right-radius: 5px !important;
-    border-bottom-left-radius: 0px !important;
-}
-
-.form-control {
-    border-top-left-radius: 5px !important;
-    border-top-right-radius: 0px !important;
-    border-bottom-right-radius: 0px !important;
-    border-bottom-left-radius: 5px !important;
-}
-
 .signup {
     margin-bottom: 150px;
 }
@@ -250,6 +313,26 @@ body {
 figure {
     margin-bottom: 50px;
     text-align: center;
+}
+
+.form-submit {
+    display: inline-block;
+    background: #6dabe4;
+    color: #fff;
+    border-bottom: none;
+    width: auto;
+    padding: 15px 39px;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -o-border-radius: 5px;
+    -ms-border-radius: 5px;
+    margin-top: 25px;
+    cursor: pointer;
+}
+
+.form-submit:hover {
+    background: #4292dc;
 }
 
 #signin {

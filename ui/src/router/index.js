@@ -6,6 +6,7 @@ import CustomerMainPage from '../views/CustomerMainPage.vue'
 import CustomerChangeInfo from '../views/CustomerChangeInfo.vue'
 import DeliveryMainPage from '../views/DeliveryMainPage.vue'
 import SupplierMainPage from '../views/SupplierMainPage.vue'
+import VerifyAccountPage from '../views/VerifyAccountPage.vue'
 
 
 Vue.use(VueRouter)
@@ -24,7 +25,7 @@ const routes = [{
         path: '/SupplierMain',
         name: 'SupplierMainPage',
         component: SupplierMainPage
-    },{
+    }, {
         path: '/CustomerChangeInfo',
         name: 'CustomerChangeInfo',
         component: CustomerChangeInfo
@@ -33,6 +34,11 @@ const routes = [{
         path: '/SignUp',
         name: 'SignUp',
         component: SignUp
+    },
+    {
+        path: '/VerifyAccount',
+        name: 'VerifyAccount',
+        component: VerifyAccountPage
     },
     {
         path: '/',
