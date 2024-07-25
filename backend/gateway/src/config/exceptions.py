@@ -41,7 +41,7 @@ class DataAccessError(BaseError):
         super().__init__(self.construct_message(message, context_message))
 
     def get_layer(self) -> str:
-        return LayerNames.DATA.value
+        return LayerNames.DATA_ACCESS.value
 
 class UserAuthenticationError(HTTPException):
     def __init__(self, detail: str, status_code: int = HTTP_401_UNAUTHORIZED):

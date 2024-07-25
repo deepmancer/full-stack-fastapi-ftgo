@@ -1,14 +1,19 @@
 import asyncio
 from typing import Any, Dict, List, Optional
+from venv import logger
+
+from ftgo_utils.errors import ErrorCodes
+import ftgo_utils as utils
+
+from config import DomainError
 
 from data_access.repository import CacheRepository, DatabaseRepository
 from domain.address import AddressDomain
 from domain.authentication import Authenticator
-from domain.exceptions import *
-from domain import get_logger
+from domain import get_logger, layer_name
 from models import Address, Profile, VehicleInfo
+from utils.error_handler import handle_error
 
-import ftgo_utils as utils
 
 class UserDomain:
     def __init__(
@@ -56,16 +61,16 @@ class UserDomain:
         try:
             user_profile = await DatabaseRepository.fetch_by_query(Profile, query=query_dict, one_or_none=True)
             if not user_profile:
-                raise UserNotFoundError(query_dict)
+                raise DomainError(error_code=ErrorCodes.USER_NOT_FOUND_ERROR)
 
             user = UserDomain._from_profile(user_profile)
             if validate_verified and not user.is_verified():
-                raise UserNotVerifiedError(user_id=user_id)
+                raise DomainError(error_code=ErrorCodes.USER_NOT_VERIFIED_ERROR)
 
             return user
         except Exception as e:
             get_logger().error(f"Error loading user with query {query_dict}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.LOAD_USER_ERROR, layer=layer_name)
 
     @staticmethod
     async def register(
@@ -79,10 +84,10 @@ class UserDomain:
         try:
             current_records = await DatabaseRepository.fetch_by_query(Profile, query={"phone_number": phone_number, "role": role})
             if current_records:
-                raise AccountExistsError(phone_number=phone_number, role=role)
+                raise DomainError(error_code=ErrorCodes.ACCOUNT_EXISTS_ERROR)
 
             if role != utils.enums.Roles.CUSTOMER.value and national_id is None:
-                raise MissingNationalIDError(role=role)
+                raise DomainError(error_code=ErrorCodes.MISSING_NATIONAL_ID_ERROR)
 
             user_id = utils.uuid_gen.uuid4()
             hashed_password = utils.hash_utils.hash_value(password)
@@ -97,31 +102,30 @@ class UserDomain:
                 national_id=national_id,
             )
             new_profile = await DatabaseRepository.insert(new_profile)
-            
+
             user = UserDomain._from_profile(new_profile)
             auth_code = await user.generate_auth_code()
 
             get_logger().info(f"User with user_id: {user_id} and phone_number: {phone_number} was created successfully")
-    
             return user_id, auth_code
         except Exception as e:
             get_logger().error(f"Error registering user with phone_number {phone_number} and role {role}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.USER_REGISTRATION_ERROR, layer=layer_name)
 
     @staticmethod
     async def verify_account(user_id: str, auth_code: str):
         try:
             profile = await DatabaseRepository.fetch_by_query(Profile, query={"id": user_id}, one_or_none=True)
             if not profile:
-                raise UserNotFoundError(dict(user_id=user_id))
+                raise DomainError(error_code=ErrorCodes.USER_NOT_FOUND_ERROR)
 
             user = UserDomain._from_profile(profile)
             if user.is_verified():
-                raise UserAlreadyVerifiedError(user_id=user_id)
+                raise DomainError(error_code=ErrorCodes.USER_ALREADY_VERIFIED_ERROR)
 
             if not Authenticator.verify_auth_code(auth_code):
-                raise AuthenticationCodeError(user_id=user_id, auth_code=auth_code)
-            
+                raise DomainError(error_code=ErrorCodes.INVALID_AUTHENTICATION_CODE_ERROR)
+
             stored_auth_code = await user._get_auth_code()
 
             if stored_auth_code and stored_auth_code == auth_code:
@@ -131,36 +135,35 @@ class UserDomain:
                 user.verified_at = verified_profile.verified_at
                 user.updated_at = verified_profile.updated_at
             else:
-                raise WrongAuthenticationCodeError(user_id=user_id, auth_code=auth_code, actual_auth_code=stored_auth_code)
-
+                raise DomainError(error_code=ErrorCodes.WRONG_AUTHENTICATION_CODE_ERROR)
             return user_id
         except Exception as e:
             get_logger().error(f"Error authenticating user with id {user_id} and auth code {auth_code}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.USER_VERIFICATION_ERROR, layer=layer_name)
 
     async def resend_auth_code(self):
         try:
             if self.is_verified():
-                raise UserAlreadyVerifiedError(user_id=self.user_id)
+                raise DomainError(error_code=ErrorCodes.USER_ALREADY_VERIFIED_ERROR)
             auth_code = await self.generate_auth_code()
             return auth_code
         except Exception as e:
             get_logger().error(f"Error resending auth code for user with id {self.user_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.RESENDING_AUTHENTICATION_CODE_ERROR, layer=layer_name)
 
     async def login(self, password):
         try:
             if not self.is_verified():
-                raise UserNotVerifiedError(user_id=self.user_id)
+                raise DomainError(error_code=ErrorCodes.USER_NOT_VERIFIED_ERROR)
 
             if not utils.hash_utils.verify(password, self.hashed_password):
-                raise WrongPasswordError(user_id=self.user_id, entered_password=password)
+                raise DomainError(error_code=ErrorCodes.WRONG_PASSWORD_ERROR)
 
             await DatabaseRepository.update_by_query(Profile, query={"id": self.user_id}, update_fields={"last_login_time": utils.utc_time.now()})
             return
         except Exception as e:
             get_logger().error(f"Error logging in user with id {self.user_id} and role {self.role}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.USER_LOGIN_ERROR, layer=layer_name)
 
     async def logout(self):
         try:
@@ -168,7 +171,7 @@ class UserDomain:
             return
         except Exception as e:
             get_logger().error(f"Error logging out user with id {self.user_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.USER_LOGOUT_ERROR, layer=layer_name)
 
     async def delete_account(self) -> bool:
         try:
@@ -177,7 +180,7 @@ class UserDomain:
             return True
         except Exception as e:
             get_logger().error(f"Error deleting account for user with id {self.user_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.USER_DELETE_ACCOUNT_ERROR, layer=layer_name)
 
     async def update_profile_information(self, update_fields: Dict[str, Optional[str]]):
         try:
@@ -188,42 +191,42 @@ class UserDomain:
                 new_fields["first_name"] = first_name
             if last_name:
                 new_fields["last_name"] = last_name
-            
+
             if not new_fields:
                 return {}
-    
+
             updated_profile = await DatabaseRepository.update_by_query(
-                Profile, 
-                query={"id": self.user_id}, 
+                Profile,
+                query={"id": self.user_id},
                 update_fields=new_fields,
             )
             self._update_from_profile(updated_profile[0])
             return self.get_info()
         except Exception as e:
             get_logger().error(f"Error updating profile for user with id {self.user_id}: {str(e)}, update_fields: {update_fields}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.USER_PROFILE_UPDATE_ERROR, layer=layer_name)
 
     async def update_address_information(self, address_id: str, update_fields: Dict[str, Optional[str]]):
         try:
             address = await self.get_address(address_id)
             if not address:
-                raise AddressNotFoundError(address_id=address_id)
+                raise DomainError(error_code=ErrorCodes.ADDRESS_NOT_FOUND_ERROR)
             await address.update_address(update_fields)
             return address.get_info()
         except Exception as e:
             get_logger().error(f"Error updating address for user with id {self.user_id} and address_id {address_id}: {str(e)}, update_fields: {update_fields}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.UPDATE_ADDRESS_ERROR, layer=layer_name)
 
     async def get_default_address(self):
         try:
             if not self.addresses:
                 await self.load_addresses()
-            
+
             default_address = next((address for address in self.addresses if address.is_default), None)
             return default_address.get_info() if default_address else None
         except Exception as e:
             get_logger().error(f"Error getting default address for user with id {self.user_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.GET_ADDRESS_ERROR, layer=layer_name)
 
     def get_info(self) -> Dict[str, Any]:
         info_dict = dict(
@@ -240,43 +243,43 @@ class UserDomain:
 
     async def add_address(self, address_line_1: str, address_line_2: str, city: str, postal_code: str = None, country: str = None) -> str:
         try:
-            address =  await AddressDomain.add_address(self.user_id, address_line_1, address_line_2, city, postal_code, country)
+            address = await AddressDomain.add_address(self.user_id, address_line_1, address_line_2, city, postal_code, country)
             if self.addresses is None:
                 self.addresses = [address]
             else:
                 self.addresses.append(address)
-            
+
             return address.get_info()
         except Exception as e:
             get_logger().error(f"Error adding address for user with id {self.user_id}: {str(e)}, address_line_1: {address_line_1}, address_line_2: {address_line_2}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.ADD_ADDRESS_ERROR, layer=layer_name)
 
     async def get_address_info(self, address_id: str) -> Dict[str, Any]:
         try:
             address = await self.get_address(address_id)
             if not address:
-                raise AddressNotFoundError(address_id=address_id)
-            
+                raise DomainError(error_code=ErrorCodes.ADDRESS_NOT_FOUND_ERROR)
+
             return address.get_info()
         except Exception as e:
             get_logger().error(f"Error getting address info for user with id {self.user_id} and address_id {address_id}: {str(e)}")
-            raise e
-    
+            return handle_error(e=e, error_code=ErrorCodes.GET_ADDRESS_INFO_ERROR, layer=layer_name)
+
     async def get_addresses_info(self) -> List[Dict[str, Any]]:
         try:
             if not self.addresses:
                 await self.load_addresses()
-            
+
             return [address.get_info() for address in self.addresses]
         except Exception as e:
             get_logger().error(f"Error getting addresses info for user with id {self.user_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.GET_ADDRESSES_ERROR, layer=layer_name)
 
     async def get_address(self, address_id: str) -> Optional[AddressDomain]:
         try:
             if not self.addresses:
                 await self.load_addresses()
-            
+
             address = next((address for address in self.addresses if address.address_id == address_id), None)
             if not address:
                 return None
@@ -284,57 +287,49 @@ class UserDomain:
             return address
         except Exception as e:
             get_logger().error(f"Error getting address for user with id {self.user_id} and address_id {address_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.GET_ADDRESS_ERROR, layer=layer_name)
 
     async def delete_address(self, address_id: str) -> bool:
         try:
-            # address = await self.get_address(address_id)
-            # if not address:
-            #     raise AddressNotFoundError(address_id=address_id)
-            #
-            # if address.is_default:
-            #     raise DefaultAddressDeletionError(address_id=address_id)
             await DatabaseRepository.delete_by_query(Address, query={"id": address_id})
-            # await CacheRepository.delete(self.user_id)
-            return
-            # await AddressDomain.delete_address(address_id)
-            # return address_id
+            return True
         except Exception as e:
             get_logger().error(f"Error deleting address for user with id {self.user_id} and address_id {address_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.DELETE_ADDRESS_ERROR, layer=layer_name)
 
     async def set_address_as_default(self, address_id: str) -> bool:
         try:
             address = await self.get_address(address_id)
 
             if not address:
-                raise AddressNotFoundError(address_id=address_id)
+                raise DomainError(error_code=ErrorCodes.ADDRESS_NOT_FOUND_ERROR)
             if address.is_default:
-                return
-            
+                return False
+
             default_address = next((address for address in self.addresses if address.is_default), None)
             if default_address is not None and default_address.address_id != address_id:
                 await default_address.unset_as_default()
             await address.set_as_default(address_id=address_id)
-            return address_id
+            return True
         except Exception as e:
             get_logger().error(f"Error setting address as default for user with id {self.user_id} and address_id {address_id}: {str(e)}")
-            raise e
+            return handle_error(e=e, error_code=ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, layer=layer_name)
 
     async def unset_address_as_default(self, address_id: str) -> bool:
         try:
             address = await self.get_address(address_id)
 
             if not address:
-                raise AddressNotFoundError(address_id=address_id)
+                raise DomainError(error_code=ErrorCodes.ADDRESS_NOT_FOUND_ERROR)
             if not address.is_default:
-                return
+                return False
 
             await address.unset_as_default()
+            return True
         except Exception as e:
             get_logger().error(f"Error unsetting address as default for user with id {self.user_id} and address_id {address_id}: {str(e)}")
-            raise e
-      
+            return handle_error(e=e, error_code=ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, layer=layer_name)
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "user_id": self.user_id,
@@ -342,7 +337,7 @@ class UserDomain:
             "last_name": self.last_name,
             "phone_number": self.phone_number,
             "hashed_password": self.hashed_password,
-            "nationl_id": self.national_id,
+            "national_id": self.national_id,
             "gender": self.gender,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -350,13 +345,12 @@ class UserDomain:
             "role": self.role,
         }
 
-
     def is_verified(self) -> bool:
         return self.verified_at is not None
 
     async def load_addresses(self) -> List[AddressDomain]:
         if self.addresses is None:
-            addresses = await DatabaseRepository.fetch_by_query(Address, query={"id": self.user_id})
+            addresses = await DatabaseRepository.fetch_by_query(Address, query={"user_id": self.user_id})
             self.addresses = [AddressDomain._from_address(address) for address in addresses]
         return self.addresses
 

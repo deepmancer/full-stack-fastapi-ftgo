@@ -7,13 +7,13 @@ from config.cache import RedisConfig
 from data_access.exceptions import *
 
 class CacheRepository:
-    data_access: Optional[AsyncRedis] = None
-    group: str = ""
+    _data_access: Optional[AsyncRedis] = None
+    _group: str = ""
 
     @classmethod
     async def initialize(cls):
         cache_config = RedisConfig()
-        cls.data_access = await AsyncRedis.create(
+        cls._data_access = await AsyncRedis.create(
             host=cache_config.host,
             port=cache_config.port,
             db=cache_config.db,
@@ -22,12 +22,12 @@ class CacheRepository:
 
     @classmethod
     def get_cache(cls, group: str = ""): 
-        cls.group = group
+        cls._group = group
         return cls
 
     @classmethod
     def _prefixed_key(cls, key: str) -> str:
-        return f"{cls.group}{key}"
+        return f"{cls._group}{key}"
 
     @classmethod
     def _serialize_value(cls, value: Union[str, dict]) -> str:
@@ -45,7 +45,7 @@ class CacheRepository:
     @classmethod
     async def get(cls, key: str) -> Union[str, dict, None]:
         try:
-            async with cls.data_access.get_or_create_session() as session:
+            async with cls._data_access.get_or_create_session() as session:
                 value = await session.get(cls._prefixed_key(key))
                 if value:
                     return cls._deserialize_value(value)
@@ -57,7 +57,7 @@ class CacheRepository:
     async def set(cls, key: str, value: Union[str, dict], ttl=None) -> None:
         try:
             print('hello')
-            async with cls.data_access.get_or_create_session() as session:
+            async with cls._data_access.get_or_create_session() as session:
                 print('how are your')
                 serialized_value = cls._serialize_value(value)
                 print('fuck you')
@@ -77,7 +77,7 @@ class CacheRepository:
     @classmethod
     async def delete(cls, key: str) -> None:
         try:
-            async with cls.data_access.get_or_create_session() as session:
+            async with cls._data_access.get_or_create_session() as session:
                 await session.delete(cls._prefixed_key(key))
         except Exception as e:
             raise CacheDeleteError(key, message=str(e))
@@ -85,7 +85,7 @@ class CacheRepository:
     @classmethod
     async def expire(cls, key: str, ttl: int) -> None:
         try:
-            async with cls.data_access.get_or_create_session() as session:
+            async with cls._data_access.get_or_create_session() as session:
                 await session.expire(cls._prefixed_key(key), ttl)
         except Exception as e:
             raise CacheExpireError(key, ttl, message=str(e))
@@ -93,7 +93,7 @@ class CacheRepository:
     @classmethod
     async def batch_delete(cls, keys: List[str]):
         try:
-            async with cls.data_access.get_or_create_session() as session:
+            async with cls._data_access.get_or_create_session() as session:
                 pipeline = session.pipeline()
                 for key in keys:
                     pipeline.delete(cls._prefixed_key(key))
@@ -104,11 +104,11 @@ class CacheRepository:
     @classmethod
     async def flush(cls):
         try:
-            async with cls.data_access.get_or_create_session() as session:
+            async with cls._data_access.get_or_create_session() as session:
                 await session.flushdb()
         except Exception as e:
             raise CacheFlushError(message=str(e))
 
     @classmethod
     async def terminate(cls):
-        await cls.data_access.disconnect()
+        await cls._data_access.disconnect()

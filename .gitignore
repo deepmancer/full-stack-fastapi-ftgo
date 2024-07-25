@@ -6,7 +6,7 @@ log.log
 *.pyc
 *.vsix
 envVars.txt
-**/.vscode/.ropeproject/**
+**/.vscode/**
 **/testFiles/**/.cache/**
 *.noseids
 .nyc_output
