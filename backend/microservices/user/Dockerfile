@@ -6,8 +6,10 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV ENVIRONMENT=dev
 
 # Upgrade pip and install Python dependencies
-RUN apt-get update
-RUN apt-get install -y git
+#RUN apt-get update
+#RUN apt-get install -y git
+RUN apt-get update && apt-get install -y git ca-certificates
+
 # Upgrade pip
 RUN pip install --upgrade pip
 

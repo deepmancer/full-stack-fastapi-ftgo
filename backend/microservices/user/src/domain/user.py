@@ -174,7 +174,7 @@ class UserDomain:
         try:
             await DatabaseRepository.delete_by_query(Profile, query={"id": self.user_id})
             await CacheRepository.delete(self.user_id)
-            return
+            return True
         except Exception as e:
             get_logger().error(f"Error deleting account for user with id {self.user_id}: {str(e)}")
             raise e
