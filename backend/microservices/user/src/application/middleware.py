@@ -11,18 +11,28 @@ def event_middleware(func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(*args, **kwargs) -> Dict[str, Any]:
         logger = get_logger(layer_name=LayerNames.APP.value, environment=BaseConfig.load_environment())
+
         try:
             result = await func(*args, **kwargs)
+            if not isinstance(result, dict):
+                logger.warning(f"Expected result to be a dict, got {type(result)} instead.")
+                result = {}
+            
             result['status'] = ResponseStatus.SUCCESS.value
             return result
+
         except BaseError as e:
-            logger.error(f"BaseError in {func.__name__}: {e.message}\n{traceback.format_exc()}")
+            logger.error(f"Domain error in {func.__name__}: {e.message}\n{traceback.format_exc()}")
             return {
-                "status": ResponseStatus.ERROR.value,
+                "status": ResponseStatus.FAILURE.value,
                 "error_message": str(e.message),
             }
+        
         except Exception as e:
-            logger.error(f"Unexpected error in {func.__name__}: {str(e)}\n{traceback.format_exc()}")
-            raise e
+            logger.error(f"Unhandled error in {func.__name__}: {str(e)}\n{traceback.format_exc()}")
+            return {
+                "status": ResponseStatus.ERROR.value,
+                "error_message": str(e),
+            }
 
     return wrapper
