@@ -128,9 +128,10 @@ export default {
     },
     async fetchAddresses() {
       try {
-        const response = await axios.get(`http://localhost:5020/user/address/get_all_info`, {
-          params: { user_id: this.userId }
-        });
+        const response = await axios.get(
+          'http://localhost:8000/api/v1/address/get_all_info',
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
         this.addresses = response.data.addresses;
       } catch (error) {
         console.error('Error fetching addresses:', error);
@@ -138,10 +139,11 @@ export default {
     },
     async addAddress() {
       try {
-        await axios.post('http://localhost:5020/user/address/add', {
-          user_id: this.userId,
-          ...this.newAddress
-        });
+        await axios.post(
+          'http://localhost:8000/api/v1/address/add',
+          this.newAddress,
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
         this.newAddress = {
           address_line_1: '',
           address_line_2: '',
@@ -156,8 +158,9 @@ export default {
     },
     async deleteAddress(addressId) {
       try {
-        await axios.delete('http://localhost:5020/user/address/delete', {
-          data: { user_id: this.userId, address_id: addressId }
+        await axios.delete('http://localhost:8000/api/v1/address/delete', {
+          data: { user_id: this.userId, address_id: addressId },
+          headers: { Authorization: `Bearer ${this.token}` }
         });
         this.fetchAddresses();
       } catch (error) {
@@ -166,9 +169,11 @@ export default {
     },
     async setPreferredAddress(addressId) {
       try {
-        await axios.post('http://localhost:5020/user/address/set-preferred', {
+        await axios.post('http://localhost:8000/api/v1/address/set-preferred', {
           user_id: this.userId,
           address_id: addressId
+        }, {
+          headers: { Authorization: `Bearer ${this.token}` }
         });
         this.fetchAddresses();
       } catch (error) {
@@ -188,15 +193,15 @@ export default {
     },
     async deleteAccount() {
       try {
-        await axios.delete('http://localhost:5020/user/profile/delete', {
-          data: { user_id: this.userId }
+        await axios.delete('http://localhost:8000/api/v1/profile/delete', {
+          data: { user_id: this.userId },
+          headers: { Authorization: `Bearer ${this.token}` }
         });
-
       } catch (error) {
         console.error('Error deleting user account:', error);
       }
     },
-    async backToUserPage() {
+    backToUserPage() {
       this.$router.push('/CustomerMainPage');
     },
   }
