@@ -84,7 +84,7 @@
 
 <script>
 import axios from 'axios';
-import { mapGetters } from 'vuex';
+import {mapGetters} from 'vuex';
 
 export default {
   name: 'CustomerChangeInfoComp',
@@ -118,8 +118,8 @@ export default {
     async fetchUserInfo() {
       try {
         const response = await axios.get(
-          'http://localhost:8000/api/v1/profile/user_info',
-          { headers: { Authorization: `Bearer ${this.token}` } }
+            'http://localhost:8000/api/v1/profile/user_info',
+            {headers: {Authorization: `Bearer ${this.token}`}}
         );
         this.userInfo = response.data;
       } catch (error) {
@@ -129,8 +129,8 @@ export default {
     async fetchAddresses() {
       try {
         const response = await axios.get(
-          'http://localhost:8000/api/v1/address/get_all_info',
-          { headers: { Authorization: `Bearer ${this.token}` } }
+            'http://localhost:8000/api/v1/address/get_all_info',
+            {headers: {Authorization: `Bearer ${this.token}`}}
         );
         this.addresses = response.data.addresses;
       } catch (error) {
@@ -140,9 +140,9 @@ export default {
     async addAddress() {
       try {
         await axios.post(
-          'http://localhost:8000/api/v1/address/add',
-          this.newAddress,
-          { headers: { Authorization: `Bearer ${this.token}` } }
+            'http://localhost:8000/api/v1/address/add',
+            this.newAddress,
+            {headers: {Authorization: `Bearer ${this.token}`}}
         );
         this.newAddress = {
           address_line_1: '',
@@ -159,8 +159,8 @@ export default {
     async deleteAddress(addressId) {
       try {
         await axios.delete('http://localhost:8000/api/v1/address/delete', {
-          data: { user_id: this.userId, address_id: addressId },
-          headers: { Authorization: `Bearer ${this.token}` }
+          data: {address_id: addressId},
+          headers: {Authorization: `Bearer ${this.token}`}
         });
         this.fetchAddresses();
       } catch (error) {
@@ -170,10 +170,9 @@ export default {
     async setPreferredAddress(addressId) {
       try {
         await axios.post('http://localhost:8000/api/v1/address/set-preferred', {
-          user_id: this.userId,
           address_id: addressId
         }, {
-          headers: { Authorization: `Bearer ${this.token}` }
+          headers: {Authorization: `Bearer ${this.token}`}
         });
         this.fetchAddresses();
       } catch (error) {
@@ -194,8 +193,8 @@ export default {
     async deleteAccount() {
       try {
         await axios.delete('http://localhost:8000/api/v1/profile/delete', {
-          data: { user_id: this.userId },
-          headers: { Authorization: `Bearer ${this.token}` }
+          data: {user_id: this.userId},
+          headers: {Authorization: `Bearer ${this.token}`}
         });
       } catch (error) {
         console.error('Error deleting user account:', error);

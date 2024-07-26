@@ -29,14 +29,12 @@ class AddAddressResponse(BaseModel):
 
 
 class DeleteAddressRequest(BaseModel):
-    user_id: str = uuid_field()
     address_id: Optional[str] = Field(None, min_length=1, max_length=36)
 class DeleteAddressResponse(BaseModel):
     address_id: Optional[str] = Field(None, min_length=1, max_length=36)
 
 
 class SetPreferredAddressRequest(BaseModel):
-    user_id: str = uuid_field()
     address_id: Optional[str] = Field(None, min_length=1, max_length=36)
 class SetPreferredAddressResponse(BaseModel):
     address_id: Optional[str] = Field(None, min_length=1, max_length=36)
