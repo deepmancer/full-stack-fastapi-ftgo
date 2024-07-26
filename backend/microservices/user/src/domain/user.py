@@ -356,7 +356,7 @@ class UserDomain:
 
     async def load_addresses(self) -> List[AddressDomain]:
         if self.addresses is None:
-            addresses = await DatabaseRepository.fetch_by_query(Address, query={"id": self.user_id})
+            addresses = await DatabaseRepository.fetch_by_query(Address, query={"user_id": self.user_id})
             self.addresses = [AddressDomain._from_address(address) for address in addresses]
         return self.addresses
 
