@@ -5,6 +5,9 @@
         <b-alert variant="info" show>
           <strong>your user_id is {{ userId }}</strong>
         </b-alert>
+        <b-alert variant="info" show>
+          <strong>your token is {{ token }}</strong>
+        </b-alert>
       </div>
       <div class="customer-main-page">
         <b-container>
@@ -72,9 +75,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['getUserId']),
+    ...mapGetters(['getUserId', 'getToken']),
     userId() {
       return this.getUserId;
+    },
+    token() {
+      return this.getToken;
     }
   },
   methods: {
