@@ -212,10 +212,12 @@ export default {
 .customer-change-info {
   padding: 20px;
 }
+
 .user-id-box {
   margin-top: 20px;
   text-align: center;
 }
+
 .rtl-text {
   direction: rtl;
 }
