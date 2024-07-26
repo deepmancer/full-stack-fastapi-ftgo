@@ -4,10 +4,10 @@ from typing import List, Optional, Union
 from aredis_client import AsyncRedis
 from ftgo_utils.errors import ErrorCodes
 
-from config import RedisConfig, DataAccessError
-from data_access import get_logger, layer_name
+from config import RedisConfig
+from data_access import get_logger
 from data_access.repository.base import BaseRepository
-from utils.error_handler import handle_error
+from utils.exception import handle_exception
 
 class CacheRepository(BaseRepository):
     _data_access: Optional[AsyncRedis] = None
@@ -24,8 +24,9 @@ class CacheRepository(BaseRepository):
                 password=cache_config.password,
             )
         except Exception as e:
-            get_logger().error(f"Error connecting to cache: config={cache_config}, error={e}")
-            return handle_error(e=e, error_code=ErrorCodes.CACHE_CONNECTION_ERROR, layer=layer_name)
+            payload = cache_config.dict()
+            get_logger().error(ErrorCodes.CACHE_CONNECTION_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.CACHE_CONNECTION_ERROR, payload=payload)
 
     @classmethod
     def get_cache(cls, group: str = ""):
@@ -58,8 +59,9 @@ class CacheRepository(BaseRepository):
                     return cls._deserialize_value(value)
                 return None
         except Exception as e:
-            get_logger().error(f"Error fetching cache: key={key}, error={e}")
-            return handle_error(e=e, error_codee=ErrorCodes.CACHE_FETCH_ERROR, layer=layer_name)
+            payload = dict(key=key)
+            get_logger().error(ErrorCodes.CACHE_FETCH_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.CACHE_FETCH_ERROR, payload=payload)
 
     @classmethod
     async def set(cls, key: str, value: Union[str, dict], ttl: Optional[int] = None) -> None:
@@ -68,8 +70,9 @@ class CacheRepository(BaseRepository):
                 serialized_value = cls._serialize_value(value)
                 await session.set(cls._prefixed_key(key), serialized_value, ex=ttl)
         except Exception as e:
-            get_logger().error(f"Error setting cache: key={key}, value={value}, ttl={ttl}, error={e}")
-            return handle_error(e=e, error_codee=ErrorCodes.CACHE_INSERT_ERROR, layer=layer_name)
+            payload = dict(key=key, value=value, ttl=ttl)
+            get_logger().error(ErrorCodes.CACHE_INSERT_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.CACHE_INSERT_ERROR, payload=payload)
 
     @classmethod
     async def delete(cls, key: str) -> None:
@@ -77,8 +80,9 @@ class CacheRepository(BaseRepository):
             async with cls._data_access.get_or_create_session() as session:
                 await session.delete(cls._prefixed_key(key))
         except Exception as e:
-            get_logger().error(f"Error deleting cache: key={key}, error={e}")
-            return handle_error(e=e, error_codee=ErrorCodes.CACHE_DELETE_ERROR, layer=layer_name)
+            payload = dict(key=key)
+            get_logger().error(ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
 
     @classmethod
     async def expire(cls, key: str, ttl: int) -> None:
@@ -86,13 +90,12 @@ class CacheRepository(BaseRepository):
             async with cls._data_access.get_or_create_session() as session:
                 await session.expire(cls._prefixed_key(key), ttl)
         except Exception as e:
-            get_logger().error(f"Error expiring cache: key={key}, ttl={ttl}, exception={e}")
-            return handle_error(e=e, error_codee=ErrorCodes.CACHE_EXPIRE_ERROR, layer=layer_name)
+            payload = dict(key=key, ttl=ttl)
+            get_logger().error(ErrorCodes.CACHE_EXPIRE_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.CACHE_EXPIRE_ERROR, payload=payload)
 
     @classmethod
     async def batch_delete(cls, keys: List[str]) -> None:
-        if cls._data_access is None:
-            raise DataAccessError(error_code=ErrorCodes.CACHE_NOT_INITIALIZED)
         try:
             async with cls._data_access.get_or_create_session() as session:
                 pipeline = session.pipeline()
@@ -100,8 +103,9 @@ class CacheRepository(BaseRepository):
                     pipeline.delete(cls._prefixed_key(key))
                 await pipeline.execute()
         except Exception as e:
-            get_logger().error(f"Error batch deleting cache: keys={key}, error={e}")
-            return handle_error(e=e, error_codee=ErrorCodes.CACHE_DELETE_ERROR, layer=layer_name)
+            payload = dict(keys=keys)
+            get_logger().error(ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
 
     @classmethod
     async def flush(cls) -> None:
@@ -109,8 +113,8 @@ class CacheRepository(BaseRepository):
             async with cls._data_access.get_or_create_session() as session:
                 await session.flushdb()
         except Exception as e:
-            get_logger().error(f"Error flushing cache: {e}")
-            return handle_error(e=e, error_codee=ErrorCodes.CACHE_FLUSH_ERROR, layer=layer_name)
+            get_logger().error(ErrorCodes.CACHE_FLUSH_ERROR)
+            handle_exception(e=e, error_code=ErrorCodes.CACHE_FLUSH_ERROR)
 
     @classmethod
     async def terminate(cls) -> None:

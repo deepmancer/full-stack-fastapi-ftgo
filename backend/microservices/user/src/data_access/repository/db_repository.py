@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 from asyncpg_client import AsyncPostgres
 from ftgo_utils.errors import ErrorCodes
 
-from config import PostgresConfig, DataAccessError
-from data_access import get_logger, layer_name
+from config import PostgresConfig
+from data_access import get_logger
 from data_access.repository.base import BaseRepository
 from models.base import Base
-from utils.error_handler import handle_error
+from utils.exception import handle_exception
 
 class DatabaseRepository(BaseRepository):
     _data_access: Optional[AsyncPostgres] = None
@@ -32,8 +32,9 @@ class DatabaseRepository(BaseRepository):
                 cls._data_access = pg_data_access
 
         except Exception as e:
-            get_logger().error(f"Error connecting to database: config={db_config}, error={e}")
-            return handle_error(e=e, error_code=ErrorCodes.DB_CONNECTION_ERROR, layer=layer_name)
+            payload = db_config.dict()
+            get_logger().error(ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
 
     @classmethod
     async def fetch_by_query(cls, model: Type[Base], query: Dict[str, str], one_or_none: bool = False):
@@ -44,8 +45,9 @@ class DatabaseRepository(BaseRepository):
                     return result.scalars().one_or_none()
                 return result.scalars().all()
         except Exception as e:
-            get_logger().error(f"Error fetching data from database: model={model.__name__}, query={query}, error={e}")
-            return handle_error(e=e, error_code=ErrorCodes.DB_FETCH_ERROR, layer=layer_name)
+            payload = dict(model=model.__name__, query=query)
+            get_logger().error(ErrorCodes.DB_FETCH_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.DB_FETCH_ERROR, payload=payload)
 
     @classmethod
     async def insert(cls, model_instance: Base):
@@ -57,9 +59,9 @@ class DatabaseRepository(BaseRepository):
                 await session.refresh(model_instance)
                 return model_instance
         except Exception as e:
-            get_logger().error(f"Error inserting data into database: model_instance={model_instance.__dict__}, error={e}")
-            await session.rollback()
-            return handle_error(e=e, error_code=ErrorCodes.DB_INSERT_ERROR, layer=layer_name)
+            payload = dict(model_instance=model_instance.__dict__)
+            get_logger().error(ErrorCodes.DB_INSERT_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.DB_INSERT_ERROR, payload=payload)
 
     @classmethod
     async def update_by_query(cls, model: Type[Base], query: Dict[str, str], update_fields: Dict[str, str]):
@@ -85,9 +87,9 @@ class DatabaseRepository(BaseRepository):
                 
                 return records
         except Exception as e:
-            get_logger().error(f"Error updating data in database: model={model.__name__}, query={query}, update_fields={update_fields}, error={e}")
-            await session.rollback()
-            return handle_error(e=e, error_code=ErrorCodes.DB_UPDATE_ERROR, layer=layer_name)
+            payload = dict(model=model.__name__, query=query, update_fields=update_fields)
+            get_logger().error(ErrorCodes.DB_UPDATE_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.DB_UPDATE_ERROR, payload=payload)
 
     @classmethod
     async def delete_by_query(cls, model: Type[Base], query: Dict[str, str]):
@@ -106,9 +108,9 @@ class DatabaseRepository(BaseRepository):
                 return records
 
         except Exception as e:
-            get_logger().error(f"Error deleting data from database: model={model.__name__}, query={query}, error={e}")
-            await session.rollback()
-            return handle_error(e=e, error_code=ErrorCodes.DB_DELETE_ERROR, layer=layer_name)
+            payload = dict(model=model.__name__, query=query)
+            get_logger().error(ErrorCodes.DB_DELETE_ERROR, payload=payload)
+            handle_exception(e=e, error_code=ErrorCodes.DB_DELETE_ERROR, payload=payload)
 
     @classmethod
     async def terminate(cls):

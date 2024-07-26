@@ -54,7 +54,7 @@ class UserService(Microservice):
 
     @classmethod
     async def delete_address(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.address.delete_address', data=data)
+        return await cls._call_rpc('user.address.delete', data=data)
 
     @classmethod
     async def set_preferred_address(cls, data: Dict) -> Dict:
@@ -69,8 +69,8 @@ class UserService(Microservice):
         return await cls._call_rpc('user.address.get_all_addresses', data=data)
 
     @classmethod
-    async def update_address(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.address.update_address', data=data)
+    async def update_information(cls, data: Dict) -> Dict:
+        return await cls._call_rpc('user.address.update_information', data=data)
 
     @classmethod
     async def get_vehicle_info(cls, data: Dict) -> Dict:

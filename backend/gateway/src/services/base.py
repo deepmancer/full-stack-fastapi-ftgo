@@ -6,7 +6,7 @@ from config import LayerNames, BaseConfig
 from data_access.broker import RPCBroker
 
 
-logger = get_logger(layer_name=LayerNames.MESSAGE_BUS.value, environment=BaseConfig.load_environment())
+logger = get_logger(layer=LayerNames.MESSAGE_BUS.value, environment=BaseConfig.load_environment())
 
 class Microservice:
     _service_name = ''

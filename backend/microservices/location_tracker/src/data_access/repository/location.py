@@ -148,7 +148,7 @@ class UserRepository:
                     raise e
 
     @classmethod
-    async def update_address(cls, address_id, update_data):
+    async def update_information(cls, address_id, update_data):
         try:
             updated_address = (await cls._data_access.update_table_by_query(Address, {"id": address_id}, update_data))[0]
             return updated_address

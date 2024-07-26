@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, func
+from sqlalchemy import Column, Float, String, Boolean, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 
 from ftgo_utils.uuid_gen import uuid4
@@ -10,6 +10,10 @@ class Address(Base):
 
     id = Column(String, primary_key=True, default=lambda: uuid4())
     user_id = Column(String, ForeignKey("user_profile.id"), nullable=False)
+
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+
     address_line_1 = Column(String, nullable=False)
     address_line_2 = Column(String, nullable=True)
     city = Column(String, nullable=False)

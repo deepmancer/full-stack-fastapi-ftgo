@@ -7,7 +7,7 @@ from application import VehicleService, AddressService, ProfileService
 from application.middleware import event_middleware
 from config import LayerNames
 from data_access.broker import RPCBroker
-from utils.error_handler import handle_error
+from utils.exception import handle_error
 
 async def register_events(rpc_broker: RPCBroker):
     rpc_client = rpc_broker.get_client()
@@ -24,11 +24,11 @@ async def register_events(rpc_broker: RPCBroker):
         'user.profile.update_profile': ProfileService.update_profile,
         'user.profile.get_user_info_with_credentials': ProfileService.get_user_info_with_credentials,
         'user.address.get_default_address': AddressService.get_default_address,
-        'user.address.delete_address': AddressService.delete_address,
+        'user.address.delete': AddressService.delete_address,
         'user.address.set_preferred_address': AddressService.set_preferred_address,
         'user.address.get_address_info': AddressService.get_address_info,
         'user.address.get_all_addresses': AddressService.get_all_addresses,
-        'user.address.update_address': AddressService.update_address,
+        'user.address.update_information': AddressService.update_information,
         'user.driver.vehicle.get_info': VehicleService.get_vehicle_info,
     }
 

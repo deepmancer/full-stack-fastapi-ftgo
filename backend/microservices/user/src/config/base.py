@@ -30,3 +30,6 @@ class BaseConfig():
         class_name = self.__class__.__name__
         attributes = ', '.join(f'{key}={value!r}' for key, value in self.__dict__.items())
         return f'{class_name}({attributes})'
+    
+    def dict(self):
+        return self.__dict__

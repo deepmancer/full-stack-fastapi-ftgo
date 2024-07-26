@@ -3,7 +3,7 @@ from functools import wraps
 import traceback
 
 from config import LayerNames, BaseConfig
-from application import get_logger, layer_name
+from application import get_logger, layer
 
 from ftgo_utils.enums import ResponseStatus
 from ftgo_utils.errors import ErrorCodes, BaseError
@@ -32,7 +32,7 @@ def event_middleware(
             }
 
         except Exception as e:
-            logger.error(f"Unhandled error in {func.__name__} ({layer_name}):: {str(e)}")
+            logger.error(f"Unhandled error in {func.__name__} ({layer}):: {str(e)}")
             return {
                 "status": ResponseStatus.ERROR.value,
                 "error_code": ErrorCodes.UNKNOWN_ERROR,

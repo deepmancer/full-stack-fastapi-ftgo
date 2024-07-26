@@ -108,7 +108,7 @@ class AddressService:
         }
 
     @staticmethod
-    async def update_address(
+    async def update_information(
         user_id: str,
         address_id: str,
         update_data: Dict[str, Any]

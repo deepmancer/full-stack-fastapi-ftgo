@@ -18,7 +18,7 @@ class RPCBroker:
             return
 
         broker_config = BrokerConfig()
-        logger = get_logger(layer_name=LayerNames.MESSAGE_BUS.value)
+        logger = get_logger(layer=LayerNames.MESSAGE_BUS.value)
 
         try:
             rpc_client = await RPCClient.create(
