@@ -96,8 +96,18 @@ class AddressDomain:
         self._update_from_address(updated_address)
         return update_fields
 
-    async def set_as_default(self) -> bool:
-        await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields={"is_default": True})
+    async def set_as_default(self, address_id: str) -> bool:
+        await DatabaseRepository.update_by_query(
+            Address,
+            query={"user_id": self.user_id, "is_default": True},
+            update_fields={"is_default": False}
+        )
+        # Set new default address
+        await DatabaseRepository.update_by_query(
+            Address,
+            query={"id": address_id},
+            update_fields={"is_default": True}
+        )
         self.is_default = True
 
     async def unset_as_default(self) -> bool:

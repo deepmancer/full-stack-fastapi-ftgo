@@ -61,7 +61,7 @@ class AddressService:
         }
 
     @staticmethod
-    async def set_preferred_address(user_id: str, address_id: str, set_default: bool) -> Dict[str, Any]:
+    async def set_preferred_address(user_id: str, address_id: str) -> Dict[str, Any]:
         """
         Sets or unsets an address as the user's default address.
 
@@ -71,13 +71,10 @@ class AddressService:
         :return: Dictionary containing status, address ID, and default status.
         """
         user = await UserDomain.load(user_id)
-        if set_default:
-            await user.set_address_as_default(address_id)
-        else:
-            await user.unset_address_as_default(address_id)
+
+        await user.set_address_as_default(address_id)
         return {
             "address_id": address_id,
-            "is_default": set_default,
         }
 
     @staticmethod
