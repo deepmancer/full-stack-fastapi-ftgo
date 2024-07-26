@@ -9,16 +9,16 @@
       <h2>اطلاعات کاربری</h2>
       <b-card>
         <b-list-group flush>
-          <b-list-group-item>
-            <strong>نام کاربری:</strong> {{ userInfo.user_id }}
+          <b-list-group-item class="rtl-text">
+            <strong>کدملی:</strong> {{ userInfo.national_id }}
           </b-list-group-item>
-          <b-list-group-item>
+          <b-list-group-item class="rtl-text">
             <strong>نام:</strong> {{ userInfo.first_name }}
           </b-list-group-item>
-          <b-list-group-item>
+          <b-list-group-item class="rtl-text">
             <strong>نام خانوادگی:</strong> {{ userInfo.last_name }}
           </b-list-group-item>
-          <b-list-group-item>
+          <b-list-group-item class="rtl-text">
             <strong>تلفن:</strong> {{ userInfo.phone_number }}
           </b-list-group-item>
         </b-list-group>
@@ -33,7 +33,7 @@
       <h2 class="mt-4">آدرس‌ها</h2>
       <b-card>
         <b-list-group>
-          <b-list-group-item v-for="address in addresses" :key="address.address_id">
+          <b-list-group-item v-for="address in addresses" :key="address.address_id" class="rtl-text">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <div><strong>ایدی</strong> {{ address.address_id }}</div>
@@ -61,19 +61,19 @@
       <b-card>
         <b-form @submit.prevent="addAddress">
           <b-form-group>
-            <b-form-input v-model="newAddress.address_line_1" placeholder="آدرس 1"></b-form-input>
+            <b-form-input v-model="newAddress.address_line_1" placeholder="آدرس 1" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-form-group>
-            <b-form-input v-model="newAddress.address_line_2" placeholder="آدرس 2"></b-form-input>
+            <b-form-input v-model="newAddress.address_line_2" placeholder="آدرس 2" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-form-group>
-            <b-form-input v-model="newAddress.city" placeholder="شهر"></b-form-input>
+            <b-form-input v-model="newAddress.city" placeholder="شهر" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-form-group>
-            <b-form-input v-model="newAddress.postal_code" placeholder="کد پستی"></b-form-input>
+            <b-form-input v-model="newAddress.postal_code" placeholder="کد پستی" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-form-group>
-            <b-form-input v-model="newAddress.country" placeholder="کشور"></b-form-input>
+            <b-form-input v-model="newAddress.country" placeholder="کشور" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-button type="submit">افزودن آدرس</b-button>
         </b-form>
@@ -84,7 +84,7 @@
 
 <script>
 import axios from 'axios';
-import { mapGetters } from 'vuex';
+import {mapGetters} from 'vuex';
 
 export default {
   name: 'CustomerChangeInfoComp',
@@ -102,10 +102,13 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['getUserId']),
+    ...mapGetters(['getUserId', 'getToken']),
     userId() {
       return this.getUserId;
     },
+    token() {
+      return this.getToken;
+    }
   },
   created() {
     this.fetchUserInfo();
@@ -114,9 +117,10 @@ export default {
   methods: {
     async fetchUserInfo() {
       try {
-        const response = await axios.post('http://localhost:5020/user/profile/user_info', {
-          user_id: this.userId
-        });
+        const response = await axios.get(
+            'http://localhost:8000/api/v1/profile/user_info',
+            {headers: {Authorization: `Bearer ${this.token}`}}
+        );
         this.userInfo = response.data;
       } catch (error) {
         console.error('Error fetching user info:', error);
@@ -124,9 +128,10 @@ export default {
     },
     async fetchAddresses() {
       try {
-        const response = await axios.get(`http://localhost:5020/user/address/get_all_info`, {
-          params: { user_id: this.userId }
-        });
+        const response = await axios.get(
+            'http://localhost:8000/api/v1/address/get_all_info',
+            {headers: {Authorization: `Bearer ${this.token}`}}
+        );
         this.addresses = response.data.addresses;
       } catch (error) {
         console.error('Error fetching addresses:', error);
@@ -134,10 +139,11 @@ export default {
     },
     async addAddress() {
       try {
-        await axios.post('http://localhost:5020/user/address/add', {
-          user_id: this.userId,
-          ...this.newAddress
-        });
+        await axios.post(
+            'http://localhost:8000/api/v1/address/add',
+            this.newAddress,
+            {headers: {Authorization: `Bearer ${this.token}`}}
+        );
         this.newAddress = {
           address_line_1: '',
           address_line_2: '',
@@ -152,8 +158,9 @@ export default {
     },
     async deleteAddress(addressId) {
       try {
-        await axios.delete('http://localhost:5020/user/address/delete', {
-          data: { user_id: this.userId, address_id: addressId }
+        await axios.delete('http://localhost:8000/api/v1/address/delete', {
+          data: {address_id: addressId},
+          headers: {Authorization: `Bearer ${this.token}`}
         });
         this.fetchAddresses();
       } catch (error) {
@@ -162,9 +169,10 @@ export default {
     },
     async setPreferredAddress(addressId) {
       try {
-        await axios.post('http://localhost:5020/user/address/set-preferred', {
-          user_id: this.userId,
+        await axios.post('http://localhost:8000/api/v1/address/set-preferred', {
           address_id: addressId
+        }, {
+          headers: {Authorization: `Bearer ${this.token}`}
         });
         this.fetchAddresses();
       } catch (error) {
@@ -184,15 +192,15 @@ export default {
     },
     async deleteAccount() {
       try {
-        await axios.delete('http://localhost:5020/user/profile/delete', {
-          data: { user_id: this.userId }
+        await axios.delete('http://localhost:8000/api/v1/profile/delete', {
+          data: {user_id: this.userId},
+          headers: {Authorization: `Bearer ${this.token}`}
         });
-
       } catch (error) {
         console.error('Error deleting user account:', error);
       }
     },
-    async backToUserPage() {
+    backToUserPage() {
       this.$router.push('/CustomerMainPage');
     },
   }
@@ -203,8 +211,13 @@ export default {
 .customer-change-info {
   padding: 20px;
 }
+
 .user-id-box {
   margin-top: 20px;
   text-align: center;
+}
+
+.rtl-text {
+  direction: rtl;
 }
 </style>

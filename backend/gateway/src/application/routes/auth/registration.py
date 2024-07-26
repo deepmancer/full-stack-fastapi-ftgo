@@ -85,7 +85,7 @@ async def login(request: LoginSchema):
             ttl=int(access_token_expires.total_seconds()),
         )
         
-        return TokenSchema(user_id=response['user_id'], token=token)
+        return TokenSchema(user_id=response['user_id'], auth_code=token)
     except Exception as e:
         logger.error(f"Error occurred while logging the user in: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
