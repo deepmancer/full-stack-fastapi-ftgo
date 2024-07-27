@@ -1,0 +1,24 @@
+services:
+  message_broker:
+    image: rabbitmq:3-management
+    container_name: "message_broker"
+    hostname: "rabbitmq"
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq_user
+      - RABBITMQ_DEFAULT_PASS=rabbitmq_password
+      - RABBITMQ_DEFAULT_VHOST=/
+    ports:
+      - "15673:15672"
+      - "5673:5672"
+    volumes:
+      - message_broker_data:/var/lib/rabbitmq
+    networks:
+      - backend-network
+
+volumes:
+  message_broker_data:
+
+networks:
+  backend-network:
+    external: true

@@ -1,0 +1,22 @@
+services:
+  user_postgres:
+    image: postgres:16.3
+    container_name: "user_postgres"
+    hostname: "user_postgres"
+    environment:
+      - POSTGRES_USER=user_user
+      - POSTGRES_PASSWORD=user_password
+      - POSTGRES_DB=user_database
+    ports:
+      - "5438:5432"
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+volumes:
+  user_postgres_data:
+
+networks:
+  backend-network:
+    external: true

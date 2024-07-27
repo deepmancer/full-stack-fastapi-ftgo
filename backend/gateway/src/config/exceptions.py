@@ -1,4 +1,7 @@
 from typing import Optional, Type
+from starlette.exceptions import HTTPException
+from starlette.status import HTTP_401_UNAUTHORIZED
+
 from config.enums import LayerNames
 
 class BaseError(Exception):
@@ -26,12 +29,12 @@ class ApplicationError(BaseError):
     def get_layer(self) -> str:
         return LayerNames.APP.value
 
-class EventCallError(BaseError):
+class MessageBusError(BaseError):
     def __init__(self, message: str, context_message: Optional[str] = None):
         super().__init__(self.construct_message(message, context_message))
 
     def get_layer(self) -> str:
-        return LayerNames.EVENT.value
+        return LayerNames.MESSAGE_BUS.value
 
 class DataAccessError(BaseError):
     def __init__(self, message: str, context_message: Optional[str] = None):
@@ -39,3 +42,8 @@ class DataAccessError(BaseError):
 
     def get_layer(self) -> str:
         return LayerNames.DATA.value
+
+class UserAuthenticationError(HTTPException):
+    def __init__(self, detail: str, status_code: int = HTTP_401_UNAUTHORIZED):
+        super().__init__(status_code=status_code, detail=detail)
+

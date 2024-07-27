@@ -1,21 +1,18 @@
 import asyncio
 from typing import Any
 
+from data_access.repository.cache_repository import CacheRepository
 
-from data_access.resources.cache import CacheDataAccess
-from config.cache import RedisConfig
+from config.base import BaseConfig
 from data_access import get_logger
 
 async def setup() -> None:
-    cache_config = RedisConfig()
-    CacheDataAccess.initialize(cache_config)
-    cache_da = await CacheDataAccess.get_instance()
-
+    BaseConfig()
     logger = get_logger()
-    await cache_da.connect()
-    logger.info("Connected to cache")
-    
-async def teardown() -> None:
-    cache_da = await CacheDataAccess.get_instance()
+    await CacheRepository.initialize()
+    logger.info("Connected to Redis")
 
-    await cache_da.disconnect()
+async def teardown() -> None:
+    logger = get_logger()
+    await CacheRepository.terminate()
+    logger.info("Disconnected from cache")

@@ -1,0 +1,36 @@
+services:
+  postgres_admin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    hostname: pgadmin4
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=alirezaheidari.cs@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=pgadmin_password
+    volumes:
+      - postgres_admin_data:/var/lib/pgadmin
+    networks:
+      - backend-network
+
+  redis_admin:
+    image: "redislabs/redisinsight:latest"
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis_admin_data:/data
+    links:
+      - gateway_redis
+      - user_redis
+    networks:
+      - backend-network
+
+volumes:
+  postgres_admin_data:
+  redis_admin_data:
+
+networks:
+  backend-network:
+    external: true

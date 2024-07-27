@@ -1,0 +1,63 @@
+services:
+  gateway_service:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: gateway_service
+    env_file:
+      - ./gateway/.env
+    environment:
+      - ENVIRONMENT=test
+      - DEBUG=true
+      - RABBITMQ_USER=rabbitmq_user
+      - RABBITMQ_PASS=rabbitmq_password
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - REDIS_HOST=gateway_redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=gateway_password
+      - TOKEN_SECRET_KEY=fdshU32U89UH324SDFHJDASFdsf2394
+      - API_PREFIX=/api/v1
+      - SERVICE_HOST=0.0.0.0
+      - SERVICE_PORT=8000
+    ports:
+      - "8000:8000"
+    networks:
+      - backend-network
+      - frontend-network
+
+  user_service:
+    build:
+      context: ./microservices/user
+      dockerfile: Dockerfile
+    container_name: "user_service"
+    env_file:
+      - ./microservices/user/.env
+    environment:
+      - ENVIRONMENT=test
+      - DEBUG=true
+      - RABBITMQ_USER=rabbitmq_user
+      - RABBITMQ_PASS=rabbitmq_password
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - REDIS_HOST=user_redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=user_password
+      - POSTGRES_HOST=user_postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=user_user
+      - POSTGRES_PASSWORD=user_password
+      - POSTGRES_DB=user_database
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    external: true
+
+  frontend-network:
+    external: true

@@ -1,0 +1,44 @@
+services:
+  gateway_redis:
+    image: redis:7.2.5
+    restart: always
+    container_name: "gateway_redis"
+    hostname: "gateway_redis"
+    ports:
+      - "6490:6379"
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=gateway_password
+    command: ["redis-server", "--requirepass", "gateway_password", "--loglevel", "notice", "--maxmemory", "500mb"]
+    volumes:
+      - gateway_redis_data:/data
+    networks:
+      - backend-network
+
+  user_redis:
+    image: redis:7.2.5
+    restart: always
+    container_name: "user_redis"
+    hostname: "user_redis"
+    ports:
+      - "6235:6379"
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=user_password
+    command: ["redis-server", "--requirepass", "user_password", "--loglevel", "notice", "--maxmemory", "500mb"]
+    volumes:
+      - user_redis_data:/data
+    networks:
+      - backend-network
+
+volumes:
+  gateway_redis_data:
+  user_redis_data:
+
+networks:
+  backend-network:
+    external: true

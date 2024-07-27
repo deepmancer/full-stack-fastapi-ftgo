@@ -5,37 +5,30 @@ FROM python:3.9-slim
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 ENV ENVIRONMENT=dev
 
-# Set the server port
-EXPOSE 5020
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    netcat-openbsd git \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # Upgrade pip and install Python dependencies
+#RUN apt-get update
+#RUN apt-get install -y git
+RUN apt-get update && apt-get install -y git ca-certificates
+
+# Upgrade pip
 RUN pip install --upgrade pip
 
 # Copy requirements.txt before other files to leverage Docker cache
 COPY ./requirements.txt /tmp/requirements.txt
-RUN pip install --force-reinstall -r /tmp/requirements.txt
-RUN pip install --force-reinstall git+https://github.com/alirezaheidari-cs/ftgo_utils.git
+
+RUN pip install -r /tmp/requirements.txt --force-reinstall --upgrade
 
 # Copy the application code to the container
-COPY . /user_service
+COPY . /user
 
 # Set the working directory
-WORKDIR /user_service
+WORKDIR /user
 
 # Set the PYTHONPATH environment variable
-ENV PYTHONPATH=/user_service/src
+ENV PYTHONPATH=/user/src
 
 # Copy the Alembic configuration file
-COPY alembic.ini /user_service/alembic.ini
+COPY alembic.ini /user/alembic.ini
 
-# Copy the entry point script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Command to run the entry point script
-ENTRYPOINT ["/entrypoint.sh"]
+# Run Alembic migrations and start the application
+CMD alembic upgrade head && python src/main.py

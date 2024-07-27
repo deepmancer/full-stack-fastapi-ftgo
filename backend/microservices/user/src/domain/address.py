@@ -72,8 +72,31 @@ class AddressDomain:
             updated_at=address.updated_at.astimezone(tz) if address.updated_at else None,
         )
 
+    async def update_address(
+        self,
+        address_line_1: Optional[str] = None,
+        address_line_2: Optional[str] = None,
+        city: Optional[str] = None,
+        postal_code: Optional[str] = None,
+        country: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        update_fields = {}
+        if address_line_1:
+            update_fields["address_line_1"] = address_line_1
+        if address_line_2:
+            update_fields["address_line_2"] = address_line_2
+        if city:
+            update_fields["city"] = city
+        if postal_code:
+            update_fields["postal_code"] = postal_code
+        if country:
+            update_fields["country"] = country
+
+        await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields=update_fields)
+        self._update_from_address(updated_address)
+        return update_fields
+
     async def set_as_default(self, address_id: str) -> bool:
-        # await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields={"is_default": True})
         await DatabaseRepository.update_by_query(
             Address,
             query={"user_id": self.user_id, "is_default": True},
@@ -91,9 +114,21 @@ class AddressDomain:
         await DatabaseRepository.update_by_query(Address, query={"id": self.address_id}, update_fields={"is_default": False})
         self.is_default = False
 
+    def _update_from_address(self, address: Address):
+        address_domain = AddressDomain._from_address(address)
+        if not address_domain:
+            return
+        self.address_line_1 = address_domain.address_line_1
+        self.address_line_2 = address_domain.address_line_2
+        self.city = address_domain.city
+        self.postal_code = address_domain.postal_code
+        self.country = address_domain.country
+        self.is_default = address_domain.is_default
+        
     def get_info(self) -> Dict[str, Any]:
         return dict(
             address_id=self.address_id,
+            user_id=self.user_id,
             is_default=self.is_default,
             address_line_1=self.address_line_1,
             address_line_2=self.address_line_2,

@@ -1,14 +1,16 @@
-from config.base import BaseConfig
-from decouple import config as de_config
+from config.base import BaseConfig, env_var
 
 class RedisConfig(BaseConfig):
-    container_name: str = de_config("CACHE_CONTAINER_NAME", default="gateway_cache")
-
-    host: str = de_config("REDIS_HOST")
-    port: int = de_config("REDIS_PORT", cast=int)
-    db: int = de_config("REDIS_DB", default=0, cast=int)
-    default_ttl: int = de_config("REDIS_DEFAULT_TTL", default=None, cast=int)
-
-    @property
-    def url(self) -> str:
-        return f"redis://{self.host}:{self.port}/{self.db}"
+    def __init__(
+        self,
+        host: str = None,
+        port: int = None,
+        db: int = None,
+        default_ttl: int = None,
+        password: str = None,
+    ):
+        self.host = host or env_var("REDIS_HOST", "localhost")
+        self.port = port or env_var("REDIS_PORT", 6490, int)
+        self.db = db or env_var("REDIS_DB", 0, int)
+        self.default_ttl = default_ttl or env_var("REDIS_DEFAULT_TTL", 1200, int)
+        self.password = password or env_var("REDIS_PASSWORD", "gateway_password")

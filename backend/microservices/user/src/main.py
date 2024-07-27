@@ -1,60 +1,38 @@
-import logging
+import asyncio
+import uvloop
+from dotenv import load_dotenv
 
-import fastapi
-import uvicorn
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
-from fastapi.exceptions import RequestValidationError
+from ftgo_utils.logger import init_logging
 
-from config import ApplicationError
-from application.routes import address_router, profile_router, vehicle_router
-
-from ftgo_utils.logger import init_logging, get_logger
-
-from config import LayerNames
 from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
+from data_access.broker import RPCBroker
+from events import register_events
 
-# Load the configuration
-service_config = ServiceConfig.load()
+load_dotenv()
 
-app = fastapi.FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(router=profile_router, prefix=service_config.api_prefix)
-app.include_router(router=address_router, prefix=service_config.api_prefix)
-app.include_router(router=vehicle_router, prefix=service_config.api_prefix)
-
-@app.on_event("startup")
 async def startup_event():
-    await setup()
+    service_config = ServiceConfig()
     init_logging(level=service_config.log_level)
 
-@app.on_event("shutdown")
+    await setup()
+    await RPCBroker.initialize(loop=asyncio.get_event_loop())
+    
+    rpc_broker = RPCBroker.get_instance()
+    await register_events(rpc_broker=rpc_broker)
+
+    await asyncio.Future()
+
 async def shutdown_event():
     await teardown()
+    await RPCBroker.close()
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    get_logger(LayerNames.APP.value).error(f"{exc}")
-    return await request_validation_exception_handler(request, exc)
+if __name__ == '__main__':
+    uvloop.install()
+    loop = asyncio.get_event_loop()
 
-if __name__ == "__main__":
-    init_logging(level=service_config.log_level)
-  
-    uvicorn.run(
-        "main:app",
-        host=service_config.service_host,
-        port=service_config.service_port,
-        reload=True,
-        log_level=service_config.log_level,
-    )
+    try:
+        loop.run_until_complete(startup_event())
+    finally:
+        loop.run_until_complete(shutdown_event())
+        loop.close()
