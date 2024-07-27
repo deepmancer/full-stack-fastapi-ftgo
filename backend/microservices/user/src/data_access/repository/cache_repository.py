@@ -7,7 +7,7 @@ from ftgo_utils.errors import ErrorCodes
 from config import RedisConfig
 from data_access import get_logger
 from data_access.repository.base import BaseRepository
-from utils.exception import handle_exception
+from utils import handle_exception
 
 class CacheRepository(BaseRepository):
     _data_access: Optional[AsyncRedis] = None
@@ -26,7 +26,7 @@ class CacheRepository(BaseRepository):
         except Exception as e:
             payload = cache_config.dict()
             get_logger().error(ErrorCodes.CACHE_CONNECTION_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.CACHE_CONNECTION_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.CACHE_CONNECTION_ERROR, payload=payload)
 
     @classmethod
     def get_cache(cls, group: str = ""):
@@ -61,7 +61,7 @@ class CacheRepository(BaseRepository):
         except Exception as e:
             payload = dict(key=key)
             get_logger().error(ErrorCodes.CACHE_FETCH_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.CACHE_FETCH_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.CACHE_FETCH_ERROR, payload=payload)
 
     @classmethod
     async def set(cls, key: str, value: Union[str, dict], ttl: Optional[int] = None) -> None:
@@ -72,7 +72,7 @@ class CacheRepository(BaseRepository):
         except Exception as e:
             payload = dict(key=key, value=value, ttl=ttl)
             get_logger().error(ErrorCodes.CACHE_INSERT_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.CACHE_INSERT_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.CACHE_INSERT_ERROR, payload=payload)
 
     @classmethod
     async def delete(cls, key: str) -> None:
@@ -82,7 +82,7 @@ class CacheRepository(BaseRepository):
         except Exception as e:
             payload = dict(key=key)
             get_logger().error(ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
 
     @classmethod
     async def expire(cls, key: str, ttl: int) -> None:
@@ -92,7 +92,7 @@ class CacheRepository(BaseRepository):
         except Exception as e:
             payload = dict(key=key, ttl=ttl)
             get_logger().error(ErrorCodes.CACHE_EXPIRE_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.CACHE_EXPIRE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.CACHE_EXPIRE_ERROR, payload=payload)
 
     @classmethod
     async def batch_delete(cls, keys: List[str]) -> None:
@@ -105,7 +105,7 @@ class CacheRepository(BaseRepository):
         except Exception as e:
             payload = dict(keys=keys)
             get_logger().error(ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
 
     @classmethod
     async def flush(cls) -> None:
@@ -114,7 +114,7 @@ class CacheRepository(BaseRepository):
                 await session.flushdb()
         except Exception as e:
             get_logger().error(ErrorCodes.CACHE_FLUSH_ERROR)
-            handle_exception(e=e, error_code=ErrorCodes.CACHE_FLUSH_ERROR)
+            await handle_exception(e=e, error_code=ErrorCodes.CACHE_FLUSH_ERROR)
 
     @classmethod
     async def terminate(cls) -> None:

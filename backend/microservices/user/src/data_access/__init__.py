@@ -1,7 +1,6 @@
 from ftgo_utils.logger import get_logger as _get_logger
 
 from config import ServiceConfig, LayerNames
-from utils.exception import handle_error as _handle_error
 
 layer = LayerNames.DATA_ACCESS.value
 

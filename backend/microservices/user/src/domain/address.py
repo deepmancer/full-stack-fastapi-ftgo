@@ -1,14 +1,12 @@
-from audioop import add
 from typing import Optional, List, Dict, Any
 
 from ftgo_utils.errors import BaseError, ErrorCodes
 from ftgo_utils.utc_time import timezone as tz
 
-from backend.gateway.src.services import user
 from domain import get_logger
 from data_access.repository import DatabaseRepository
 from models.address import Address
-from utils.exception import handle_exception
+from utils import handle_exception
 
 
 class AddressDomain:
@@ -63,7 +61,7 @@ class AddressDomain:
         except Exception as e:
             payload = {"address_id": address_id}
             get_logger().error(ErrorCodes.LOAD_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.LOAD_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.LOAD_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
     async def load_user_addresses(user_id: str, raise_error_on_missing: bool = True) -> Optional[List["AddressDomain"]]:
@@ -77,7 +75,7 @@ class AddressDomain:
         except Exception as e:
             payload = {"user_id": user_id}
             get_logger().error(ErrorCodes.BATCH_LOAD_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.BATCH_LOAD_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.BATCH_LOAD_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
     async def add_address(
@@ -107,7 +105,7 @@ class AddressDomain:
                 "longitude": longitude,
             }
             get_logger().error(ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
 
     async def delete(self) -> bool:
         try:
@@ -116,7 +114,7 @@ class AddressDomain:
         except Exception as e:
             payload = {"address_id": self.address_id}
             get_logger().error(ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
 
     async def update_information(
         self,
@@ -155,7 +153,7 @@ class AddressDomain:
                 "update_fields": update_fields,
             }
             get_logger().error(ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
 
     async def set_as_default(self) -> bool:
         try:
@@ -169,7 +167,7 @@ class AddressDomain:
                 "is_default": self.is_default,
             }
             get_logger().error(ErrorCodes.SET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.SET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.SET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
 
     async def unset_as_default(self) -> bool:
         try:
@@ -183,7 +181,7 @@ class AddressDomain:
                 "is_default": self.is_default,
             }
             get_logger().error(ErrorCodes.UNSET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.UNSET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.UNSET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
 
     def get_info(self) -> Dict[str, Any]:
         return {

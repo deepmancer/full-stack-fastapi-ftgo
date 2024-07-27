@@ -9,7 +9,7 @@ from config import PostgresConfig
 from data_access import get_logger
 from data_access.repository.base import BaseRepository
 from models.base import Base
-from utils.exception import handle_exception
+from utils import handle_exception
 
 class DatabaseRepository(BaseRepository):
     _data_access: Optional[AsyncPostgres] = None
@@ -34,7 +34,7 @@ class DatabaseRepository(BaseRepository):
         except Exception as e:
             payload = db_config.dict()
             get_logger().error(ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
 
     @classmethod
     async def fetch_by_query(cls, model: Type[Base], query: Dict[str, str], one_or_none: bool = False):
@@ -47,7 +47,7 @@ class DatabaseRepository(BaseRepository):
         except Exception as e:
             payload = dict(model=model.__name__, query=query)
             get_logger().error(ErrorCodes.DB_FETCH_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DB_FETCH_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DB_FETCH_ERROR, payload=payload)
 
     @classmethod
     async def insert(cls, model_instance: Base):
@@ -61,7 +61,7 @@ class DatabaseRepository(BaseRepository):
         except Exception as e:
             payload = dict(model_instance=model_instance.__dict__)
             get_logger().error(ErrorCodes.DB_INSERT_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DB_INSERT_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DB_INSERT_ERROR, payload=payload)
 
     @classmethod
     async def update_by_query(cls, model: Type[Base], query: Dict[str, str], update_fields: Dict[str, str]):
@@ -89,7 +89,7 @@ class DatabaseRepository(BaseRepository):
         except Exception as e:
             payload = dict(model=model.__name__, query=query, update_fields=update_fields)
             get_logger().error(ErrorCodes.DB_UPDATE_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DB_UPDATE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DB_UPDATE_ERROR, payload=payload)
 
     @classmethod
     async def delete_by_query(cls, model: Type[Base], query: Dict[str, str]):
@@ -110,7 +110,7 @@ class DatabaseRepository(BaseRepository):
         except Exception as e:
             payload = dict(model=model.__name__, query=query)
             get_logger().error(ErrorCodes.DB_DELETE_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DB_DELETE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DB_DELETE_ERROR, payload=payload)
 
     @classmethod
     async def terminate(cls):

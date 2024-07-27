@@ -6,7 +6,7 @@ from rabbitmq_rpc import RPCClient, RabbitMQConfig
 from data_access import get_logger
 from config.broker import BrokerConfig
 from config import LayerNames
-from utils.exception import handle_exception
+from utils import handle_exception
 
 logger = get_logger(layer=LayerNames.MESSAGE_BUS.value)
 
@@ -40,7 +40,7 @@ class RPCBroker:
         except Exception as e:
             message = "Failed to create an RPC Client"
             logger.exception(message, payload=config.dict())
-            handle_exception(e=e, error_code=ErrorCodes.RABBITMQ_CONNECTION_ERROR, message=message, payload=config.dict())
+            await handle_exception(e=e, error_code=ErrorCodes.RABBITMQ_CONNECTION_ERROR, message=message, payload=config.dict())
 
     @classmethod
     def get_instance(cls) -> 'RPCBroker':

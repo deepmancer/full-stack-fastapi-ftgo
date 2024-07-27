@@ -1,6 +1,5 @@
 import asyncio
 from typing import Any, Dict, List, Optional
-from unittest.mock import Base
 
 from ftgo_utils.errors import ErrorCodes, BaseError
 import ftgo_utils as utils
@@ -10,7 +9,8 @@ from domain.address import AddressDomain
 from domain.authentication import Authenticator
 from domain import get_logger
 from models import Address, Profile, VehicleInfo
-from utils.exception import handle_exception
+from utils import handle_exception
+
 
 class UserDomain:
     def __init__(
@@ -46,7 +46,8 @@ class UserDomain:
         role: Optional[str] = None,
         validate_verified: bool = True,
         raise_error_on_missing: bool = True,
-    ) -> "UserDomain":
+        **kwargs,
+    ) -> Optional["UserDomain"]:
         query_dict = {}
         if user_id:
             query_dict["id"] = user_id
@@ -69,7 +70,7 @@ class UserDomain:
         except Exception as e:
             payload = dict(query=query_dict)
             get_logger().error(ErrorCodes.LOAD_USER_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.LOAD_USER_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.LOAD_USER_ERROR, payload=payload)
 
     @staticmethod
     async def register(
@@ -79,6 +80,7 @@ class UserDomain:
         password: str,
         role: str,
         national_id: Optional[str] = None,
+        **kwargs,
     ):
         try:
             current_records = await DatabaseRepository.fetch_by_query(Profile, query={"phone_number": phone_number, "role": role})
@@ -110,10 +112,10 @@ class UserDomain:
         except Exception as e:
             payload = dict(phone_number=phone_number, role=role)
             get_logger().error(ErrorCodes.USER_REGISTRATION_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.USER_REGISTRATION_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_REGISTRATION_ERROR, payload=payload)
 
     @staticmethod
-    async def verify_account(user_id: str, auth_code: str):
+    async def verify_account(user_id: str, auth_code: str) -> Optional["UserDomain"]:
         try:
             user = await UserDomain.load(user_id=user_id, validate_verified=False)
 
@@ -136,14 +138,14 @@ class UserDomain:
                     error_code=ErrorCodes.WRONG_AUTHENTICATION_CODE_ERROR,
                     payload=dict(user_id=user.user_id, auth_code=auth_code, stored_auth_code=stored_auth_code),
                 )
-            return user_id
+            return user
         except Exception as e:
             payload = dict(user_id=user_id, auth_code=auth_code)
             get_logger().error(ErrorCodes.USER_VERIFICATION_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.USER_VERIFICATION_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_VERIFICATION_ERROR, payload=payload)
 
     @staticmethod
-    async def resend_auth_code(user_id: str):
+    async def resend_auth_code(user_id: str) -> str:
         try:
             user = await UserDomain.load(user_id=user_id, validate_verified=False)
             if user.is_verified():
@@ -157,15 +159,15 @@ class UserDomain:
         except Exception as e:
             payload = dict(user_id=user_id)
             get_logger().error(ErrorCodes.RESENDING_AUTHENTICATION_CODE_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.RESENDING_AUTHENTICATION_CODE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.RESENDING_AUTHENTICATION_CODE_ERROR, payload=payload)
 
     @staticmethod
     async def login(
         password: str,
+        role: str,
         user_id: Optional[str] = None,
         phone_number: Optional[str] = None,
-        role: Optional[str] = None,
-    ):
+    ) -> Optional["UserDomain"]:
         try:
             user = await UserDomain.load(phone_number=phone_number, role=role, user_id=user_id)
             if not utils.hash_utils.verify(password, user.hashed_password):
@@ -173,31 +175,30 @@ class UserDomain:
                     error_code=ErrorCodes.WRONG_PASSWORD_ERROR,
                     payload=dict(user_id=user.user_id, password=password),
                 )
-            await DatabaseRepository.update_by_query(Profile, query={"id": user_id}, update_fields={"last_login_time": utils.utc_time.now()})
-            return
+            user_schema = (await DatabaseRepository.update_by_query(Profile, query={"id": user_id}, update_fields={"last_login_time": utils.utc_time.now()}))[0]
+            user = UserDomain._from_schema(user_schema)
+            return user
         except Exception as e:
             payload = dict(user_id=user_id, phone_number=phone_number, password=password, role=role)
             get_logger().error(ErrorCodes.USER_LOGIN_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.USER_LOGIN_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_LOGIN_ERROR, payload=payload)
 
     async def logout(self):
         try:
             await CacheRepository.delete(self.user_id)
-            return
         except Exception as e:
             payload = dict(user_id=self.user_id)
             get_logger().error(ErrorCodes.USER_LOGOUT_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.USER_LOGOUT_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_LOGOUT_ERROR, payload=payload)
 
-    async def delete_account(self) -> bool:
+    async def delete_account(self):
         try:
             await DatabaseRepository.delete_by_query(Profile, query={"id": self.user_id})
             await CacheRepository.delete(self.user_id)
-            return True
         except Exception as e:
             payload = dict(user_id=self.user_id)
             get_logger().error(ErrorCodes.USER_DELETE_ACCOUNT_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.USER_DELETE_ACCOUNT_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_DELETE_ACCOUNT_ERROR, payload=payload)
 
     async def update_profile_information(self, update_fields: Dict[str, Optional[str]]):
         try:
@@ -210,7 +211,7 @@ class UserDomain:
                 new_fields["last_name"] = last_name
 
             if not new_fields:
-                return {}
+                return
 
             updated_profile = await DatabaseRepository.update_by_query(
                 Profile,
@@ -218,11 +219,10 @@ class UserDomain:
                 update_fields=new_fields,
             )
             self._update_from_schema(updated_profile[0])
-            return self.get_info()
         except Exception as e:
             payload = dict(user_id=self.user_id, update_fields=update_fields)
             get_logger().error(ErrorCodes.USER_PROFILE_UPDATE_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.USER_PROFILE_UPDATE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_PROFILE_UPDATE_ERROR, payload=payload)
 
     async def update_address_information(self, address_id: str, update_fields: Dict[str, Optional[str]]) -> Optional[Dict[str, Any]]:
         try:
@@ -232,7 +232,7 @@ class UserDomain:
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id, "update_fields": update_fields}
             get_logger().error(ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
 
     async def get_default_address(self) -> Optional[Dict[str, Any]]:
         try:
@@ -241,11 +241,11 @@ class UserDomain:
             default_address = next((address for address in addresses if address.is_default), None)
             if not default_address:
                 raise BaseError(error_code=ErrorCodes.DEFAULT_ADDRESS_NOT_FOUND_ERROR, payload=dict(user_id=self.user_id))
-            return default_address.get_info() if default_address else None
+            return default_address.get_info()
         except Exception as e:
             payload = {"user_id": self.user_id}
             get_logger().error(ErrorCodes.GET_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESS_ERROR, payload=payload)
 
     def get_info(self) -> Dict[str, Any]:
         info_dict = dict(
@@ -285,7 +285,7 @@ class UserDomain:
                 "longitude": longitude,
             }
             get_logger().error(ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
 
     async def get_address_info(self, address_id: str) -> Optional[Dict[str, Any]]:
         try:
@@ -294,7 +294,7 @@ class UserDomain:
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.GET_ADDRESS_INFO_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESS_INFO_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESS_INFO_ERROR, payload=payload)
 
     async def get_addresses_info(self) -> List[Dict[str, Any]]:
         try:
@@ -303,23 +303,22 @@ class UserDomain:
         except Exception as e:
             payload = {"user_id": self.user_id}
             get_logger().error(ErrorCodes.GET_ADDRESSES_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESSES_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESSES_ERROR, payload=payload)
 
     async def delete_address(self, address_id: str) -> bool:
         try:
             address = await AddressDomain.load(user_id=self.user_id, address_id=address_id)
             await address.delete_address()
-            return True
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
 
-    async def set_address_as_default(self, address_id: str) -> bool:
+    async def set_address_as_default(self, address_id: str):
         try:
             address = await AddressDomain.load(user_id=self.user_id, address_id=address_id)
             if address.is_default:
-                return False
+                return
 
             addresses = await AddressDomain.load_user_addresses(self.user_id)
             default_address = next((addr for addr in addresses if addr.is_default), None)
@@ -327,25 +326,23 @@ class UserDomain:
             if default_address is not None and default_address.address_id != address_id:
                 await default_address.unset_as_default()
             await address.set_as_default()
-            return True
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, payload=payload)
 
-    async def unset_address_as_default(self, address_id: str) -> bool:
+    async def unset_address_as_default(self, address_id: str):
         try:
             address = await AddressDomain.load(user_id=self.user_id, address_id=address_id)
 
             if not address.is_default:
-                return False
+                return
 
             await address.unset_as_default()
-            return True
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR, payload=payload)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -365,7 +362,7 @@ class UserDomain:
     def is_verified(self) -> bool:
         return self.verified_at is not None
 
-    async def fetch_auth_code(self):
+    async def fetch_auth_code(self) -> Optional[str]:
         try:
             auth_code = await CacheRepository.get(self.user_id)
             if auth_code and Authenticator.verify_auth_code(auth_code):
@@ -395,7 +392,7 @@ class UserDomain:
         self.verified_at = updated_user.verified_at
 
     @staticmethod
-    def _from_schema(profile: Profile):
+    def _from_schema(profile: Profile) -> Optional["UserDomain"]:
         if not profile:
             return None
 

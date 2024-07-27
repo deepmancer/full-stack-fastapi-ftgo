@@ -1,46 +1,48 @@
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from ftgo_utils.errors import ErrorCodes
+from ftgo_utils.errors import ErrorCodes, BaseError
 
-from data_access.repository import DatabaseRepository
-from config import DomainError
-from domain.user import UserDomain
 from domain import get_logger
+from domain.vehicle import VehicleDomain
+from domain.user import UserDomain
 from models import VehicleInfo
-from utils.exception import handle_exception
+from utils import handle_exception
+
+logger = get_logger()
 
 class DriverDomain(UserDomain):
-    async def register_vehicle_data(self, plate_number: str, license_number: str):
+    async def register_vehicle(self, plate_number: str, license_number: str) -> Optional[Dict[str, Any]]:
         try:
-            vehicle_info = VehicleInfo(
-                driver_id=self.user.id,
+            vehicle = await VehicleDomain.register_vehicle(
+                driver_id=self.user_id,
                 plate_number=plate_number,
                 license_number=license_number,
             )
-            vehicle_info = await DatabaseRepository.insert(vehicle_info)
-            return DriverDomain.vehicle_dict(vehicle_info)
+            return vehicle.get_info()
         except Exception as e:
-            payload = dict(user_id=self.user.id, plate_number=plate_number, license_number=license_number)
-            get_logger().error(ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
+            payload = {
+                'user_id': self.user_id,
+                'plate_number': plate_number,
+                'license_number': license_number
+            }
+            logger.error(ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
 
     async def get_vehicle_info(self) -> Optional[Dict[str, str]]:
         try:
-            vehicle_info = await DatabaseRepository.fetch_by_query(VehicleInfo, {"driver_id": self.user.id}, one_or_none=True)
-            return DriverDomain.vehicle_dict(vehicle_info)
+            vehicle = await VehicleDomain.load_driver_vehicle(driver_id=self.user_id)
+            return vehicle.get_info()
         except Exception as e:
-            payload = dict(user_id=self.user.id)
-            get_logger().error(ErrorCodes.VEHICLE_NOT_FOUND_ERROR, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.VEHICLE_NOT_FOUND_ERROR, payload=payload)
+            payload = {'user_id': self.user_id}
+            logger.error(ErrorCodes.VEHICLE_NOT_FOUND_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_NOT_FOUND_ERROR, payload=payload)
 
-    @staticmethod
-    def vehicle_dict(vehicle: VehicleInfo) -> Optional[Dict[str, str]]:
-        if not vehicle:
-            return None
-        return dict(
-            vehicle_id=vehicle.id,
-            driver_id=vehicle.driver_id,
-            plate_number=vehicle.plate_number,
-            license_number=vehicle.license_number,
-        )
+    async def delete_vehicle(self):
+        try:
+            vehicle = await VehicleDomain.load_driver_vehicle(driver_id=self.user_id)
+            await vehicle.delete()
+        except Exception as e:
+            payload = {'user_id': self.user_id}
+            logger.error(ErrorCodes.VEHICLE_REMOVE_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_REMOVE_ERROR, payload=payload)

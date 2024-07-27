@@ -14,7 +14,7 @@ class UserService(Microservice):
 
     @classmethod
     async def register_vehicle(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.driver.vehicle.register_vehicle', data=data)
+        return await cls._call_rpc('driver.vehicle.register', data=data)
 
     @classmethod
     async def resend_auth_code(cls, data: Dict) -> Dict:
@@ -74,4 +74,4 @@ class UserService(Microservice):
 
     @classmethod
     async def get_vehicle_info(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.driver.vehicle.get_info', data=data)
+        return await cls._call_rpc('driver.vehicle.get_info', data=data)

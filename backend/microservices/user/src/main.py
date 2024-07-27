@@ -12,9 +12,6 @@ from events import register_events
 load_dotenv()
 
 async def startup_event():
-    service_config = ServiceConfig()
-    init_logging(level=service_config.log_level)
-
     await setup()
     await RPCBroker.initialize(loop=asyncio.get_event_loop())
     
@@ -30,6 +27,9 @@ async def shutdown_event():
 if __name__ == '__main__':
     uvloop.install()
     loop = asyncio.get_event_loop()
+
+    service_config = ServiceConfig()
+    init_logging(level=service_config.log_level)
 
     try:
         loop.run_until_complete(startup_event())
