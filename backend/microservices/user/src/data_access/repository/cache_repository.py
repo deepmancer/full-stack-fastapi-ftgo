@@ -25,7 +25,7 @@ class CacheRepository(BaseRepository):
             )
         except Exception as e:
             payload = cache_config.dict()
-            get_logger().error(ErrorCodes.CACHE_CONNECTION_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.CACHE_CONNECTION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.CACHE_CONNECTION_ERROR, payload=payload)
 
     @classmethod
@@ -60,7 +60,7 @@ class CacheRepository(BaseRepository):
                 return None
         except Exception as e:
             payload = dict(key=key)
-            get_logger().error(ErrorCodes.CACHE_FETCH_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.CACHE_FETCH_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.CACHE_FETCH_ERROR, payload=payload)
 
     @classmethod
@@ -71,7 +71,7 @@ class CacheRepository(BaseRepository):
                 await session.set(cls._prefixed_key(key), serialized_value, ex=ttl)
         except Exception as e:
             payload = dict(key=key, value=value, ttl=ttl)
-            get_logger().error(ErrorCodes.CACHE_INSERT_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.CACHE_INSERT_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.CACHE_INSERT_ERROR, payload=payload)
 
     @classmethod
@@ -81,7 +81,7 @@ class CacheRepository(BaseRepository):
                 await session.delete(cls._prefixed_key(key))
         except Exception as e:
             payload = dict(key=key)
-            get_logger().error(ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.CACHE_DELETE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
 
     @classmethod
@@ -91,7 +91,7 @@ class CacheRepository(BaseRepository):
                 await session.expire(cls._prefixed_key(key), ttl)
         except Exception as e:
             payload = dict(key=key, ttl=ttl)
-            get_logger().error(ErrorCodes.CACHE_EXPIRE_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.CACHE_EXPIRE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.CACHE_EXPIRE_ERROR, payload=payload)
 
     @classmethod
@@ -104,7 +104,7 @@ class CacheRepository(BaseRepository):
                 await pipeline.execute()
         except Exception as e:
             payload = dict(keys=keys)
-            get_logger().error(ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.CACHE_DELETE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.CACHE_DELETE_ERROR, payload=payload)
 
     @classmethod
@@ -113,7 +113,7 @@ class CacheRepository(BaseRepository):
             async with cls._data_access.get_or_create_session() as session:
                 await session.flushdb()
         except Exception as e:
-            get_logger().error(ErrorCodes.CACHE_FLUSH_ERROR)
+            get_logger().error(ErrorCodes.CACHE_FLUSH_ERROR.value)
             await handle_exception(e=e, error_code=ErrorCodes.CACHE_FLUSH_ERROR)
 
     @classmethod

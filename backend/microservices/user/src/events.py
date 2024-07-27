@@ -39,5 +39,5 @@ async def register_events(rpc_broker: RPCBroker):
             rpc_client.logger.info(f"Registered event '{event}' with handler '{handler.__name__}'")
         except Exception as e:
             payload = {"event_name": event}
-            rpc_client.logger.exception(ErrorCodes.EVENT_REGISTERATION_ERROR, payload=payload)
+            rpc_client.logger.exception(ErrorCodes.EVENT_REGISTERATION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.EVENT_REGISTERATION_ERROR, payload=payload)

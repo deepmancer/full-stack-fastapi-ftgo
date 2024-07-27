@@ -60,7 +60,7 @@ class AddressDomain:
             return address
         except Exception as e:
             payload = {"address_id": address_id}
-            get_logger().error(ErrorCodes.LOAD_ADDRESS_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.LOAD_ADDRESS_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.LOAD_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
@@ -74,7 +74,7 @@ class AddressDomain:
             return [AddressDomain._from_schema(address) for address in addresses]
         except Exception as e:
             payload = {"user_id": user_id}
-            get_logger().error(ErrorCodes.BATCH_LOAD_ADDRESS_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.BATCH_LOAD_ADDRESS_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.BATCH_LOAD_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
@@ -104,7 +104,7 @@ class AddressDomain:
                 "latitude": latitude,
                 "longitude": longitude,
             }
-            get_logger().error(ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.ADD_ADDRESS_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
 
     async def delete(self) -> bool:
@@ -113,7 +113,7 @@ class AddressDomain:
             return True
         except Exception as e:
             payload = {"address_id": self.address_id}
-            get_logger().error(ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.DELETE_ADDRESS_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
 
     async def update_information(
@@ -152,7 +152,7 @@ class AddressDomain:
                 "address_id": self.address_id,
                 "update_fields": update_fields,
             }
-            get_logger().error(ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.UPDATE_ADDRESS_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
 
     async def set_as_default(self) -> bool:
@@ -166,7 +166,7 @@ class AddressDomain:
                 "user_id": self.user_id,
                 "is_default": self.is_default,
             }
-            get_logger().error(ErrorCodes.SET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.SET_ADDRESS_AS_DEFAULT_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.SET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
 
     async def unset_as_default(self) -> bool:
@@ -180,7 +180,7 @@ class AddressDomain:
                 "user_id": self.user_id,
                 "is_default": self.is_default,
             }
-            get_logger().error(ErrorCodes.UNSET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.UNSET_ADDRESS_AS_DEFAULT_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.UNSET_ADDRESS_AS_DEFAULT_ERROR, payload=payload)
 
     def get_info(self) -> Dict[str, Any]:

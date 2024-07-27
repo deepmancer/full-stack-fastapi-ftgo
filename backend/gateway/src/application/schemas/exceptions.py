@@ -1,6 +1,6 @@
 from typing import Optional
 import json
-from config.exceptions import ApplicationError
+from ftgo_utils.errors import ErrorCodes, BaseError
 
         
 class PasswordValidationError(ApplicationError):

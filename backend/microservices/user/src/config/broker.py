@@ -1,4 +1,3 @@
-from math import log
 from config.base import BaseConfig, env_var
 
 class BrokerConfig(BaseConfig):

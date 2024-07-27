@@ -59,7 +59,7 @@ class VehicleDomain:
             return vehicle
         except Exception as e:
             payload = {"vehicle_id": vehicle_id}
-            get_logger().error(ErrorCodes.VEHICLE_GET_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.VEHICLE_GET_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_GET_ERROR, payload=payload)
 
     @staticmethod
@@ -71,7 +71,7 @@ class VehicleDomain:
             return VehicleDomain._from_schema(vehicle_schema)
         except Exception as e:
             payload = {"driver_id": driver_id}
-            get_logger().error(ErrorCodes.VEHICLE_GET_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.VEHICLE_GET_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_GET_ERROR, payload=payload)
 
     @staticmethod
@@ -90,7 +90,7 @@ class VehicleDomain:
                 "plate_number": plate_number,
                 "license_number": license_number,
             }
-            get_logger().error(ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.VEHICLE_SUBMISSION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
 
     async def delete(self):
@@ -98,7 +98,7 @@ class VehicleDomain:
             await DatabaseRepository.delete_by_query(VehicleInfo, query={"id": self.vehicle_id})
         except Exception as e:
             payload = {"vehicle_id": self.vehicle_id}
-            get_logger().error(ErrorCodes.VEHICLE_REMOVE_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.VEHICLE_REMOVE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_REMOVE_ERROR, payload=payload)
 
     async def update_information(
@@ -122,7 +122,7 @@ class VehicleDomain:
                 "vehicle_id": self.vehicle_id,
                 "update_fields": update_fields,
             }
-            get_logger().error(ErrorCodes.VEHICLE_MODIFY_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.VEHICLE_MODIFY_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_MODIFY_ERROR, payload=payload)
 
     def get_info(self) -> Dict[str, Any]:

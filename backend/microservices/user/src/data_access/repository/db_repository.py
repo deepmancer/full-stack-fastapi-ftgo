@@ -33,7 +33,7 @@ class DatabaseRepository(BaseRepository):
 
         except Exception as e:
             payload = db_config.dict()
-            get_logger().error(ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.DB_CONNECTION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
 
     @classmethod
@@ -46,7 +46,7 @@ class DatabaseRepository(BaseRepository):
                 return result.scalars().all()
         except Exception as e:
             payload = dict(model=model.__name__, query=query)
-            get_logger().error(ErrorCodes.DB_FETCH_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.DB_FETCH_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_FETCH_ERROR, payload=payload)
 
     @classmethod
@@ -60,7 +60,7 @@ class DatabaseRepository(BaseRepository):
                 return model_instance
         except Exception as e:
             payload = dict(model_instance=model_instance.__dict__)
-            get_logger().error(ErrorCodes.DB_INSERT_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.DB_INSERT_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_INSERT_ERROR, payload=payload)
 
     @classmethod
@@ -88,7 +88,7 @@ class DatabaseRepository(BaseRepository):
                 return records
         except Exception as e:
             payload = dict(model=model.__name__, query=query, update_fields=update_fields)
-            get_logger().error(ErrorCodes.DB_UPDATE_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.DB_UPDATE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_UPDATE_ERROR, payload=payload)
 
     @classmethod
@@ -109,7 +109,7 @@ class DatabaseRepository(BaseRepository):
 
         except Exception as e:
             payload = dict(model=model.__name__, query=query)
-            get_logger().error(ErrorCodes.DB_DELETE_ERROR, payload=payload)
+            get_logger().error(ErrorCodes.DB_DELETE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_DELETE_ERROR, payload=payload)
 
     @classmethod

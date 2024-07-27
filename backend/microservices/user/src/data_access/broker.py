@@ -8,7 +8,6 @@ from config.broker import BrokerConfig
 from config import LayerNames
 from utils import handle_exception
 
-logger = get_logger(layer=LayerNames.MESSAGE_BUS.value)
 
 class RPCBroker:
     _instance: 'RPCBroker' = None
@@ -18,6 +17,8 @@ class RPCBroker:
 
     @classmethod
     async def initialize(cls, loop: asyncio.AbstractEventLoop = None) -> None:
+        logger = get_logger(layer=LayerNames.MESSAGE_BUS.value)
+
         if cls._instance is not None:
             return
 

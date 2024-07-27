@@ -8,7 +8,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.encoders import jsonable_encoder
 
 from application import get_logger
-from config.exceptions import UserAuthenticationError
+
+from ftgo_utils.errors import ErrorCodes, BaseError
 
 def register_error_handlers(app: FastAPI):
     logger = get_logger()
