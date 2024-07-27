@@ -9,6 +9,7 @@ class MenuService:
 
     @staticmethod
     async def add_item(
+        restaurant_id: str,
         name: str,
         price: float,
         description: str,
@@ -17,13 +18,15 @@ class MenuService:
         """
         Adds a new menu item.
 
+        :param restaurant_id: ID of the Restaurant.
         :param name: Name of the menu item.
         :param price: Price of the menu item.
         :param description: Description of the menu item.
         :param score: Score of the menu item.
         :return: Dictionary containing the menu item ID.
         """
-        menu_item = await MenuDomain.add_item(name=name, price=price, description=description, score=score)
+        menu_item = await MenuDomain.add_item(restaurant_id=restaurant_id, name=name, price=price,
+                                              description=description, score=score)
         return {
             "item_id": menu_item.item_id
         }
