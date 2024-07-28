@@ -13,7 +13,6 @@ class MenuService:
         name: str,
         price: float,
         description: str,
-        score: float = 5.0,
     ) -> Dict[str, Any]:
         """
         Adds a new menu item.
@@ -22,11 +21,10 @@ class MenuService:
         :param name: Name of the menu item.
         :param price: Price of the menu item.
         :param description: Description of the menu item.
-        :param score: Score of the menu item.
         :return: Dictionary containing the menu item ID.
         """
         menu_item = await MenuDomain.add_item(restaurant_id=restaurant_id, name=name, price=price,
-                                              description=description, score=score)
+                                              description=description)
         return {
             "item_id": menu_item.item_id
         }
@@ -37,7 +35,6 @@ class MenuService:
         name: Optional[str] = None,
         price: Optional[float] = None,
         description: Optional[str] = None,
-        score: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Updates a menu item's information.
@@ -46,11 +43,10 @@ class MenuService:
         :param name: New name of the menu item.
         :param price: New price of the menu item.
         :param description: New description of the menu item.
-        :param score: New score of the menu item.
         :return: Dictionary containing updated menu item information.
         """
         return await MenuDomain.update_item(item_id=item_id, name=name, price=price,
-                                            description=description, score=score)
+                                            description=description)
 
     @staticmethod
     async def delete_item(item_id: str) -> Dict[str, str]:

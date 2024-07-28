@@ -13,10 +13,10 @@ class PostgresConfig(BaseConfig):
         enable_expire_on_commit: bool = None,
     ):
         self.host = host or env_var("POSTGRES_HOST", default="localhost")
-        self.port = port or env_var("POSTGRES_PORT", default=5438, cast_type=int)
-        self.db = db or env_var("POSTGRES_DB", default="user_database")
-        self.user = user or env_var("POSTGRES_USER", default="user_user")
-        self.password = password or env_var("POSTGRES_PASSWORD", default="user_password")
+        self.port = port or env_var("POSTGRES_PORT", default=5439, cast_type=int)
+        self.db = db or env_var("POSTGRES_DB", default="restaurant_database")
+        self.user = user or env_var("POSTGRES_USER", default="restaurant_user")
+        self.password = password or env_var("POSTGRES_PASSWORD", default="restaurant_password")
         self.enable_echo_log = enable_echo_log or env_var(
             "ENABLE_DB_ECHO_LOG", default=False, cast_type=lambda s: isinstance(s, str) and s.lower() in ['true', '1']
         )

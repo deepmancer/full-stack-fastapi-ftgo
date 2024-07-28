@@ -14,8 +14,24 @@ services:
     networks:
       - backend-network
 
+  restaurant_postgres:
+    image: postgres:16.3
+    container_name: "restaurant_postgres"
+    hostname: "restaurant_postgres"
+    environment:
+      - POSTGRES_USER=restaurant_user
+      - POSTGRES_PASSWORD=restaurant_password
+      - POSTGRES_DB=restaurant_database
+    ports:
+      - "5439:5432"
+    volumes:
+      - restaurant_postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
 volumes:
   user_postgres_data:
+  restaurant_postgres_data:
 
 networks:
   backend-network:

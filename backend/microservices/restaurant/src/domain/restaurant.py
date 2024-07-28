@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, List
 from data_access.repository import DatabaseRepository
 from domain.exceptions import RestaurantExistsError, RestaurantNotFoundError
 from domain import get_logger
-from models import Restaurant
+from models.supplier import Supplier
 from domain import MenuDomain
 from models.menu import MenuItem
 
@@ -48,7 +48,7 @@ class RestaurantDomain:
         if owner_user_id:
             query_dict["owner_user_id"] = owner_user_id
         try:
-            restaurant_profile = await DatabaseRepository.fetch_by_query(Restaurant, query=query_dict, one_or_none=True)
+            restaurant_profile = await DatabaseRepository.fetch_by_query(Supplier, query=query_dict, one_or_none=True)
             if not restaurant_profile:
                 raise RestaurantNotFoundError(query_dict)
 
@@ -68,13 +68,13 @@ class RestaurantDomain:
         restaurant_licence_id: str,
     ) -> str:
         try:
-            current_records = await DatabaseRepository.fetch_by_query(Restaurant, query={"owner_user_id": owner_user_id})
+            current_records = await DatabaseRepository.fetch_by_query(Supplier, query={"owner_user_id": owner_user_id})
             if current_records:
                 raise RestaurantExistsError(owner_user_id=owner_user_id)
 
             restaurant_id = utils.uuid_gen.uuid4()
 
-            new_profile = Restaurant(
+            new_profile = Supplier(
                 id=restaurant_id,
                 owner_user_id=owner_user_id,
                 name=name,
@@ -114,7 +114,7 @@ class RestaurantDomain:
                 return {}
 
             updated_profile = await DatabaseRepository.update_by_query(
-                Restaurant,
+                Supplier,
                 query={"id": self.restaurant_id},
                 update_fields=new_fields,
             )
@@ -126,7 +126,7 @@ class RestaurantDomain:
 
     async def delete_restaurant(self) -> bool:
         try:
-            await DatabaseRepository.delete_by_query(Restaurant, query={"id": self.restaurant_id})
+            await DatabaseRepository.delete_by_query(Supplier, query={"id": self.restaurant_id})
             return True
         except Exception as e:
             get_logger().error(f"Error deleting restaurant account with id {self.restaurant_id}: {str(e)}")
@@ -145,7 +145,7 @@ class RestaurantDomain:
         )
         return {key: value for key, value in info_dict.items() if value is not None}
 
-    def _update_from_profile(self, profile: Restaurant):
+    def _update_from_profile(self, profile: Supplier):
         updated_restaurant = RestaurantDomain._from_profile(profile)
         if not updated_restaurant:
             return
@@ -158,7 +158,7 @@ class RestaurantDomain:
         self.updated_at = updated_restaurant.updated_at
 
     @staticmethod
-    def _from_profile(profile: Restaurant):
+    def _from_profile(profile: Supplier):
         if not profile:
             return None
 
@@ -168,8 +168,9 @@ class RestaurantDomain:
             name=profile.name,
             postal_code=profile.postal_code,
             address=profile.address,
-            address_lat=profile.address_lat,  # Add if applicable
-            address_lng=profile.address_lng,  # Add if applicable
+            address_lat=profile.address_lat,
+            address_lng=profile.address_lng,
+            restaurant_licence_id=profile.restaurant_licence_id,
             created_at=profile.created_at,
             updated_at=profile.updated_at,
         )
