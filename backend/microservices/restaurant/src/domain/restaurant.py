@@ -2,10 +2,9 @@ import asyncio
 from typing import Any, Dict, Optional, List
 
 from data_access.repository import DatabaseRepository
-from domain.exceptions import RestaurantExistsError, RestaurantNotFoundError
 from domain import get_logger
 from models.supplier import Supplier
-from domain import MenuDomain
+from domain.menu import MenuDomain
 from models.menu import MenuItem
 
 import ftgo_utils as utils
@@ -50,7 +49,7 @@ class RestaurantDomain:
         try:
             restaurant_profile = await DatabaseRepository.fetch_by_query(Supplier, query=query_dict, one_or_none=True)
             if not restaurant_profile:
-                raise RestaurantNotFoundError(query_dict)
+                raise Exception("Error loading restaurant")
 
             return RestaurantDomain._from_profile(restaurant_profile)
         except Exception as e:
@@ -70,7 +69,7 @@ class RestaurantDomain:
         try:
             current_records = await DatabaseRepository.fetch_by_query(Supplier, query={"owner_user_id": owner_user_id})
             if current_records:
-                raise RestaurantExistsError(owner_user_id=owner_user_id)
+                raise Exception("Error registering restaurant")
 
             restaurant_id = utils.uuid_gen.uuid4()
 

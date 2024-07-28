@@ -4,7 +4,7 @@ from typing import Any
 from data_access.repository.cache_repository import CacheRepository
 from data_access.repository.db_repository import DatabaseRepository
 
-from models import Base, Address, VehicleInfo, Profile
+from models import Base, Supplier, MenuItem
 from config import BaseConfig
 from data_access import get_logger
 
