@@ -9,7 +9,8 @@ from config import LayerNames
 from data_access.broker import RPCBroker
 from utils import handle_exception
 
-async def register_events(rpc_broker: RPCBroker):
+async def register_events():
+    rpc_broker = RPCBroker.get_instance()
     rpc_client = rpc_broker.get_client()
     events_handlers = {
         'user.profile.create': ProfileService.register,

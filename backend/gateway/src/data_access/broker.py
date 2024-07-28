@@ -8,7 +8,7 @@ from config.broker import BrokerConfig
 from config import LayerNames
 from utils import handle_exception
 
-logger = get_logger(layer=LayerNames.MESSAGE_BUS.value)
+logger = get_logger(layer=LayerNames.MESSAGE_BROKER.value)
 
 class RPCBroker:
     _instance: 'RPCBroker' = None

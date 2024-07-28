@@ -1,1 +1,1 @@
-from application.routes.account.profile import router as profile_router
+# from application.routes.account.profile import router as profile_router

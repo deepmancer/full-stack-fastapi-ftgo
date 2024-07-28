@@ -1,22 +1,28 @@
-from typing import Dict
+from typing import Dict, Any
 
 from ftgo_utils.logger import get_logger
+from ftgo_utils.enums import ResponseStatus
+from ftgo_utils.errors import ErrorCodes
 
 from config import LayerNames, BaseConfig
 from data_access.broker import RPCBroker
 
-
-logger = get_logger(layer=LayerNames.MESSAGE_BUS.value, environment=BaseConfig.load_environment())
+logger = get_logger(layer=LayerNames.MESSAGE_BROKER.value, environment=BaseConfig.load_environment())
 
 class Microservice:
     _service_name = ''
-        
+
     @classmethod
-    async def _call_rpc(cls, event_name: str, data: Dict, **kwargs) -> Dict:
+    async def _call_rpc(cls, event_name: str, data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         try:
-            rpc_client = await RPCBroker.get_client()
+            rpc_client = RPCBroker.get_client()
             response = await rpc_client.call(event_name, data=data, **kwargs)
+            if response.get('status') not in [status.value for status in ResponseStatus]:
+                raise ValueError(f"Invalid response status: {response}")
             return response
         except Exception as e:
-            logger.error(f"Exception at event: {event_name} and service: {cls._service_name}: {e}")
-            return {'error': 'internal error', 'service': cls._service_name, 'event': event_name}
+            logger.error(f"Exception at calling event: {event_name} in service: {cls._service_name}: {e}")
+            return {
+                "response": ResponseStatus.ERROR.value,
+                "error_code": ErrorCodes.UNKNOWN_ERROR.value,
+            }

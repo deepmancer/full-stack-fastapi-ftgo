@@ -17,7 +17,7 @@ class RPCBroker:
 
     @classmethod
     async def initialize(cls, loop: asyncio.AbstractEventLoop = None) -> None:
-        logger = get_logger(layer=LayerNames.MESSAGE_BUS.value)
+        logger = get_logger(layer=LayerNames.MESSAGE_BROKER.value)
 
         if cls._instance is not None:
             return
@@ -34,6 +34,7 @@ class RPCBroker:
                 ssl=False,
             )
             rpc_client = await RPCClient.create(config=config)
+
             if loop is not None:
                 rpc_client.set_event_loop(loop)
 
@@ -56,7 +57,7 @@ class RPCBroker:
         return cls._instance._rpc_client
 
     @classmethod
-    async def close(cls) -> None:
+    async def terminate(cls) -> None:
         if cls._instance is not None:
             await cls._instance._rpc_client.close()
             cls._instance = None

@@ -45,10 +45,6 @@ class UserService(Microservice):
         return await cls._call_rpc('user.profile.update_profile', data=data)
 
     @classmethod
-    async def get_user_info_with_credentials(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.profile.get_user_info_with_credentials', data=data)
-
-    @classmethod
     async def get_default_address(cls, data: Dict) -> Dict:
         return await cls._call_rpc('user.address.get_default_address', data=data)
 

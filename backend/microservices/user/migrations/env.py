@@ -101,9 +101,6 @@ async def run_migrations_online() -> None:
 
     await connectable.dispose()
 
-
-# print(PostgresConfig().host)
-# print(PostgresConfig().async_url)
 if context.is_offline_mode():
     run_migrations_offline()
 else:

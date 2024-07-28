@@ -5,7 +5,7 @@ from config import LayerNames, BaseConfig
 from application import get_logger
 
 from ftgo_utils.enums import ResponseStatus
-from ftgo_utils.errors import ErrorCodes, BaseError, ErrorCategory
+from ftgo_utils.errors import ErrorCodes, BaseError, ErrorCategories
 
 logger = get_logger()
 
@@ -24,7 +24,7 @@ def event_middleware(event_name: str, func: Callable) -> Callable:
         except BaseError as e:
             logger.exception(f"Error in {event_name}: {e.error_code.value}", payload=e.to_dict())
             error_code = e.error_code
-            if error_code.category != ErrorCategory.DOMAIN_ERROR:
+            if error_code.category != ErrorCategories.BUSINESS_LOGIC_ERROR:
                 error_code = ErrorCodes.UNKNOWN_ERROR
             return {
                 "status": ResponseStatus.FAILURE.value,
