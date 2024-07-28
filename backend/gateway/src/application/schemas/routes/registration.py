@@ -33,7 +33,7 @@ class LoginSchema(BaseModel):
 
 class TokenSchema(BaseModel):
     user_id: str = uuid_field()
-    auth_code: str = Field(..., min_length=1, max_length=100)
+    auth_code: str
 
 class LogoutResponse(BaseModel):
     user_id: str = uuid_field()

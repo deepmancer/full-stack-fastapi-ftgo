@@ -36,13 +36,10 @@ class AddressService:
     @staticmethod
     async def set_preferred_address(user_id: str, address_id: str, set_default: bool) -> Dict[str, Any]:
         user = await UserDomain.load(user_id)
-        if set_default:
-            await user.set_address_as_default(address_id)
-        else:
-            await user.unset_address_as_default(address_id)
+
+        await user.set_address_as_default(address_id)
         return {
             "address_id": address_id,
-            "is_default": set_default,
         }
 
     @staticmethod

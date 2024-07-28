@@ -146,7 +146,7 @@ export default {
       this.menu = response.data;
     },
     navigateToEditSupplierInfo() {
-      this.$router.push({ name: 'EditSupplierInfo' });
+      this.$router.push({ name: 'ChangeRestaurantInfo' });
     },
     navigateToSupplierOrdersHistory() {
       this.$router.push({ name: 'SupplierOrdersHistory' });

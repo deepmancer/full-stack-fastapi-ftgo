@@ -6,7 +6,7 @@
                     <div class="signup-form">
                         <h2 class="form-title">ثبت‌نام</h2>
                         <form class="register-form" id="register-form">
-							<b-input-group class="mt-3">
+                            <b-input-group class="mt-3">
                                 <template #prepend>
                                     <b-input-group-text>
                                         <font-awesome-icon icon="fa-solid fa-user"/>
@@ -14,7 +14,7 @@
                                 </template>
                                 <b-form-input placeholder="نام" v-model="firstName"></b-form-input>
                             </b-input-group>
-							<b-input-group class="mt-3">
+                            <b-input-group class="mt-3">
                                 <template #prepend>
                                     <b-input-group-text>
                                         <font-awesome-icon icon="fa-solid fa-user"/>
@@ -22,7 +22,7 @@
                                 </template>
                                 <b-form-input placeholder="نام‌خانوادگی" v-model="lastName"></b-form-input>
                             </b-input-group>
-							<b-input-group class="mt-3">
+                            <b-input-group class="mt-3">
                                 <template #prepend>
                                     <b-input-group-text>
                                         <font-awesome-icon icon="fa-solid fa-id-card"/>
@@ -30,7 +30,7 @@
                                 </template>
                                 <b-form-input placeholder="کد ملی" v-model="nationalId"></b-form-input>
                             </b-input-group>
-							<b-input-group class="mt-3">
+                            <b-input-group class="mt-3">
                                 <template #prepend>
                                     <b-input-group-text>
                                         <font-awesome-icon icon="fa-solid fa-phone"/>
@@ -46,9 +46,56 @@
                                 </template>
                                 <b-form-input type="password" placeholder="رمزعبور" v-model="password"></b-form-input>
                             </b-input-group>
-							<b-input-group class="mt-3">
-								<b-form-select placeholder="نقش" v-model="userRole" :options="userRoles" class="w-100"></b-form-select>
-							</b-input-group>
+                            <b-input-group class="mt-3">
+                                <b-form-select placeholder="نقش" v-model="userRole" :options="userRoles" class="w-100"></b-form-select>
+                            </b-input-group>
+
+                            <!-- Conditional Fields -->
+                            <div v-if="userRole === 'courier'">
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-car"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="شماره پلاک" v-model="plateNumber"></b-form-input>
+                                </b-input-group>
+                            </div>
+                            <div v-if="userRole === 'restaurant'">
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-store"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="نام رستوران" v-model="restaurantName"></b-form-input>
+                                </b-input-group>
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="آدرس رستوران" v-model="restaurantAddress"></b-form-input>
+                                </b-input-group>
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="شهر رستوران" v-model="restaurantCity"></b-form-input>
+                                </b-input-group>
+                                <b-input-group class="mt-3">
+                                    <template #prepend>
+                                        <b-input-group-text>
+                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
+                                        </b-input-group-text>
+                                    </template>
+                                    <b-form-input placeholder="کدپستی رستوران" v-model="postalCode"></b-form-input>
+                                </b-input-group>
+                            </div>
+
                             <div class="form-group form-button mt-5">
                                 <b-button variant="secondary" @click="signup()">
                                     <b-spinner v-if="loading" label="Spinning"></b-spinner>
@@ -74,8 +121,10 @@ import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
 Vue.use(VueAxios, axios);
-import {BVToastPlugin} from "bootstrap-vue";
+import { BVToastPlugin } from "bootstrap-vue";
 Vue.use(BVToastPlugin);
+import { mapActions } from 'vuex';
+
 
 export default {
     data() {
@@ -86,40 +135,65 @@ export default {
             nationalId: '',
             password: '',
             userRole: 'customer',
+            plateNumber: '', // For couriers
+            restaurantName: '', // For restaurants
+            restaurantAddress: '', // For restaurants
+            restaurantCity: '', //For restaurants
+            postalCode: '', //For restaurants
             userRoles: [
-                {value: 'customer', text: 'مشتری'},
-                {value: 'courier', text: 'پیک'},
-                {value: 'restaurant', text: 'رستوران'}
+                { value: 'customer', text: 'مشتری' },
+                { value: 'courier', text: 'پیک' },
+                { value: 'restaurant', text: 'رستوران' }
             ],
             loading: false
         };
     },
     methods: {
+        ...mapActions(['updateUserId', 'updateAuthCode']),
         signup() {
             this.loading = true;
-            let api = "http://localhost:5020/user/profile/register"; // Updated API endpoint
+            let api = "http://localhost:8000/api/v1/auth/register";
             const data = {
                 first_name: this.firstName,
                 last_name: this.lastName,
                 phone_number: this.phone,
                 password: this.password,
                 role: this.userRole,
-                national_id: this.nationalId
+                national_id: this.nationalId,
             };
+            // if (this.userRole === 'restaurant') {
+            //     api = "http://localhost:5021/restaurant/restaurant/register";
+            //     const data = {
+            //     name: this.restaurantName,
+            //     address_line: this.restaurantAddress,
+            //     city: this.restaurantCity,
+            //     postal_code: this.postalCode,
+            //     holder_first_name: this.firstName,
+            //     holder_last_name: this.lastName,
+            //     holder_national_id: this.nationalId,
+            //     holder_phone_number: this.phone,
+            //     role: this.userRole,
+            //     password: this.password,
+            // };
+            // }
+
+
             Vue.axios.post(api, data)
                 .then(response => {
                     console.log(response);
+                    this.updateUserId(response.data.user_id);
+                    this.updateAuthCode(response.data.auth_code);
                     this.loading = false;
-                    this.$router.push('/');
+                    this.$router.push('/VerifyAccount');
                 }).catch((e) => {
-                console.log(e);
-                this.$bvToast.toast(e.response.data.message, {
-                    title: 'پیام خطا',
-                    autoHideDelay: 5000,
-                    appendToast: true
+                    console.log(e);
+                    this.$bvToast.toast(e.response.data.message, {
+                        title: 'پیام خطا',
+                        autoHideDelay: 5000,
+                        appendToast: true
+                    });
+                    this.loading = false;
                 });
-                this.loading = false;
-            });
         }
     }
 }
