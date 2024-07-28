@@ -21,6 +21,7 @@ class RestaurantService:
         """
         Registers a new restaurant.
 
+        :param owner_user_id: id of the restaurant owner.
         :param name: Name of the restaurant.
         :param postal_code: Postal Code of the restaurant.
         :param address: Address of the restaurant.
@@ -51,6 +52,17 @@ class RestaurantService:
         :return: Dictionary containing restaurant information.
         """
         restaurant = await RestaurantDomain.load(restaurant_id=restaurant_id)
+        return restaurant.get_info()
+
+    @staticmethod
+    async def get_supplier_restaurant_info(user_id: str) -> Dict[str, Any]:
+        """
+        Retrieves restaurant information.
+
+        :param user_id: ID of the restaurant's owner.
+        :return: Dictionary containing restaurant information.
+        """
+        restaurant = await RestaurantDomain.load(owner_user_id=user_id)
         return restaurant.get_info()
 
     @staticmethod

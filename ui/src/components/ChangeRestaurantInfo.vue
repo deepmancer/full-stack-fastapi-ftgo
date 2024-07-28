@@ -57,8 +57,8 @@
               </b-input-group>
 
               <div class="form-group form-button mt-5">
-                <b-button variant="secondary" type="submit">
-                  <b-spinner v-if="loading" label="Spinning"></b-spinner>
+                <b-button variant="secondary" type="submit" :disabled="loading">
+                  <b-spinner v-if="loading" small></b-spinner>
                   <span v-else>ثبت‌نام</span>
                 </b-button>
               </div>
@@ -85,6 +85,7 @@ import VueAxios from "vue-axios";
 Vue.use(VueAxios, axios);
 import { BVToastPlugin } from "bootstrap-vue";
 Vue.use(BVToastPlugin);
+import { mapGetters } from 'vuex';
 
 export default {
   data() {
@@ -98,33 +99,49 @@ export default {
       loading: false
     };
   },
+  computed: {
+    ...mapGetters(['getUserId', 'getToken']),
+    userId() {
+      return this.getUserId;
+    },
+    token() {
+      return this.getToken;
+    }
+  },
   methods: {
-    registerRestaurant() {
+    async registerRestaurant() {
       this.loading = true;
-      const api = "http://localhost:8000/api/v1/restaurants";
-      const data = {
-        name: this.restaurantName,
-        postal_code: this.postalCode,
-        address: this.restaurantAddress,
-        lat: this.restaurantLat,
-        lng: this.restaurantLng,
-        licence_id: this.restaurantLicenceId,
-      };
-
-      Vue.axios.post(api, data)
-        .then(response => {
-          console.log(response);
-          this.loading = false;
-          this.$router.push({ name: 'SupplierMainPage' });
-        }).catch((e) => {
-          console.log(e);
-          this.$bvToast.toast(e.response.data.message, {
-            title: 'پیام خطا',
-            autoHideDelay: 5000,
-            appendToast: true
-          });
-          this.loading = false;
+      try {
+        const registerInfo = {
+          name: this.restaurantName,
+          postal_code: this.postalCode,
+          address: this.restaurantAddress,
+          address_lat: this.restaurantLat,
+          address_lng: this.restaurantLng,
+          restaurant_licence_id: this.restaurantLicenceId
+        };
+        await axios.post(
+          'http://localhost:8000/api/v1/restaurant/register',
+          registerInfo,
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+        this.$bvToast.toast('Restaurant registered successfully!', {
+          title: 'Success',
+          variant: 'success',
+          solid: true
         });
+
+        this.$router.push({ name: 'SupplierMainPage' });
+      } catch (error) {
+        console.error('Error registering restaurant:', error);
+        this.$bvToast.toast('Error registering restaurant. Please try again.', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+      } finally {
+        this.loading = false;
+      }
     },
     navigateBack() {
       this.$router.push({ name: 'SupplierMainPage' });

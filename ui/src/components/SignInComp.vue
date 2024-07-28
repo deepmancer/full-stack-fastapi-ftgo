@@ -87,9 +87,6 @@ export default {
         signin() {
             this.loading = true;
             let api = "http://localhost:8000/api/v1/auth/login";
-            if (this.userRole === 'restaurant') {
-                api = "http://localhost:5021/restaurant/restaurant/login";
-            }
             const data = {
                 phone_number: this.phone,
                 role: this.userRole,

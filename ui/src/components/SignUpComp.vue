@@ -61,41 +61,6 @@
                                     <b-form-input placeholder="شماره پلاک" v-model="plateNumber"></b-form-input>
                                 </b-input-group>
                             </div>
-                            <div v-if="userRole === 'restaurant'">
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-store"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="نام رستوران" v-model="restaurantName"></b-form-input>
-                                </b-input-group>
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="آدرس رستوران" v-model="restaurantAddress"></b-form-input>
-                                </b-input-group>
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="شهر رستوران" v-model="restaurantCity"></b-form-input>
-                                </b-input-group>
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="کدپستی رستوران" v-model="postalCode"></b-form-input>
-                                </b-input-group>
-                            </div>
-
                             <div class="form-group form-button mt-5">
                                 <b-button variant="secondary" @click="signup()">
                                     <b-spinner v-if="loading" label="Spinning"></b-spinner>

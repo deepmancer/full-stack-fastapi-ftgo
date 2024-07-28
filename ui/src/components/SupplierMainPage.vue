@@ -1,6 +1,14 @@
 <template>
   <div class="restaurant-main-page" style="background-image: url('/images/background.jpg');">
     <b-container>
+    <div class="user-id-box">
+        <b-alert variant="info" show>
+          <strong>your user_id is {{ userId }}</strong>
+        </b-alert>
+        <b-alert variant="info" show>
+          <strong>your toke is {{ token }}</strong>
+        </b-alert>
+      </div>
       <div class="restaurant-main-page">
         <b-container>
           <b-row>
@@ -88,6 +96,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   data() {
     return {
@@ -139,6 +149,15 @@ export default {
         { value: 'ناموجود', text: 'ناموجود' }
       ]
     };
+  },
+  computed: {
+    ...mapGetters(['getUserId', 'getToken']),
+    userId() {
+      return this.getUserId;
+    },
+    token() {
+      return this.getToken;
+    }
   },
   methods: {
     async fetchMenu() {

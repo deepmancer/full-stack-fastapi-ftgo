@@ -15,11 +15,12 @@ class Supplier(Base):
     name = Column(String, nullable=False)
     postal_code = Column(String, nullable=False)
     address = Column(String, nullable=False)
-    address_lat = Column(String, nullable=False)
-    address_lng = Column(String, nullable=False)
+    address_lat = Column(Float, nullable=False)
+    address_lng = Column(Float, nullable=False)
     restaurant_licence_id = Column(String, nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     menu = relationship("MenuItem", back_populates="supplier", cascade="all, delete-orphan")
+
