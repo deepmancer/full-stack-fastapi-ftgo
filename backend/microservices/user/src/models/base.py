@@ -4,17 +4,17 @@ from typing import Container, Optional, Type
 import sqlalchemy
 from sqlalchemy.orm import DeclarativeBase, ColumnProperty
 from sqlalchemy.inspection import inspect
-from pydantic import BaseModel, create_model, BaseConfig
+from pydantic import BaseModel, create_model, ConfigDict
 
-class OrmConfig(BaseConfig):
-    orm_mode = True
+class OrmConfig(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
 class DBTable(DeclarativeBase):
     metadata: sqlalchemy.MetaData = sqlalchemy.MetaData()
 
     @classmethod
     def to_pydantic(
-        cls, *, config: Type[BaseConfig] = OrmConfig, exclude: Container[str] = []
+        cls, *, config: Type[BaseModel] = OrmConfig, exclude: Container[str] = []
     ) -> Type[BaseModel]:
         mapper = inspect(cls)
         fields = {}
