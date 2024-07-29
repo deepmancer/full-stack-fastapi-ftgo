@@ -9,7 +9,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from starlette.types import ASGIApp
 
-from application.schemas.user import UserSchema
+from application.schemas.user import UserStateSchema
 from config.auth import AuthConfig
 from data_access.repository.cache_repository import CacheRepository
 from ftgo_utils.errors import BaseError, ErrorCodes
@@ -64,7 +64,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
         try:
             token = self.extract_token_from_headers(request.headers)
             user = await self._authenticate(token)
-            request.state.user = UserSchema.model_validate(user.dict(exclude={'token'}))
+            request.state.user = UserStateSchema.model_validate(user.dict())
         except BaseError as e:
             raise e
         except Exception as e:
@@ -75,7 +75,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
 
         return await call_next(request)
 
-    async def _authenticate(self, token: str) -> UserSchema:
+    async def _authenticate(self, token: str) -> UserStateSchema:
         try:
             payload = decode(token, self.config.secret, algorithms=[self.config.algorithm])
             if not payload:
@@ -85,7 +85,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
                 )
 
             try:
-                request_token_user = UserSchema.model_validate(payload)
+                request_token_user = UserStateSchema.model_validate(payload)
             except Exception as e:
                 raise BaseError(
                     error_code=ErrorCodes.INTERNAL_AUTHENTICATION_ERROR,
@@ -100,7 +100,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
                 )
 
             try:
-                user = UserSchema.model_validate(cached_user)
+                user = UserStateSchema.model_validate(cached_user)
             except Exception as e:
                 raise BaseError(
                     error_code=ErrorCodes.INTERNAL_AUTHENTICATION_ERROR,

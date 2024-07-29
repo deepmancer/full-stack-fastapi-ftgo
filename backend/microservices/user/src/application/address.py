@@ -13,6 +13,7 @@ class AddressService:
         city: str,
         postal_code: Optional[str] = None,
         country: Optional[str] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         
         user = await UserDomain.load(user_id=user_id)
@@ -22,34 +23,34 @@ class AddressService:
         return address_info
 
     @staticmethod
-    async def get_default_address(user_id: str) -> Dict[str, Any]:
+    async def get_default_address(user_id: str, **kwargs) -> Dict[str, Any]:
         user = await UserDomain.load(user_id)
         address_info = await user.get_default_address()
         return address_info
 
     @staticmethod
-    async def delete_address(user_id: str, address_id: str) -> Dict[str, Any]:
+    async def delete_address(user_id: str, address_id: str, **kwargs) -> Dict[str, Any]:
         user = await UserDomain.load(user_id)
         await user.delete_address(address_id)
         return {}
 
     @staticmethod
-    async def set_preferred_address(user_id: str, address_id: str, set_default: bool) -> Dict[str, Any]:
+    async def set_preferred_address(user_id: str, address_id: str, set_default: bool, **kwargs) -> Dict[str, Any]:
         user = await UserDomain.load(user_id)
-
-        await user.set_address_as_default(address_id)
-        return {
-            "address_id": address_id,
-        }
+        if set_default:
+            updated_address_info = await user.set_address_as_default(address_id)
+        else:
+            updated_address_info = await user.unset_address_as_default(address_id)
+        return updated_address_info
 
     @staticmethod
-    async def get_address_info(user_id: str, address_id: str) -> Dict[str, Any]:
+    async def get_address_info(user_id: str, address_id: str, **kwargs) -> Dict[str, Any]:
         user = await UserDomain.load(user_id)
         address_info = await user.get_address_info(address_id)
         return address_info
 
     @staticmethod
-    async def get_all_addresses(user_id: str) -> Dict[str, Any]:
+    async def get_all_addresses(user_id: str, **kwargs) -> Dict[str, Any]:
         user = await UserDomain.load(user_id)
         addresses = await user.get_addresses_info()
         return {
@@ -60,7 +61,8 @@ class AddressService:
     async def update_information(
         user_id: str,
         address_id: str,
-        update_data: Dict[str, Any]
+        update_data: Dict[str, Any],
+        **kwargs,
     ) -> Dict[str, Any]:
         user = await UserDomain.load(user_id)
         updated_address_info = await user.update_address_information(

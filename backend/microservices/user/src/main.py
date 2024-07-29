@@ -27,7 +27,6 @@ async def shutdown_event():
 if __name__ == '__main__':
     uvloop.install()
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
     loop = asyncio.get_event_loop()
 
     try:

@@ -175,7 +175,7 @@ class UserDomain:
                     error_code=ErrorCodes.WRONG_PASSWORD_ERROR,
                     payload=dict(user_id=user.user_id, password=password),
                 )
-            user_schema = (await DatabaseRepository.update_by_query(Profile, query={"id": user_id}, update_fields={"last_login_time": utils.utc_time.now()}))[0]
+            user_schema = (await DatabaseRepository.update_by_query(Profile, query={"id": user.user_id}, update_fields={"last_login_time": utils.utc_time.now()}))[0]
             user = UserDomain._from_schema(user_schema)
             return user
         except Exception as e:
@@ -326,6 +326,8 @@ class UserDomain:
             if default_address is not None and default_address.address_id != address_id:
                 await default_address.unset_as_default()
             await address.set_as_default()
+            return address.get_info()
+
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR.value, payload=payload)
@@ -339,6 +341,7 @@ class UserDomain:
                 return
 
             await address.unset_as_default()
+            return address.get_info()
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.DEFAULT_ADDRESS_DELETION_ERROR.value, payload=payload)

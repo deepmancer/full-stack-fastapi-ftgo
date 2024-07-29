@@ -1,8 +1,7 @@
 from fastapi import APIRouter
 
 from application.routes.auth import authentication_router
-from application.routes.account import profile_router
-from application.routes.account import address_router
+from application.routes.account import profile_router, address_router
 
 
 def init_router() -> APIRouter:

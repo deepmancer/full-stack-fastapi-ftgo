@@ -13,6 +13,7 @@ class ProfileService:
         role: str,
         email: Optional[str] = None,
         national_id: Optional[str] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         user_id, auth_code = await UserDomain.register(
             first_name=first_name,
@@ -29,7 +30,7 @@ class ProfileService:
         }
 
     @staticmethod
-    async def resend_auth_code(user_id: str) -> Dict[str, Any]:
+    async def resend_auth_code(user_id: str, **kwargs) -> Dict[str, Any]:
         auth_code = await UserDomain.resend_auth_code(user_id)
         return {
             "user_id": user_id,
@@ -37,7 +38,7 @@ class ProfileService:
         }
 
     @staticmethod
-    async def verify_account(user_id: str, auth_code: str) -> Dict[str, str]:
+    async def verify_account(user_id: str, auth_code: str, **kwargs) -> Dict[str, str]:
         user = await UserDomain.verify_account(user_id, auth_code.strip())
         return user.get_info()
 
@@ -47,29 +48,30 @@ class ProfileService:
         role: str,
         user_id: Optional[str] = None,
         phone_number: Optional[str] = None,
+        **kwargs,
     ) -> Dict[str, str]:
         user = await UserDomain.login(password, role, user_id, phone_number)
         return user.get_info()
 
     @staticmethod
-    async def get_info(user_id: str) -> Dict[str, Any]:
+    async def get_info(user_id: str, **kwargs) -> Dict[str, Any]:
         user = await UserDomain.load(user_id=user_id)
-        return await user.get_info()
+        return user.get_info()
 
     @staticmethod
-    async def delete_account(user_id: str) -> Dict[str, str]:
+    async def delete_account(user_id: str, **kwargs) -> Dict[str, str]:
         user = await UserDomain.load(user_id=user_id)
         await user.delete_account()
         return {}
 
     @staticmethod
-    async def logout(user_id: str) -> Dict[str, str]:
+    async def logout(user_id: str, **kwargs) -> Dict[str, str]:
         user = await UserDomain.load(user_id=user_id)
         await user.logout()
         return {}
 
     @staticmethod
-    async def update_profile(user_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def update_profile(user_id: str, update_data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         user = await UserDomain.load(user_id=user_id)
         await user.update_profile_information(update_data)
         return user.get_info()
