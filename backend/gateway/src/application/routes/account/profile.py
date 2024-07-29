@@ -11,6 +11,7 @@ from application.schemas.common import EmptyResponse, SuccessResponse
 from ftgo_utils.schemas import (
     UserIdMixin, UserInfoMixin, UserMixin
 )
+from ftgo_utils.errors import BaseError, ErrorCodes
 from application.schemas.user import UserStateSchema
 from ftgo_utils.enums import ResponseStatus
 from services.user import UserService
