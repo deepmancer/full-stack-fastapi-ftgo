@@ -32,7 +32,7 @@ app = FastAPI(
 )
 
 app.include_router(init_router(), prefix=service_config.api_prefix)
-middleware_builder = MiddlewareBuilder().add_rate_limit().add_cors().add_authentication()
+middleware_builder = MiddlewareBuilder().add_rate_limit().add_authentication().add_cors()
 middleware_builder.build(app=app)
 
 if __name__ == "__main__":

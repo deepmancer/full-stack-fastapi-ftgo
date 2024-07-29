@@ -87,9 +87,6 @@ export default {
         signin() {
             this.loading = true;
             let api = "http://localhost:8000/api/v1/auth/login";
-            if (this.userRole === 'restaurant') {
-                api = "http://localhost:5021/restaurant/restaurant/login";
-            }
             const data = {
                 phone_number: this.phone,
                 role: this.userRole,
@@ -100,7 +97,7 @@ export default {
                     localStorage.removeItem('token');
                     localStorage.setItem('token', response.data.user_id);
                     this.updateUserId(response.data.user_id);  // Store the user ID in Vuex
-                    this.updateToken(response.data.auth_code);  // Store the user ID in Vuex
+                    this.updateToken(response.data.token);  // Store the user ID in Vuex
                     this.phone = '';
                     this.password = '';
                     this.loading = false;
@@ -150,7 +147,11 @@ export default {
                 })
                 .catch(e => {
                     console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
+                    this.$bvToast.toast(e.response.data.detail[0].msg, {
+                      title: 'Verification Error',
+                      autoHideDelay: 5000,
+                      appendToast: true
+                    });
                 });
         }
     }
