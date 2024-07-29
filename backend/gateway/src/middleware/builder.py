@@ -13,20 +13,20 @@ class MiddlewareBuilder:
     def __init__(self) -> None:
         self._middlewares: List[Callable[[FastAPI], None]] = []
 
-    def add_authentication(self) -> 'MiddlewareBuilder':
-        self._middlewares.append(mount_authentication)
-        return self
-
     def add_cors(self) -> 'MiddlewareBuilder':
         self._middlewares.append(mount_cors)
         return self
 
-    def add_exception_handling(self) -> 'MiddlewareBuilder':
-        self._middlewares.append(mount_exception_handling)
-        return self
-
     def add_rate_limit(self) -> 'MiddlewareBuilder':
         self._middlewares.append(mount_rate_limit)
+        return self
+
+    def add_authentication(self) -> 'MiddlewareBuilder':
+        self._middlewares.append(mount_authentication)
+        return self
+
+    def add_exception_handling(self) -> 'MiddlewareBuilder':
+        self._middlewares.append(mount_exception_handling)
         return self
 
     def add_https_redirect(self) -> 'MiddlewareBuilder':
