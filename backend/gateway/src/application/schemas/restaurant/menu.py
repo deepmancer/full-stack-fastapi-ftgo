@@ -4,14 +4,56 @@ from ftgo_utils.schemas import (
     PhoneNumberMixin, RoleMixin, UserMixin, UserInfoMixin, uuid_field,
 )
 
-class AddMenuItemResponse(BaseModel):
+
+class AddMenuItemRequest(BaseModel):
     restaurant_id: str = uuid_field()
 
-class GetMenuItemInfoResponse(BaseModel):
+
+class AddMenuItemResponse(BaseModel):
     restaurant_id: str = uuid_field()
+    name: str = Field(..., min_length=1, max_length=100)
+    price: float
+    description: str = Field(..., min_length=1, max_length=500)
+
+
+class GetMenuItemInfoRequest(BaseModel):
+    item_id: str = uuid_field()
+    restaurant_id: str = uuid_field()
+    name: str = Field(..., min_length=1, max_length=100)
+    price: float
+    description: str = Field(..., min_length=1, max_length=500)
+
+
+class GetMenuItemInfoResponse(BaseModel):
+    item_id: str = uuid_field()
+    restaurant_id: str = uuid_field()
+    name: str = Field(..., min_length=1, max_length=100)
+    price: float
+    description: str = Field(..., min_length=1, max_length=500)
+
+
+class UpdateMenuItemRequest(BaseModel):
+    item_id: str = uuid_field()
+    name: str = Field(..., min_length=1, max_length=100)
+    price: float
+    description: str = Field(..., min_length=1, max_length=500)
+
 
 class UpdateMenuItemResponse(BaseModel):
     restaurant_id: str = uuid_field()
 
+
+class DeleteMenuItemRequest(BaseModel):
+    item_id: str = uuid_field()
+
+
 class DeleteMenuItemResponse(BaseModel):
+    item_id: str = uuid_field()
+
+
+class GetAllMenuItemRequest(BaseModel):
     restaurant_id: str = uuid_field()
+
+
+class GetAllMenuItemResponse(BaseModel):
+    item_id: str = uuid_field()

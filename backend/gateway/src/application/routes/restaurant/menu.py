@@ -3,98 +3,125 @@ from fastapi import APIRouter, status, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from application import get_logger
+from application.schemas.user import UserStateSchema
+from application.exceptions import handle_exception
 from application.schemas.restaurant.menu import (
-    AddMenuItemResponse, GetMenuItemInfoResponse, UpdateMenuItemResponse, DeleteMenuItemResponse
+    AddMenuItemRequest, AddMenuItemResponse, GetMenuItemInfoRequest, GetMenuItemInfoResponse,
+    UpdateMenuItemRequest, UpdateMenuItemResponse, DeleteMenuItemRequest, DeleteMenuItemResponse,
+    GetAllMenuItemRequest, GetAllMenuItemResponse,
 )
 from ftgo_utils.enums import ResponseStatus
-from services.restaurant import RestaurantService
+from services.menu import MenuService
+from ftgo_utils.errors import BaseError, ErrorCodes
 
 router = APIRouter(prefix='/menu', tags=["menu"])
 logger = get_logger()
 
+
 @router.post("/add", response_model=AddMenuItemResponse)
-async def add_item(request: Request):
+async def add_item(request: Request, request_data: AddMenuItemRequest):
     try:
-        data = await request.json()
-        response = await RestaurantService.add_item(
-            name=data['name'],
-            price=data['price'],
-            description=data.get('description')
-        )
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response.get('error_message', 'Adding menu item failed')
-            )
-        return AddMenuItemResponse(item_id=response["item_id"])
-    except Exception as e:
-        logger.error(f"Error occurred while adding the menu item: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder({"detail": str(e)})
-        )
+        data = request_data.dict()
+        response = await MenuService.add_item(data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
 
-@router.get("/info/{item_id}", response_model=GetMenuItemInfoResponse)
-async def get_info(item_id: str):
-    try:
-        response = await RestaurantService.get_item_info(item_id=item_id)
-        if response.pop('status', ResponseStatus.ERROR.value) == ResponseStatus.ERROR.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response.get('error_message', 'Get menu item information failed')
+        if status == ResponseStatus.SUCCESS.value:
+            return AddMenuItemResponse(
+                **response,
             )
-        return GetMenuItemInfoResponse(
-            name=response.get("name"),
-            price=response.get("price"),
-            description=response.get("description")
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Adding menu item failed",
+            payload=data,
         )
     except Exception as e:
-        logger.error(f"Error occurred while getting the menu item info: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder({"detail": str(e)})
-        )
+        await handle_exception(request, e, default_failure_message="Adding menu item failed")
+        raise
 
-@router.put("/update/{item_id}", response_model=UpdateMenuItemResponse)
-async def update_item(item_id: str, request: Request):
-    try:
-        data = await request.json()
-        response = await RestaurantService.update_item(
-            item_id=item_id,
-            name=data.get('name'),
-            price=data.get('price'),
-            description=data.get('description')
-        )
-        if response.pop('status', ResponseStatus.ERROR.value) == ResponseStatus.ERROR.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response.get('error_message', 'Update menu item failed')
-            )
-        return UpdateMenuItemResponse(
-            name=response.get("name"),
-            price=response.get("price"),
-            description=response.get("description")
-        )
-    except Exception as e:
-        logger.error(f"Error occurred while updating the menu item: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder({"detail": str(e)})
-        )
 
-@router.delete("/delete/{item_id}", response_model=DeleteMenuItemResponse)
-async def delete_item(item_id: str):
+@router.get("/get_info", response_model=GetMenuItemInfoResponse)
+async def get_info(request: Request, request_data: GetMenuItemInfoRequest):
+
     try:
-        response = await RestaurantService.delete_item(item_id=item_id)
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response.get('error_message', 'Delete menu item failed')
+        data = request_data.dict()
+        response = await MenuService.get_item_info(data=data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
+
+        if status == ResponseStatus.SUCCESS.value:
+            return GetMenuItemInfoResponse(
+                **response,
             )
-        return DeleteMenuItemResponse(success=True)
-    except Exception as e:
-        logger.error(f"Error occurred while deleting the menu item: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder({"detail": str(e)})
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Get menu item info failed",
+            payload=data,
         )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Get menu item info failed")
+        raise
+
+
+@router.put("/update", response_model=UpdateMenuItemResponse)
+async def update_item(request: Request, request_data: UpdateMenuItemRequest):
+    try:
+        data = request_data.dict()
+        response = await MenuService.update_item(data=data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
+
+        if status == ResponseStatus.SUCCESS.value:
+            return UpdateMenuItemResponse(
+                **response,
+            )
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Update menu item info failed",
+            payload=data,
+        )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Update menu item info failed")
+        raise
+
+
+@router.delete("/delete", response_model=DeleteMenuItemResponse)
+async def delete_item(request: Request, request_data: DeleteMenuItemRequest):
+    try:
+        data = request_data.dict()
+        response = await MenuService.delete_item(data=data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
+
+        if status == ResponseStatus.SUCCESS.value:
+            return DeleteMenuItemResponse(
+                **response,
+            )
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Delete menu item info failed",
+            payload=data,
+        )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Delete menu item info failed")
+        raise
+
+@router.get("/get_all_menu_item", response_model=GetAllMenuItemResponse)
+async def get_all_menu_item(request: Request, request_data: GetAllMenuItemRequest):
+    try:
+        data = request_data.dict()
+        response = await MenuService.get_all_menu_item(data=data)
+
+        status = response.pop('status', ResponseStatus.ERROR.value)
+        if status == ResponseStatus.SUCCESS.value:
+            return GetAllMenuItemResponse(
+                **response,
+            )
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Getting all menus failed",
+            payload={"user_id": user.user_id},
+        )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Getting all menus failed")
+        raise

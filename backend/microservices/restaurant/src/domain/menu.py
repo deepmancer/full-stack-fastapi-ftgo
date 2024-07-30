@@ -30,16 +30,16 @@ class MenuDomain:
         price: float,
         description: str,
     ) -> "MenuDomain":
-        food_id = utils.uuid_gen.uuid4()
+        item_id = utils.uuid_gen.uuid4()
         new_item = MenuItem(
-            item_id=food_id,
+            item_id=item_id,
             restaurant_id=restaurant_id,
             name=name,
             price=price,
             description=description,
         )
         new_item = await DatabaseRepository.insert(new_item)
-        return food_id
+        return item_id
 
     @staticmethod
     async def load(item_id: str) -> "MenuDomain":
@@ -71,9 +71,9 @@ class MenuDomain:
         return MenuDomain._from_menu_item(updated_item[0]).to_dict()
 
     @staticmethod
-    async def delete_item(item_id: str) -> bool:
+    async def delete_item(item_id: str) -> Dict[str, Any]:
         await DatabaseRepository.delete_by_query(MenuItem, query={"item_id": item_id})
-        return True
+        return {"item_id": item_id}
 
     @staticmethod
     def _from_menu_item(menu_item: MenuItem) -> "MenuDomain":
