@@ -5,6 +5,9 @@
         <b-alert variant="info" show>
           <strong>your user_id is {{ userId }}</strong>
         </b-alert>
+        <b-alert variant="info" show>
+          <strong>your token is {{ token }}</strong>
+        </b-alert>
       </div>
       <h2>اطلاعات کاربری</h2>
       <b-card>
@@ -61,10 +64,16 @@
       <b-card>
         <b-form @submit.prevent="addAddress">
           <b-form-group>
-            <b-form-input v-model="newAddress.address_line_1" placeholder="آدرس 1" class="rtl-text"></b-form-input>
+            <b-form-input v-model="newAddress.latitude" placeholder="عرض جغرافیایی" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-form-group>
-            <b-form-input v-model="newAddress.address_line_2" placeholder="آدرس 2" class="rtl-text"></b-form-input>
+            <b-form-input v-model="newAddress.longitude" placeholder="طول جغرافیایی" class="rtl-text"></b-form-input>
+          </b-form-group>
+          <b-form-group>
+            <b-form-input v-model="newAddress.address_line_1" placeholder="آدرس خط 1" class="rtl-text"></b-form-input>
+          </b-form-group>
+          <b-form-group>
+            <b-form-input v-model="newAddress.address_line_2" placeholder="آدرس خط 2" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-form-group>
             <b-form-input v-model="newAddress.city" placeholder="شهر" class="rtl-text"></b-form-input>
@@ -93,6 +102,8 @@ export default {
       userInfo: {},
       addresses: [],
       newAddress: {
+        latitude: 0,
+        longitude: 0,
         address_line_1: '',
         address_line_2: '',
         city: '',
@@ -145,6 +156,8 @@ export default {
           { headers: { Authorization: `Bearer ${this.token}` } }
         );
         this.newAddress = {
+          latitude: 0,
+          longitude: 0,
           address_line_1: '',
           address_line_2: '',
           city: '',

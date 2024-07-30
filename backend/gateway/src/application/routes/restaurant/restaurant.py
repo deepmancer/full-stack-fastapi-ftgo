@@ -27,6 +27,7 @@ async def register(request: Request, request_data: RegisterRestaurantRequest):
         response = await RestaurantService.register(data)
 
         status = response.pop('status', ResponseStatus.ERROR.value)
+
         if status == ResponseStatus.SUCCESS.value:
             return RegisterRestaurantResponse(
                 restaurant_id=response["restaurant_id"],
@@ -38,35 +39,44 @@ async def register(request: Request, request_data: RegisterRestaurantRequest):
             payload=data,
         )
     except Exception as e:
-        await handle_exception(request, e, default_failure_message="User registration failed")
+        await handle_exception(request, e, default_failure_message="Restaurant registration failed")
 
-
-@router.get("/supplier_restaurant_info", response_model=GetRestaurantInfoResponse)
+@router.get("/get_supplier_restaurant_info", response_model=GetRestaurantInfoResponse)
 async def get_supplier_restaurant_info(request: Request):
     try:
-        user: UserSchema = request.state.user
-        response = await RestaurantService.get_supplier_restaurant_info(data={"user_id": user.user_id})
-        if response.get('status', ResponseStatus.ERROR.value) == ResponseStatus.ERROR.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response.get('error_message', 'Get restaurant information failed')
+        user: UserStateSchema = request.state.user
+        data = {"user_id": user.user_id}
+        response = await RestaurantService.get_supplier_restaurant_info(data=data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
+        if status == ResponseStatus.SUCCESS.value:
+            print(GetRestaurantInfoResponse(
+                id=response.get('id'),
+                owner_user_id=response.get('owner_user_id'),
+                name=response.get("name"),
+                postal_code=response.get("postal_code"),
+                address=response.get("address"),
+                address_lat=response.get("address_lat"),
+                address_lng=response.get("address_lng"),
+                restaurant_licence_id=response.get("restaurant_licence_id")
+            ))
+            return GetRestaurantInfoResponse(
+                id=response.get('id'),
+                owner_user_id=response.get('owner_user_id'),
+                name=response.get("name"),
+                postal_code=response.get("postal_code"),
+                address=response.get("address"),
+                address_lat=response.get("address_lat"),
+                address_lng=response.get("address_lng"),
+                restaurant_licence_id=response.get("restaurant_licence_id")
             )
-        return GetRestaurantInfoResponse(
-            id=response.get('id'),
-            owner_user_id=response.get('owner_user_id'),
-            name=response.get("name"),
-            postal_code=response.get("postal_code"),
-            address=response.get("address"),
-            address_lat=response.get("address_lat"),
-            address_lng=response.get("address_lng"),
-            restaurant_licence_id=response.get("restaurant_licence_id")
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Get restaurant info failed",
+            payload={data},
         )
     except Exception as e:
-        logger.error(f"Error occurred while getting the restaurant info: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder({"detail": str(e)})
-        )
+        await handle_exception(request, e, default_failure_message="Get restaurant info failed")
 
 @router.delete("/delete", response_model=DeleteRestaurantResponse)
 async def delete_account(request: Request):

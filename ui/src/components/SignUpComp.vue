@@ -108,7 +108,7 @@ export default {
             userRoles: [
                 { value: 'customer', text: 'مشتری' },
                 { value: 'courier', text: 'پیک' },
-                { value: 'restaurant', text: 'رستوران' }
+                { value: 'restaurant_admin', text: 'رستوران' }
             ],
             loading: false
         };
@@ -119,30 +119,13 @@ export default {
             this.loading = true;
             let api = "http://localhost:8000/api/v1/auth/register";
             const data = {
+                national_id: this.nationalId,
+                role: this.userRole,
                 first_name: this.firstName,
                 last_name: this.lastName,
                 phone_number: this.phone,
                 password: this.password,
-                role: this.userRole,
-                national_id: this.nationalId,
             };
-            // if (this.userRole === 'restaurant') {
-            //     api = "http://localhost:5021/restaurant/restaurant/register";
-            //     const data = {
-            //     name: this.restaurantName,
-            //     address_line: this.restaurantAddress,
-            //     city: this.restaurantCity,
-            //     postal_code: this.postalCode,
-            //     holder_first_name: this.firstName,
-            //     holder_last_name: this.lastName,
-            //     holder_national_id: this.nationalId,
-            //     holder_phone_number: this.phone,
-            //     role: this.userRole,
-            //     password: this.password,
-            // };
-            // }
-
-
             Vue.axios.post(api, data)
                 .then(response => {
                     console.log(response);
