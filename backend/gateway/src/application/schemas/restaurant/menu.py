@@ -56,4 +56,4 @@ class GetAllMenuItemRequest(BaseModel):
 
 
 class GetAllMenuItemResponse(BaseModel):
-    item_id: str = uuid_field()
+    menu: list[GetMenuItemInfoResponse] = Field(...)

@@ -65,7 +65,7 @@ class MenuService:
 
 
     @staticmethod
-    async def get_item_info(item_id: str) -> Dict[str, Any]:
+    async def get_item_info(item_id: str, **kwargs) -> Dict[str, Any]:
         """
         Retrieves menu item information.
 
@@ -78,7 +78,7 @@ class MenuService:
         return menu_item.to_dict()
 
     @staticmethod
-    async def get_all_menu_item(restaurant_id: str) -> Dict[str, Any]:
+    async def get_all_menu_item(restaurant_id: str, **kwargs) -> Dict[str, Any]:
         """
         Retrieves all menu item associated with the restaurant's account.
 

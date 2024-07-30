@@ -1,6 +1,10 @@
 from typing import Optional, Dict, Any
+from ftgo_utils.errors import BaseError, ErrorCodes
+
+from domain import get_logger
 from data_access.repository import DatabaseRepository
 from models.menu import MenuItem
+from utils import handle_exception
 
 import ftgo_utils as utils
 
@@ -30,23 +34,40 @@ class MenuDomain:
         price: float,
         description: str,
     ) -> "MenuDomain":
-        item_id = utils.uuid_gen.uuid4()
-        new_item = MenuItem(
-            item_id=item_id,
-            restaurant_id=restaurant_id,
-            name=name,
-            price=price,
-            description=description,
-        )
-        new_item = await DatabaseRepository.insert(new_item)
-        return item_id
+        try:
+            item_id = utils.uuid_gen.uuid4()
+            new_item = MenuItem(
+                item_id=item_id,
+                restaurant_id=restaurant_id,
+                name=name,
+                price=price,
+                description=description,
+            )
+            new_item = await DatabaseRepository.insert(new_item)
+            return item_id
+        except Exception as e:
+            payload = {
+                "restaurant_id": restaurant_id,
+                "name": name,
+                "price": price,
+                "description": description,
+            }
+            #TODO change error code
+            get_logger().error(ErrorCodes.ADD_ADDRESS_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.ADD_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
-    async def load(item_id: str) -> "MenuDomain":
-        menu_item = await DatabaseRepository.fetch_by_query(MenuItem, query={"item_id": item_id}, one_or_none=True)
-        if not menu_item:
-            return None
-        return MenuDomain._from_menu_item(menu_item)
+    async def load(item_id: str) -> Optional["MenuDomain"]:
+        try:
+            menu_item = await DatabaseRepository.fetch_by_query(MenuItem, query={"item_id": item_id}, one_or_none=True)
+            if not menu_item:
+                return None
+            return MenuDomain._from_schema(menu_item)
+        except Exception as e:
+            payload = {"item_id": item_id}
+            #TODO change error code
+            get_logger().error(ErrorCodes.LOAD_ADDRESS_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.LOAD_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
     async def update_item(
@@ -62,21 +83,35 @@ class MenuDomain:
             update_fields["price"] = price
         if description:
             update_fields["description"] = description
-
-        updated_item = await DatabaseRepository.update_by_query(
-            MenuItem,
-            query={"item_id": item_id},
-            update_fields=update_fields,
-        )
-        return MenuDomain._from_menu_item(updated_item[0]).to_dict()
+        try:
+            updated_item = await DatabaseRepository.update_by_query(
+                MenuItem,
+                query={"item_id": item_id},
+                update_fields=update_fields,
+            )
+            return MenuDomain._from_schema(updated_item[0]).to_dict()
+        except Exception as e:
+            payload = {
+                "user_id": item_id,
+                "update_fields": update_fields,
+            }
+            #TODO change error code
+            get_logger().error(ErrorCodes.UPDATE_ADDRESS_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.UPDATE_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
     async def delete_item(item_id: str) -> Dict[str, Any]:
-        await DatabaseRepository.delete_by_query(MenuItem, query={"item_id": item_id})
-        return {"item_id": item_id}
+        try:
+            await DatabaseRepository.delete_by_query(MenuItem, query={"item_id": item_id})
+            return {"item_id": item_id}
+        except Exception as e:
+            payload = {"item_id": item_id}
+            #TODO change error code
+            get_logger().error(ErrorCodes.DELETE_ADDRESS_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.DELETE_ADDRESS_ERROR, payload=payload)
 
     @staticmethod
-    def _from_menu_item(menu_item: MenuItem) -> "MenuDomain":
+    def _from_schema(menu_item: MenuItem) -> "MenuDomain":
         return MenuDomain(
             item_id=menu_item.item_id,
             restaurant_id=menu_item.restaurant_id,
