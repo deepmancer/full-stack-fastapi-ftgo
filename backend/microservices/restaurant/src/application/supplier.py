@@ -17,6 +17,7 @@ class RestaurantService:
         address_lat: float,
         address_lng: float,
         restaurant_licence_id: str,
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Registers a new restaurant.
@@ -44,7 +45,7 @@ class RestaurantService:
         }
 
     @staticmethod
-    async def get_restaurant_info(restaurant_id: str) -> Dict[str, Any]:
+    async def get_restaurant_info(restaurant_id: str, **kwargs) -> Dict[str, Any]:
         """
         Retrieves restaurant information.
 
@@ -55,7 +56,7 @@ class RestaurantService:
         return restaurant.get_info()
 
     @staticmethod
-    async def get_supplier_restaurant_info(user_id: str) -> Dict[str, Any]:
+    async def get_supplier_restaurant_info(user_id: str, **kwargs) -> Dict[str, Any]:
         """
         Retrieves restaurant information.
 
@@ -66,7 +67,7 @@ class RestaurantService:
         return restaurant.get_info()
 
     @staticmethod
-    async def update_information(restaurant_id: str, update_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def update_information(restaurant_id: str, update_data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """
         Updates restaurant profile information.
 
@@ -78,7 +79,7 @@ class RestaurantService:
         return await restaurant.update_profile_information(update_data)
 
     @staticmethod
-    async def delete_restaurant(restaurant_id: str) -> Dict[str, str]:
+    async def delete_restaurant(restaurant_id: str, **kwargs) -> Dict[str, str]:
         """
         Deletes a restaurant account.
 

@@ -1,12 +1,6 @@
-import os
 from fastapi import APIRouter, status, HTTPException, Request
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 from application import get_logger
 from application.exceptions import handle_exception
-from application.schemas.auth.registration import (
-    UserAuthCodeSchema, UpdateProfileSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
-)
 from application.schemas.common import EmptyResponse, SuccessResponse
 from ftgo_utils.schemas import (
     UserIdMixin, UserInfoMixin, UserMixin

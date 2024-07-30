@@ -13,6 +13,7 @@ class MenuService:
         name: str,
         price: float,
         description: str,
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Adds a new menu item.
@@ -35,6 +36,7 @@ class MenuService:
         name: Optional[str] = None,
         price: Optional[float] = None,
         description: Optional[str] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         """
         Updates a menu item's information.
@@ -49,7 +51,7 @@ class MenuService:
                                             description=description)
 
     @staticmethod
-    async def delete_item(item_id: str) -> Dict[str, str]:
+    async def delete_item(item_id: str, **kwargs) -> Dict[str, str]:
         """
         Deletes a menu item.
 

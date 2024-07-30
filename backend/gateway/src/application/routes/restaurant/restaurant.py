@@ -8,8 +8,10 @@ from application.schemas.restaurant.restaurant import (
     RegisterRestaurantRequest, RegisterRestaurantResponse,
     GetRestaurantInfoResponse, DeleteRestaurantResponse
 )
-from application.schemas.user import UserSchema
+from application.schemas.user import UserStateSchema
+from application.exceptions import handle_exception
 from ftgo_utils.enums import ResponseStatus
+from ftgo_utils.errors import BaseError, ErrorCodes
 from services.restaurant import RestaurantService
 
 router = APIRouter(prefix='/restaurant', tags=["restaurant"])
@@ -18,30 +20,26 @@ logger = get_logger()
 @router.post("/register", response_model=RegisterRestaurantResponse)
 async def register(request: Request, request_data: RegisterRestaurantRequest):
     try:
-        user: UserSchema = request.state.user
-        response = await RestaurantService.register(
-            data={
-                "owner_user_id": user.user_id,
-                "name": request_data.name,
-                "postal_code": request_data.postal_code,
-                "address": request_data.address,
-                "address_lat": request_data.address_lat,
-                "address_lng": request_data.address_lng,
-                "restaurant_licence_id": request_data.restaurant_licence_id,
-            }
-        )
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response.get('error_message', 'Restaurant registration failed')
+        user: UserStateSchema = request.state.user
+
+        data = request_data.dict()
+        data.update({"owner_user_id": user.user_id})
+        response = await RestaurantService.register(data)
+
+        status = response.pop('status', ResponseStatus.ERROR.value)
+        if status == ResponseStatus.SUCCESS.value:
+            return RegisterRestaurantResponse(
+                restaurant_id=response["restaurant_id"],
             )
-        return RegisterRestaurantResponse(restaurant_id=response["restaurant_id"])
-    except Exception as e:
-        logger.error(f"Error occurred while registering the restaurant: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder({"detail": str(e)})
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Restaurant registration failed",
+            payload=data,
         )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="User registration failed")
+
 
 @router.get("/supplier_restaurant_info", response_model=GetRestaurantInfoResponse)
 async def get_supplier_restaurant_info(request: Request):

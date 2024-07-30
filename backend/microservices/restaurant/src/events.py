@@ -1,12 +1,16 @@
 import asyncio
-from ftgo_utils.logger import get_logger
 
-from data_access.broker import RPCBroker
+from ftgo_utils.logger import get_logger
+from ftgo_utils.errors import ErrorCodes
+
 from application import MenuService, RestaurantService
 from application.middleware import event_middleware
-from config import BaseConfig, LayerNames, env_var
+from config import LayerNames
+from data_access.broker import RPCBroker
+from utils import handle_exception
 
-async def register_events(rpc_broker: RPCBroker):
+async def register_events():
+    rpc_broker = RPCBroker.get_instance()
     rpc_client = rpc_broker.get_client()
     events_handlers = {
         'restaurant.supplier.register': RestaurantService.register,
@@ -23,9 +27,10 @@ async def register_events(rpc_broker: RPCBroker):
 
     for event, _handler in events_handlers.items():
         try:
-            handler = event_middleware(_handler)
+            handler = event_middleware(event, _handler)
             await rpc_client.register_event(event=event, handler=handler)
             rpc_client.logger.info(f"Registered event '{event}' with handler '{handler.__name__}'")
         except Exception as e:
-            rpc_client.logger.error(f"Failed to register event '{event}': {e}")
-            raise e
+            payload = {"event_name": event}
+            rpc_client.logger.exception(ErrorCodes.EVENT_REGISTERATION_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.EVENT_REGISTERATION_ERROR, payload=payload)

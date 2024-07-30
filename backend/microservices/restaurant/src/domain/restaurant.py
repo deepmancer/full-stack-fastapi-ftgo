@@ -1,13 +1,16 @@
 import asyncio
 from typing import Any, Dict, Optional, List
 
+from ftgo_utils.errors import ErrorCodes, BaseError
+import ftgo_utils as utils
+
 from data_access.repository import DatabaseRepository
 from domain import get_logger
 from models.supplier import Supplier
 from domain.menu import MenuDomain
 from models.menu import MenuItem
+from utils import handle_exception
 
-import ftgo_utils as utils
 
 class RestaurantDomain:
     def __init__(
@@ -40,7 +43,8 @@ class RestaurantDomain:
         cls,
         owner_user_id: Optional[str] = None,
         restaurant_id: Optional[str] = None,
-    ) -> "RestaurantDomain":
+        raise_error_on_missing: bool = True,
+    ) -> Optional["RestaurantDomain"]:
         query_dict = {}
         if restaurant_id:
             query_dict["id"] = restaurant_id
@@ -49,12 +53,18 @@ class RestaurantDomain:
         try:
             restaurant_profile = await DatabaseRepository.fetch_by_query(Supplier, query=query_dict, one_or_none=True)
             if not restaurant_profile:
-                raise Exception("Error loading restaurant")
+                if raise_error_on_missing:
+                    #TODO change error code
+                    raise BaseError(error_code=ErrorCodes.USER_NOT_FOUND_ERROR, payload=query_dict)
+                return None
 
             return RestaurantDomain._from_profile(restaurant_profile)
         except Exception as e:
-            get_logger().error(f"Error loading restaurant with query {query_dict}: {str(e)}")
-            raise e
+            payload = dict(query=query_dict)
+            #TODO change error code
+            get_logger().error(ErrorCodes.USER_LOAD_ACCOUNT_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_LOAD_ACCOUNT_ERROR, payload=payload)
+
 
     @staticmethod
     async def register(
@@ -69,7 +79,8 @@ class RestaurantDomain:
         try:
             current_records = await DatabaseRepository.fetch_by_query(Supplier, query={"owner_user_id": owner_user_id})
             if current_records:
-                raise Exception("Error registering restaurant")
+                #TODO change error code
+                raise BaseError(error_code=ErrorCodes.ACCOUNT_EXISTS_ERROR, payload=dict(owner_user_id=owner_user_id))
 
             restaurant_id = utils.uuid_gen.uuid4()
 
@@ -84,10 +95,14 @@ class RestaurantDomain:
                 restaurant_licence_id=restaurant_licence_id,
             )
             new_profile = await DatabaseRepository.insert(new_profile)
+            get_logger().info(f"Restaurant with user_id: {owner_user_id} and name: {name} was created successfully")
+
             return restaurant_id
         except Exception as e:
-            get_logger().error(f"Error registering restaurant with owner_user_id {owner_user_id}: {str(e)}")
-            raise e
+            payload = dict(owner_user_id=owner_user_id, name=name)
+            #TODO change error code
+            get_logger().error(ErrorCodes.USER_REGISTRATION_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_REGISTRATION_ERROR, payload=payload)
 
     async def update_profile_information(self, update_fields: Dict[str, Optional[str]]):
         try:
@@ -117,19 +132,23 @@ class RestaurantDomain:
                 query={"id": self.restaurant_id},
                 update_fields=new_fields,
             )
-            self._update_from_profile(updated_profile[0])
+            self._update_from_schema(updated_profile[0])
             return self.get_info()
         except Exception as e:
-            get_logger().error(f"Error updating restaurant profile with id {self.restaurant_id}: {str(e)}, update_fields: {update_fields}")
-            raise e
+            payload = dict(restaurant_id=self.restaurant_id, update_fields=update_fields)
+            #TODO change error code
+            get_logger().error(ErrorCodes.USER_PROFILE_UPDATE_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_PROFILE_UPDATE_ERROR, payload=payload)
 
     async def delete_restaurant(self) -> bool:
         try:
             await DatabaseRepository.delete_by_query(Supplier, query={"id": self.restaurant_id})
             return True
         except Exception as e:
-            get_logger().error(f"Error deleting restaurant account with id {self.restaurant_id}: {str(e)}")
-            raise e
+            payload = dict(restaurant_id=self.restaurant_id)
+            #TODO change error code
+            get_logger().error(ErrorCodes.USER_DELETE_ACCOUNT_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_DELETE_ACCOUNT_ERROR, payload=payload)
 
     def get_info(self) -> Dict[str, Any]:
         info_dict = dict(
@@ -144,7 +163,7 @@ class RestaurantDomain:
         )
         return {key: value for key, value in info_dict.items() if value is not None}
 
-    def _update_from_profile(self, profile: Supplier):
+    def _update_from_schema(self, profile: Supplier):
         updated_restaurant = RestaurantDomain._from_profile(profile)
         if not updated_restaurant:
             return
@@ -176,17 +195,24 @@ class RestaurantDomain:
 
 
     async def load_all_menu_item(self) -> List[MenuDomain]:
-        if self.menu is None:
-            menu = await DatabaseRepository.fetch_by_query(MenuItem, query={"restaurant_id": self.restaurant_id})
-            self.menu = [MenuDomain._from_menu_item(food) for food in menu]
-        return self.menu
+        try:
+            if self.menu is None:
+                menu = await DatabaseRepository.fetch_by_query(MenuItem, query={"restaurant_id": self.restaurant_id})
+                self.menu = [MenuDomain._from_menu_item(food) for food in menu]
+            return self.menu
+        except Exception as e:
+            payload = {"restaurant_id": self.restaurant_id}
+            #TODO change error code
+            get_logger().error(ErrorCodes.BATCH_LOAD_ADDRESS_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.BATCH_LOAD_ADDRESS_ERROR, payload=payload)
 
     async def get_all_menu_item_info(self) -> List[Dict[str, Any]]:
         try:
             if not self.menu:
                 await self.load_all_menu_item()
-
             return [food.get_info() for food in self.menu]
         except Exception as e:
-            get_logger().error(f"Error getting addresses info for restaurant with id {self.restaurant_id}: {str(e)}")
-            raise e
+            payload = {"restaurant_id": self.restaurant_id}
+            #TODO change error code
+            get_logger().error(ErrorCodes.GET_ADDRESSES_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESSES_ERROR, payload=payload)
