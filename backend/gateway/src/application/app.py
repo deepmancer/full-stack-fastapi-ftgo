@@ -1,11 +1,8 @@
 from fastapi import APIRouter
 
 from application.routes.auth import authentication_router
-from application.routes.account import profile_router
-from application.routes.account import address_router
-from application.routes.restaurant import restaurant_router
-from application.routes.restaurant import menu_router
-
+from application.routes.account import profile_router, address_router
+from application.routes.restaurant import restaurant_router, menu_router
 
 def init_router() -> APIRouter:
     router = APIRouter()

@@ -1,52 +1,39 @@
 import asyncio
-import logging
 import contextlib
+
+from fastapi import FastAPI
+import uvicorn
 from dotenv import load_dotenv
 
-import fastapi
-import uvicorn
-
-from config import ApplicationError
-
-from ftgo_utils.logger import init_logging, get_logger
-
 from application.app import init_router
-from config import LayerNames
 from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
-from data_access.broker import RPCBroker
-
-from application.error_handlers import register_error_handlers
-from middleware import rate_limiter, cors, authentication
+from ftgo_utils.logger import init_logging
+from middleware.builder import MiddlewareBuilder
 
 load_dotenv()
 
 service_config = ServiceConfig()
 init_logging(level=service_config.log_level)
 
-async def lifespan(app: fastapi.FastAPI):
-    service_config = ServiceConfig()
-    init_logging(level=service_config.log_level)
-
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
     await setup()
-    await RPCBroker.initialize(loop=asyncio.get_event_loop())
 
     yield
 
     await teardown()
     await RPCBroker.close()
 
-app = fastapi.FastAPI(
+app = FastAPI(
     title="Food Delivery Server",
     debug=service_config.debug,
     lifespan=lifespan,
 )
 
 app.include_router(init_router(), prefix=service_config.api_prefix)
-authentication.mount_middleware(app=app)
-# register_error_handlers(app=app)
-rate_limiter.mount_middleware(app=app)
-cors.mount_middleware(app=app)
+middleware_builder = MiddlewareBuilder().add_rate_limit().add_authentication().add_cors()
+middleware_builder.build(app=app)
 
 if __name__ == "__main__":
     uvicorn.run(

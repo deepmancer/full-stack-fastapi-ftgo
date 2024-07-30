@@ -1,81 +1,107 @@
 import os
-from fastapi import APIRouter, status, HTTPException, Request
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from application import get_logger
+from fastapi import APIRouter, Request
 from application.schemas.account.address import (
-    AllAddressesResponse,
-    AddAddressRequest, AddAddressResponse,
-    DeleteAddressRequest, DeleteAddressResponse,
-    SetPreferredAddressRequest, SetPreferredAddressResponse,
+    AddressIdSchema, AddressesSchema, AddressIdPreferencySchema
 )
-from application.schemas.user import UserSchema
+from ftgo_utils.schemas import (
+    AddressMixin, AddressInfoMixin
+)
+from application.schemas.user import UserStateSchema
+from application.exceptions import handle_exception
 from ftgo_utils.enums import ResponseStatus
+from ftgo_utils.errors import BaseError, ErrorCodes
+from application.schemas.common import SuccessResponse
 from services.user import UserService
+from application import get_logger
 
 router = APIRouter(prefix='/address', tags=["user_address"])
-logger = get_logger()
 
-@router.get("/get_all_info", response_model=AllAddressesResponse)
+@router.get("/get_all_info", response_model=AddressesSchema)
 async def get_all_addresses(request: Request):
     try:
-        user: UserSchema = request.state.user
+        user: UserStateSchema = request.state.user
         response = await UserService.get_all_addresses(data={"user_id": user.user_id})
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                                detail=response.get('error_message', 'Getting All Addresses has been failed'))
-        return AllAddressesResponse(addresses=response["addresses"])
-    except Exception as e:
-        get_logger().error(f"Error occurred while getting all addresses: {e}", request=request)
-        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
 
-@router.post("/add", response_model=AddAddressResponse)
-async def add_address(request: Request, add_address_request: AddAddressRequest):
+        status = response.pop('status', ResponseStatus.ERROR.value)
+        if status == ResponseStatus.SUCCESS.value:
+            return AddressesSchema(addresses=response["addresses"])
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Getting all addresses failed",
+            payload={"user_id": user.user_id},
+        )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Getting all addresses failed")
+        raise
+
+
+@router.post("/add", response_model=AddressMixin)
+async def add_address(request: Request, request_data: AddressInfoMixin):
     try:
+        user: UserStateSchema = request.state.user
+        data = request_data.dict()
+        data.update({"user_id": user.user_id})
+        response = await UserService.add_address(data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
 
-        user: UserSchema = request.state.user
-        response = await UserService.add_address(data={"user_id": user.user_id,
-                                                       "address_line_1": add_address_request.address_line_1,
-                                                       "address_line_2": add_address_request.address_line_2,
-                                                       "city": add_address_request.city,
-                                                       "postal_code": add_address_request.postal_code,
-                                                       "country": add_address_request.country})
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=response.get('error_message', 'Adding Address has been failed'))
-        return AddAddressResponse(address_id=response["address_id"])
+        if status == ResponseStatus.SUCCESS.value:
+            return AddressMixin(
+                **response,
+            )
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Adding address failed",
+            payload=data,
+        )
     except Exception as e:
-        get_logger().error(f"Error occurred while adding address: {e}", request=add_address_request)
-        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
+        await handle_exception(request, e, default_failure_message="Adding address failed")
+        raise
 
 
-@router.delete("/delete", response_model=DeleteAddressResponse)
-async def delete_address(request: Request, delete_address_request: DeleteAddressRequest):
+@router.delete("/delete", response_model=SuccessResponse)
+async def delete_address(request: Request, request_data: AddressIdSchema):
     try:
-        user: UserSchema = request.state.user
-        response = await UserService.delete_address(data={"user_id": user.user_id,
-                                                          'address_id': delete_address_request.address_id})
+        user: UserStateSchema = request.state.user
+        data = request_data.dict()
+        data.update({"user_id": user.user_id})
+        response = await UserService.delete_address(data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
 
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                                detail=response.get('error_message', 'Deleting Address has been failed'))
-        return DeleteAddressResponse(address_id=delete_address_request.address_id, success=True)
+        if status == ResponseStatus.SUCCESS.value:
+            return SuccessResponse()
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Deleting address failed",
+            payload=data,
+        )
     except Exception as e:
-        get_logger().error(f"Error occurred while deleting address: {e}", request=request)
-        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
+        await handle_exception(request, e, default_failure_message="Deleting address failed")
+        raise
 
-@router.post("/set-preferred", response_model=SetPreferredAddressResponse)
-async def set_address_as_default(request: Request, set_address_preferred_request: SetPreferredAddressRequest):
+
+@router.post("/set-preferred", response_model=AddressMixin)
+async def set_address_preferency(request: Request, request_data: AddressIdPreferencySchema):
     try:
-        user: UserSchema = request.state.user
+        user: UserStateSchema = request.state.user
+        data = request_data.dict()
+        data.update({"user_id": user.user_id, "set_default": True})
+        response = await UserService.set_preferred_address(data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
 
-        response = await UserService.set_preferred_address(data={"user_id": user.user_id,
-                                                                 'address_id': set_address_preferred_request.address_id})
+        if status == ResponseStatus.SUCCESS.value:
+            return AddressMixin(
+                # user_id=user.user_id,
+                **response,
+            )
 
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                                detail=response.get('error_message', 'Setting Address As Preferred has been failed'))
-
-        return SetPreferredAddressResponse(address_id=response['address_id'], success=True)
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Setting address as preferred failed",
+            payload=data,
+        )
     except Exception as e:
-        get_logger().error(f"Error occurred while setting preferred address: {e}", request=request)
-        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=jsonable_encoder({"detail": str(e)}))
+        await handle_exception(request, e, default_failure_message="Setting address as preferred failed")
+        raise

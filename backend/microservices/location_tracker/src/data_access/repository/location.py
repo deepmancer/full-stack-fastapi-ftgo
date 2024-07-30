@@ -20,7 +20,7 @@ class UserRepository:
 
     @classmethod
     def initialize(cls, db_config: PostgresConfig):
-        cls.data_access = DatabaseDataAccess(db_config)
+        cls._data_access = DatabaseDataAccess(db_config)
 
     @classmethod
     async def create_user(
@@ -33,7 +33,7 @@ class UserRepository:
         role: str,
         national_id: str = None,
     ) -> Profile:
-        async with cls.data_access.get_or_create_session() as session:
+        async with cls._data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
                     new_profile = Profile(
@@ -60,7 +60,7 @@ class UserRepository:
     @classmethod
     async def load_user_by_id(cls, user_id: str):
         try:
-            profile = await cls.data_access.load_from_table_by_query(Profile, {"id": user_id}, one_or_none=True)
+            profile = await cls._data_access.load_from_table_by_query(Profile, {"id": user_id}, one_or_none=True)
             return profile
         except Exception as e:
             message = f"Error occurred while loading user: {e}"
@@ -70,7 +70,7 @@ class UserRepository:
     @classmethod
     async def load_user_by_phone_number_and_role(cls, phone_number: str, role: str):
         try:
-            profile = await cls.data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=True)
+            profile = await cls._data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=True)
             return profile
         except Exception as e:
             message = f"Error occurred while loading user by phone number & role: {e}"
@@ -80,7 +80,7 @@ class UserRepository:
     @classmethod
     async def exists_role_for_phone_number(cls, phone_number: str, role: str) -> bool:
         try:
-            result = await cls.data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=False)
+            result = await cls._data_access.load_from_table_by_query(Profile, {"phone_number": phone_number, "role": role}, one_or_none=False)
             return len(result) > 0
         except Exception as e:
             message = f"Error occurred while checking if phone number is taken: {e}"
@@ -89,7 +89,7 @@ class UserRepository:
 
     @classmethod
     async def verify_user(cls, user_id: str) -> Optional[Profile]:
-        async with cls.data_access.get_or_create_session() as session:
+        async with cls._data_access.get_or_create_session() as session:
             try:
                 result = await session.execute(select(Profile).filter_by(id=user_id))
                 user_profile = result.scalars().one_or_none()
@@ -106,7 +106,7 @@ class UserRepository:
 
     @classmethod
     async def delete_user(cls, user_id: str):
-        async with cls.data_access.get_or_create_session() as session:
+        async with cls._data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
                     result = await session.execute(select(Profile).filter_by(id=user_id))
@@ -126,7 +126,7 @@ class UserRepository:
 
     @classmethod
     async def add_address(cls, user_id: str, address_line_1: str, address_line_2: str, city: str, postal_code: str = None, country: str = None):
-        async with cls.data_access.get_or_create_session() as session:
+        async with cls._data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
                     new_address = Address(
@@ -148,9 +148,9 @@ class UserRepository:
                     raise e
 
     @classmethod
-    async def update_address(cls, address_id, update_data):
+    async def update_information(cls, address_id, update_data):
         try:
-            updated_address = (await cls.data_access.update_table_by_query(Address, {"id": address_id}, update_data))[0]
+            updated_address = (await cls._data_access.update_table_by_query(Address, {"id": address_id}, update_data))[0]
             return updated_address
         except Exception as e:
             message = f"Error occurred while updating address: {e}"
@@ -160,7 +160,7 @@ class UserRepository:
     @classmethod
     async def unset_user_default_addresses(cls, user_id: str):
         try:
-            await cls.data_access.update_table_by_query(Address, {"user_id": user_id}, {"is_default": False})
+            await cls._data_access.update_table_by_query(Address, {"user_id": user_id}, {"is_default": False})
         except Exception as e:
             message = f"Error occurred while unsetting default address: {e}"
             logger.error(message, user_id=user_id)
@@ -169,7 +169,7 @@ class UserRepository:
     @classmethod
     async def delete_address(cls, address_id: str):
         try:
-            await cls.data_access.delete_from_table_by_query(Address, {"id": address_id})
+            await cls._data_access.delete_from_table_by_query(Address, {"id": address_id})
         except Exception as e:
             message = f"Error occurred while deleting address: {e}"
             logger.error(message, address_id=address_id)
@@ -179,7 +179,7 @@ class UserRepository:
     @classmethod
     async def load_user_addresses(cls, user_id: str) -> List[Address]:
         try:
-            addresses = await cls.data_access.load_from_table_by_query(Address, {"user_id": user_id})
+            addresses = await cls._data_access.load_from_table_by_query(Address, {"user_id": user_id})
             return addresses
         except Exception as e:
             message = f"Error occurred while retrieving addresses by user ID: {e}"
@@ -189,7 +189,7 @@ class UserRepository:
     @classmethod
     async def load_address_by_id(cls, address_id: str) -> Optional[Address]:
         try:
-            address = await cls.data_access.load_from_table_by_query(Address, {"id: address_id"}, one_or_none=True)
+            address = await cls._data_access.load_from_table_by_query(Address, {"id: address_id"}, one_or_none=True)
             return address
         except Exception as e:
             message = f"Error occurred while retrieving address: {e}"
@@ -198,7 +198,7 @@ class UserRepository:
 
     @classmethod
     async def delete_unverified_users(cls) -> List[str]:
-        async with cls.data_access.get_or_create_session() as session:
+        async with cls._data_access.get_or_create_session() as session:
             async with session.begin():
                 try:
                     result = await session.execute(select(Profile).filter_by(verified_at=None))

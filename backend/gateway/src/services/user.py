@@ -14,7 +14,7 @@ class UserService(Microservice):
 
     @classmethod
     async def register_vehicle(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.driver.vehicle.register_vehicle', data=data)
+        return await cls._call_rpc('driver.vehicle.register', data=data)
 
     @classmethod
     async def resend_auth_code(cls, data: Dict) -> Dict:
@@ -45,16 +45,12 @@ class UserService(Microservice):
         return await cls._call_rpc('user.profile.update_profile', data=data)
 
     @classmethod
-    async def get_user_info_with_credentials(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.profile.get_user_info_with_credentials', data=data)
-
-    @classmethod
     async def get_default_address(cls, data: Dict) -> Dict:
         return await cls._call_rpc('user.address.get_default_address', data=data)
 
     @classmethod
     async def delete_address(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.address.delete_address', data=data)
+        return await cls._call_rpc('user.address.delete', data=data)
 
     @classmethod
     async def set_preferred_address(cls, data: Dict) -> Dict:
@@ -69,9 +65,9 @@ class UserService(Microservice):
         return await cls._call_rpc('user.address.get_all_addresses', data=data)
 
     @classmethod
-    async def update_address(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.address.update_address', data=data)
+    async def update_information(cls, data: Dict) -> Dict:
+        return await cls._call_rpc('user.address.update_information', data=data)
 
     @classmethod
     async def get_vehicle_info(cls, data: Dict) -> Dict:
-        return await cls._call_rpc('user.driver.vehicle.get_info', data=data)
+        return await cls._call_rpc('driver.vehicle.get_info', data=data)

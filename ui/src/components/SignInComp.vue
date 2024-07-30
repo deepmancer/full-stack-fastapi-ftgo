@@ -97,7 +97,7 @@ export default {
                     localStorage.removeItem('token');
                     localStorage.setItem('token', response.data.user_id);
                     this.updateUserId(response.data.user_id);  // Store the user ID in Vuex
-                    this.updateToken(response.data.auth_code);  // Store the user ID in Vuex
+                    this.updateToken(response.data.token);  // Store the user ID in Vuex
                     this.phone = '';
                     this.password = '';
                     this.loading = false;
@@ -147,7 +147,11 @@ export default {
                 })
                 .catch(e => {
                     console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
+                    this.$bvToast.toast(e.response.data.detail[0].msg, {
+                      title: 'Verification Error',
+                      autoHideDelay: 5000,
+                      appendToast: true
+                    });
                 });
         }
     }

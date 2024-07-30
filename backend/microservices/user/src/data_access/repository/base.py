@@ -7,5 +7,5 @@ class BaseRepository:
 
     @classmethod
     async def terminate(cls):
-        if cls.data_access is not None:
-            await cls.data_access.disconnect()
+        if cls._data_access is not None:
+            await cls._data_access.disconnect()

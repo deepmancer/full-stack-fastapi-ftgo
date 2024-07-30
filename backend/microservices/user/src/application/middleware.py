@@ -1,38 +1,41 @@
 from typing import Callable, Any, Dict
 from functools import wraps
-import traceback
 
 from config import LayerNames, BaseConfig
-from config.exceptions import BaseError
-from ftgo_utils.logger import get_logger
-from ftgo_utils.enums import ResponseStatus
+from application import get_logger
 
-def event_middleware(func: Callable) -> Callable:
+from ftgo_utils.enums import ResponseStatus
+from ftgo_utils.errors import ErrorCodes, BaseError, ErrorCategories
+
+logger = get_logger()
+
+def event_middleware(event_name: str, func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(*args, **kwargs) -> Dict[str, Any]:
-        logger = get_logger(layer_name=LayerNames.APP.value, environment=BaseConfig.load_environment())
-
         try:
             result = await func(*args, **kwargs)
-            if not isinstance(result, dict):
+            if not isinstance(result, dict) or not result:
                 logger.warning(f"Expected result to be a dict, got {type(result)} instead.")
                 result = {}
-            
+
             result['status'] = ResponseStatus.SUCCESS.value
             return result
 
         except BaseError as e:
-            logger.error(f"Domain error in {func.__name__}: {e.message}\n{traceback.format_exc()}")
+            logger.exception(f"Error in {event_name}: {e.error_code.value}", payload=e.to_dict())
+            error_code = e.error_code
+            if error_code.category != ErrorCategories.BUSINESS_LOGIC_ERROR:
+                error_code = ErrorCodes.UNKNOWN_ERROR
             return {
                 "status": ResponseStatus.FAILURE.value,
-                "error_message": str(e.message),
+                "error_code": error_code.value,
             }
-        
+
         except Exception as e:
-            logger.error(f"Unhandled error in {func.__name__}: {str(e)}\n{traceback.format_exc()}")
+            logger.exception(f"Error in {event_name}: {ErrorCodes.UNKNOWN_ERROR.value}", payload={"error": str(e)})
             return {
                 "status": ResponseStatus.ERROR.value,
-                "error_message": str(e),
+                "error_code": ErrorCodes.UNKNOWN_ERROR.value,
             }
 
     return wrapper

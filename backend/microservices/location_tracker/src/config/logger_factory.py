@@ -2,9 +2,9 @@ from config.enums import LayerNames
 
 class LoggerFactory:
     @classmethod
-    def get_logger(cls, layer_name):
+    def get_logger(cls, layer):
         from loguru import logger
-        if layer_name not in [layer.value for layer in LayerNames]:
+        if layer not in [layer.value for layer in LayerNames]:
             return logger
 
-        return logger.bind(layer=layer_name)
+        return logger.bind(layer=layer)
