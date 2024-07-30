@@ -47,7 +47,6 @@ async def add_address(request: Request, request_data: AddressInfoMixin):
 
         if status == ResponseStatus.SUCCESS.value:
             return AddressMixin(
-                user_id=user.user_id,
                 **response,
             )
 
@@ -88,13 +87,13 @@ async def set_address_preferency(request: Request, request_data: AddressIdPrefer
     try:
         user: UserStateSchema = request.state.user
         data = request_data.dict()
-        data.update({"user_id": user.user_id})
+        data.update({"user_id": user.user_id, "set_default": True})
         response = await UserService.set_preferred_address(data)
         status = response.pop('status', ResponseStatus.ERROR.value)
 
         if status == ResponseStatus.SUCCESS.value:
             return AddressMixin(
-                user_id=user.user_id,
+                # user_id=user.user_id,
                 **response,
             )
 

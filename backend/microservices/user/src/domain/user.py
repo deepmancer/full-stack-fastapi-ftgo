@@ -308,7 +308,7 @@ class UserDomain:
     async def delete_address(self, address_id: str) -> bool:
         try:
             address = await AddressDomain.load(user_id=self.user_id, address_id=address_id)
-            await address.delete_address()
+            await address.delete()
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.DELETE_ADDRESS_ERROR.value, payload=payload)
