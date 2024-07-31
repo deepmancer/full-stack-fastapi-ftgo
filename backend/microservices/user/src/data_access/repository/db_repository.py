@@ -1,21 +1,26 @@
-from typing import Optional, List, Dict, Type
+from typing import Optional, List, Dict, Type, Union
 from sqlalchemy.future import select
-from sqlalchemy.orm import Session
 
 from asyncpg_client import AsyncPostgres
 from ftgo_utils.errors import ErrorCodes
-
 from config import PostgresConfig
 from data_access import get_logger
 from data_access.repository.base import BaseRepository
-from models.base import Base
+from data_access.models import Profile, Address, VehicleInfo, Base
 from utils import handle_exception
+from dto import BaseDTO, AddressDTO, ProfileDTO, VehicleDTO
 
 class DatabaseRepository(BaseRepository):
     _data_access: Optional[AsyncPostgres] = None
 
+    _dto_model_mapping: Dict[Type[BaseDTO], Type[Base]] = {
+        ProfileDTO: Profile,
+        AddressDTO: Address,
+        VehicleDTO: VehicleInfo,
+    }
+
     @classmethod
-    async def initialize(cls):
+    async def initialize(cls) -> None:
         db_config = PostgresConfig()
         try:
             pg_data_access = await AsyncPostgres.create(
@@ -37,83 +42,97 @@ class DatabaseRepository(BaseRepository):
             await handle_exception(e=e, error_code=ErrorCodes.DB_CONNECTION_ERROR, payload=payload)
 
     @classmethod
-    async def fetch_by_query(cls, model: Type[Base], query: Dict[str, str], one_or_none: bool = False):
+    async def fetch(
+        cls,
+        dto_class: Type[BaseDTO],
+        query: Dict[str, Union[str, int, float]],
+        one_or_none: bool = False,
+        **kwargs
+    ) -> Union[BaseDTO, List[BaseDTO], None]:
+        model_class = cls._get_model_class(dto_class)
         try:
             async with cls._data_access.get_or_create_session() as session:
-                result = await session.execute(select(model).filter_by(**query))
+                result = await session.execute(select(model_class).filter_by(**query))
                 if one_or_none:
-                    return result.scalars().one_or_none()
-                return result.scalars().all()
+                    instance = result.scalars().one_or_none()
+                    return instance.to_dto() if instance else None
+                return [instance.to_dto() for instance in result.scalars().all()]
         except Exception as e:
-            payload = dict(model=model.__name__, query=query)
+            payload = dict(model=model_class.__name__, query=query)
             get_logger().error(ErrorCodes.DB_FETCH_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_FETCH_ERROR, payload=payload)
 
     @classmethod
-    async def insert(cls, model_instance: Base):
+    async def insert(cls, dto_instances: List[BaseDTO], **kwargs) -> Union[BaseDTO, List[BaseDTO], None]:
+        if not dto_instances:
+            return None
+        model_class = cls._get_model_class(type(dto_instances[0]))
+        model_instances = [model_class.from_dto(dto) for dto in dto_instances]
         try:
             async with cls._data_access.get_or_create_session() as session:
-                session.add(model_instance)
+                session.add_all(model_instances)
                 await session.flush()
                 await session.commit()
-                await session.refresh(model_instance)
-                return model_instance
+                for instance in model_instances:
+                    await session.refresh(instance)
+                casted_instances = [instance.to_dto() for instance in model_instances]
+                return casted_instances[0] if len(casted_instances) == 1 else casted_instances
         except Exception as e:
-            payload = dict(model_instance=model_instance.__dict__)
+            payload = dict(dto=[dto.dict() for dto in dto_instances])
             get_logger().error(ErrorCodes.DB_INSERT_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_INSERT_ERROR, payload=payload)
 
     @classmethod
-    async def update_by_query(cls, model: Type[Base], query: Dict[str, str], update_fields: Dict[str, str]):
+    async def update(
+        cls,
+        dto_class: Type[BaseDTO],
+        query: Dict[str, Union[str, int, float]],
+        update_fields: Dict[str, Union[str, int, float]],
+        **kwargs
+    ) -> Union[List[BaseDTO], None]:
+        model_class = cls._get_model_class(dto_class)
         try:
             async with cls._data_access.get_or_create_session() as session:
-                result = await session.execute(select(model).filter_by(**query))
+                result = await session.execute(select(model_class).filter_by(**query))
                 records = result.scalars().all()
-
                 if not records:
-                    return None
-
+                    return []
                 for record in records:
                     for key, value in update_fields.items():
                         setattr(record, key, value)
                     if not session.is_modified(record):
                         session.add(record)
-                    await session.flush()
-
+                await session.flush()
                 await session.commit()
-                
                 for record in records:
                     await session.refresh(record)
-                
-                return records
+                return [record.to_dto() for record in records]
         except Exception as e:
-            payload = dict(model=model.__name__, query=query, update_fields=update_fields)
+            payload = dict(model=model_class.__name__, query=query, update_fields=update_fields)
             get_logger().error(ErrorCodes.DB_UPDATE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_UPDATE_ERROR, payload=payload)
 
     @classmethod
-    async def delete_by_query(cls, model: Type[Base], query: Dict[str, str]):
+    async def delete(cls, dto_class: Type[BaseDTO], query: Dict[str, Union[str, int, float]], **kwargs) -> Union[List[BaseDTO], None]:
+        model_class = cls._get_model_class(dto_class)
         try:
             async with cls._data_access.get_or_create_session() as session:
-                result = await session.execute(select(model).filter_by(**query))
+                result = await session.execute(select(model_class).filter_by(**query))
                 records = result.scalars().all()
-
                 if not records:
-                    return None
-
+                    return []
+                dtos = [record.to_dto() for record in records]
                 for record in records:
                     await session.delete(record)
-
                 await session.commit()
-                return records
-
+                return dtos
         except Exception as e:
-            payload = dict(model=model.__name__, query=query)
+            payload = dict(model=model_class.__name__, query=query)
             get_logger().error(ErrorCodes.DB_DELETE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.DB_DELETE_ERROR, payload=payload)
 
     @classmethod
-    async def terminate(cls):
-        if cls._data_access:
-            await cls._data_access.disconnect()
-            cls._data_access = None
+    def _get_model_class(cls, dto: Union[BaseDTO, Type[BaseDTO]]) -> Type[Base]:
+        if isinstance(dto, type):
+            return cls._dto_model_mapping[dto]
+        return cls._dto_model_mapping[type(dto)]

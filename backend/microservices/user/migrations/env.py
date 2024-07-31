@@ -14,7 +14,7 @@ src_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../src")
 sys.path.append(src_dir)
 
 from config.db import PostgresConfig
-from models import Base
+from data_access.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

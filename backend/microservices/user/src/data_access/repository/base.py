@@ -1,11 +1,29 @@
+from typing import Any
+
+
 class BaseRepository:
-    data_access = None
+    _data_access = None
 
     @classmethod
-    async def initialize(cls, configuration):
+    async def insert(cls, *args, **kwargs) -> Any:
         raise NotImplementedError
 
     @classmethod
-    async def terminate(cls):
-        if cls._data_access is not None:
-            await cls._data_access.disconnect()
+    async def delete(cls, *args, **kwargs) -> Any:
+        raise NotImplementedError
+
+    @classmethod
+    async def update(cls, *args, **kwargs) -> Any:
+        raise NotImplementedError
+
+    @classmethod
+    async def fetch(cls, *args, **kwargs) -> Any:
+        raise NotImplementedError
+
+    @classmethod
+    async def initialize(cls) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    async def terminate(cls) -> None:
+        raise NotImplementedError
