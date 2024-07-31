@@ -38,9 +38,8 @@ class RestaurantDomain:
         self.updated_at = updated_at
         self.menu = None
 
-    @classmethod
+    @staticmethod
     async def load(
-        cls,
         owner_user_id: Optional[str] = None,
         restaurant_id: Optional[str] = None,
         raise_error_on_missing: bool = True,
@@ -57,7 +56,6 @@ class RestaurantDomain:
                     #TODO change error code
                     raise BaseError(error_code=ErrorCodes.USER_NOT_FOUND_ERROR, payload=query_dict)
                 return None
-
             return RestaurantDomain._from_profile(restaurant_profile)
         except Exception as e:
             payload = dict(query=query_dict)
@@ -179,26 +177,25 @@ class RestaurantDomain:
     def _from_profile(profile: Supplier):
         if not profile:
             return None
-
         return RestaurantDomain(
-            restaurant_id=str(profile.id),
-            owner_user_id=str(profile.owner_user_id),
+            restaurant_id=profile.id,
+            owner_user_id=profile.owner_user_id,
             name=profile.name,
             postal_code=profile.postal_code,
             address=profile.address,
             address_lat=profile.address_lat,
             address_lng=profile.address_lng,
             restaurant_licence_id=profile.restaurant_licence_id,
-            created_at=profile.created_at,
-            updated_at=profile.updated_at,
+            created_at=str(profile.created_at),
+            updated_at=str(profile.updated_at),
         )
 
 
-    async def load_all_menu_item(self) -> List[MenuDomain]:
+    async def load_all_menu_item(self):
         try:
             if self.menu is None:
                 menu = await DatabaseRepository.fetch_by_query(MenuItem, query={"restaurant_id": self.restaurant_id})
-                self.menu = [MenuDomain._from_menu_item(food) for food in menu]
+                self.menu = [MenuDomain._from_schema(menu_item) for menu_item in menu]
             return self.menu
         except Exception as e:
             payload = {"restaurant_id": self.restaurant_id}
@@ -210,7 +207,7 @@ class RestaurantDomain:
         try:
             if not self.menu:
                 await self.load_all_menu_item()
-            return [food.get_info() for food in self.menu]
+            return [food.to_dict() for food in self.menu]
         except Exception as e:
             payload = {"restaurant_id": self.restaurant_id}
             #TODO change error code

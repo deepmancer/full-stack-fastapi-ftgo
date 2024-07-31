@@ -15,6 +15,7 @@ class MenuDomain:
         restaurant_id: str,
         name: str,
         price: float,
+        count: int,
         description: str,
         created_at: str,
         updated_at: Optional[str],
@@ -23,6 +24,7 @@ class MenuDomain:
         self.restaurant_id = restaurant_id
         self.name = name
         self.price = price
+        self.count = count
         self.description = description
         self.created_at = created_at
         self.updated_at = updated_at
@@ -32,6 +34,7 @@ class MenuDomain:
         restaurant_id: str,
         name: str,
         price: float,
+        count: int,
         description: str,
     ) -> "MenuDomain":
         try:
@@ -41,6 +44,7 @@ class MenuDomain:
                 restaurant_id=restaurant_id,
                 name=name,
                 price=price,
+                count=count,
                 description=description,
             )
             new_item = await DatabaseRepository.insert(new_item)
@@ -50,6 +54,7 @@ class MenuDomain:
                 "restaurant_id": restaurant_id,
                 "name": name,
                 "price": price,
+                "count": count,
                 "description": description,
             }
             #TODO change error code
@@ -74,6 +79,7 @@ class MenuDomain:
         item_id: str,
         name: Optional[str] = None,
         price: Optional[float] = None,
+        count: Optional[int] = None,
         description: Optional[str] = None,
     ) -> Dict[str, Any]:
         update_fields = {}
@@ -83,6 +89,8 @@ class MenuDomain:
             update_fields["price"] = price
         if description:
             update_fields["description"] = description
+        if count:
+            update_fields["count"] = count
         try:
             updated_item = await DatabaseRepository.update_by_query(
                 MenuItem,
@@ -117,9 +125,10 @@ class MenuDomain:
             restaurant_id=menu_item.restaurant_id,
             name=menu_item.name,
             price=menu_item.price,
+            count=menu_item.count,
             description=menu_item.description,
-            created_at=menu_item.created_at,
-            updated_at=menu_item.updated_at,
+            created_at=str(menu_item.created_at),
+            updated_at=str(menu_item.updated_at),
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -128,6 +137,7 @@ class MenuDomain:
             "restaurant_id": self.restaurant_id,
             "name": self.name,
             "price": self.price,
+            "count": self.count,
             "description": self.description,
             "created_at": self.created_at,
             "updated_at": self.updated_at,

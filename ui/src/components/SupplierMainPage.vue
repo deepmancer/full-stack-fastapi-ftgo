@@ -1,9 +1,12 @@
 <template>
   <div class="restaurant-main-page" style="background-image: url('/images/background.jpg');">
     <b-container>
-    <div class="user-id-box">
+      <div class="user-id-box">
         <b-alert variant="info" show>
           <strong>your user_id is {{ userId }}</strong>
+        </b-alert>
+        <b-alert variant="info" show>
+          <strong>your restaurant is {{ restaurant.id }}</strong>
         </b-alert>
         <b-alert variant="info" show>
           <strong>your token is {{ token }}</strong>
@@ -32,30 +35,48 @@
         </b-row>
         <b-row>
           <b-col>
+            <h2 class="mt-4">افزودن محصول جدید به منو</h2>
+            <b-card>
+              <b-form @submit.prevent="addFood">
+                <b-form-group>
+                  <b-form-input v-model="newItem.name" placeholder="نام محصول" class="rtl-text"></b-form-input>
+                </b-form-group>
+                <b-form-group>
+                  <b-form-input v-model.number="newItem.price" placeholder="قیمت" class="rtl-text"></b-form-input>
+                </b-form-group>
+                <b-form-group>
+                  <b-form-input v-model.number="newItem.count" placeholder="تعداد موجود" class="rtl-text"></b-form-input>
+                </b-form-group>
+                <b-form-group>
+                  <b-form-input v-model="newItem.description" placeholder="توضیحات" class="rtl-text"></b-form-input>
+                </b-form-group>
+                <b-button type="submit">افزودن محصول</b-button>
+              </b-form>
+            </b-card>
+
             <h2 class="mt-4">منو</h2>
+            <b-card>
             <b-list-group>
-              <b-list-group-item
-                v-for="food in menu"
-                :key="food.id"
-                @click="openFoodModal(food)"
-                class="d-flex align-items-center restaurant-item"
-              >
-                <div class="restaurant-info d-flex align-items-center justify-content-between w-100">
-                  <div class="d-flex align-items-center">
-                    <img :src="food.logo" alt="Logo" class="restaurant-logo" />
-                    <div>
-                      <div><strong>امتیاز:</strong> {{ food.score }}</div>
-                      <div><strong>وضعیت:</strong> {{ food.status }}</div>
-                    </div>
+              <b-list-group-item v-for="item in menu" :key="item.item_id" class="rtl-text">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div><strong>آیدی غذا:</strong> {{ item.item_id }}</div>
+                    <div><strong>آیدی رستوران:</strong> {{ item.restaurant_id }}</div>
+                    <div><strong>نام محصول:</strong> {{ item.name }}</div>
+                    <div><strong>قیمت:</strong> {{ item.price }}</div>
+                    <div><strong>موجودی:</strong> {{ item.count }}</div>
+                    <div><strong>توضیحات:</strong> {{ item.description }}</div>
                   </div>
                   <div>
-                    <div>{{ food.name }}</div>
-                    <div><strong>قیمت :</strong> {{ food.price }} تومان</div>
+                    <b-button variant="danger" @click="confirmDeleteItem(item.item_id)">
+                      حذف محصول
+                    </b-button>
                   </div>
-                  <b-icon icon="chevron-right"></b-icon>
                 </div>
               </b-list-group-item>
             </b-list-group>
+          </b-card>
+
           </b-col>
         </b-row>
       </div>
@@ -66,54 +87,26 @@
         </b-button>
       </div>
     </b-container>
-
-    <b-modal
-      v-if="selectedFood"
-      @hide="clearSelectedFood"
-      id="food-modal"
-      title="جزئیات غذا"
-      size="lg"
-      ok-title="ذخیره"
-      ok-variant="success"
-      cancel-title="لغو"
-      cancel-variant="danger"
-      @ok="updateFood"
-    >
-      <div class="d-block">
-        <img :src="selectedFood.logo" alt="Logo" class="restaurant-logo mb-3" />
-        <b-form @submit.prevent="updateFood">
-          <b-form-group label="نام" label-for="food-name">
-            <b-form-input id="food-name" v-model="selectedFood.name" required></b-form-input>
-          </b-form-group>
-          <b-form-group label="قیمت" label-for="food-price">
-            <b-form-input id="food-price" v-model="selectedFood.price" required></b-form-input>
-          </b-form-group>
-          <b-form-group label="وضعیت" label-for="food-status">
-            <b-form-select id="food-status" v-model="selectedFood.status" :options="statusOptions" required></b-form-select>
-          </b-form-group>
-        </b-form>
-      </div>
-
-      <template #modal-footer="{ ok, cancel }">
-        <b-button variant="danger" @click="cancel">لغو</b-button>
-        <b-button variant="success" @click="ok">ذخیره</b-button>
-      </template>
-    </b-modal>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import axios from 'axios';
 
 export default {
   data() {
     return {
       menu: [],
       selectedFood: null,
-      statusOptions: [
-        { value: 'موجود', text: 'موجود' },
-        { value: 'ناموجود', text: 'ناموجود' }
-      ]
+      isEditing: false,
+      newItem: {
+        restaurant_id: '',
+        name: '',
+        price: '',
+        count: '',
+        description: '',
+      }
     };
   },
   computed: {
@@ -129,12 +122,6 @@ export default {
     }
   },
   methods: {
-    async fetchMenu() {
-      if (this.restaurant) {
-        const response = await this.$axios.get('/resturant/menu');
-        this.menu = response.data;
-      }
-    },
     navigateToEditSupplierInfo() {
       this.$router.push({ name: 'ChangeRestaurantInfo' });
     },
@@ -147,20 +134,43 @@ export default {
     navigateToRegisterRestaurant() {
       this.$router.push({ name: 'RegisterRestaurantPage' });
     },
-    openFoodModal(food) {
-      this.selectedFood = { ...food };
-      this.$bvModal.show('food-modal');
+    async fetchMenu() {
+      if (this.restaurant) {
+        try {
+          const response = await axios.post(
+            'http://localhost:8000/api/v1/menu/get_all_menu_item',
+            {restaurant_id: this.restaurant.id},
+            {
+              headers: { Authorization: `Bearer ${this.token}` },
+            }
+          );
+          this.menu = response.data.menu;
+        } catch (error) {
+          console.error('Error fetching menu:', error);
+        }
+      }
     },
-    clearSelectedFood() {
-      this.selectedFood = null;
-    },
-    async updateFood() {
+    async addFood() {
       try {
-        await this.$axios.put(`/resturant/menu/${this.selectedFood.id}`, this.selectedFood);
-        this.$bvModal.hide('food-modal');
-        this.fetchMenu(); // refresh menu list
+        this.newItem.restaurant_id = this.restaurant.id;
+
+        await axios.post(
+          'http://localhost:8000/api/v1/menu/add',
+          this.newItem,
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+
+        this.newItem = {
+          restaurant_id: this.restaurant.id,
+          name: '',
+          price: '',
+          count: '',
+          description: '',
+        };
+
+        await this.fetchMenu();
       } catch (error) {
-        console.error(error);
+        console.error('Error adding food:', error);
       }
     }
   },
@@ -188,15 +198,11 @@ export default {
   margin-top: 50px;
 }
 
-.restaurant-logo {
-  width: 50px;
-  height: 50px;
-  margin-right: 10px;
-  object-fit: cover;
-}
-
 .restaurant-info {
   display: flex;
   align-items: center;
+}
+.rtl-text {
+  direction: rtl;
 }
 </style>

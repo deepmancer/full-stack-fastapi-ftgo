@@ -12,6 +12,7 @@ class MenuService:
         restaurant_id: str,
         name: str,
         price: float,
+        count: int,
         description: str,
         **kwargs,
     ) -> Dict[str, Any]:
@@ -21,11 +22,12 @@ class MenuService:
         :param restaurant_id: ID of the Restaurant.
         :param name: Name of the menu item.
         :param price: Price of the menu item.
+        :param count: Number of menu items.
         :param description: Description of the menu item.
         :return: Dictionary containing the menu item ID.
         """
         item_id = await MenuDomain.add_item(restaurant_id=restaurant_id, name=name, price=price,
-                                              description=description)
+                                            count=count, description=description)
         return {
             "item_id": item_id
         }
@@ -35,6 +37,7 @@ class MenuService:
         item_id: str,
         name: Optional[str] = None,
         price: Optional[float] = None,
+        count: Optional[int] = None,
         description: Optional[str] = None,
         **kwargs,
     ) -> Dict[str, Any]:
@@ -44,6 +47,7 @@ class MenuService:
         :param item_id: ID of the menu item.
         :param name: New name of the menu item.
         :param price: New price of the menu item.
+        :param count: New count of the menu item.
         :param description: New description of the menu item.
         :return: Dictionary containing updated menu item information.
         """
@@ -85,7 +89,8 @@ class MenuService:
         :param restaurant_id: ID of the user.
         :return: Dictionary containing status and a list of menu item.
         """
-        restaurant = await RestaurantDomain.load(restaurant_id)
+
+        restaurant = await RestaurantDomain.load(restaurant_id=restaurant_id)
         menu = await restaurant.get_all_menu_item_info()
         return {
             "menu": menu,

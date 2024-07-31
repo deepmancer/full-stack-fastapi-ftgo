@@ -49,16 +49,6 @@ async def get_supplier_restaurant_info(request: Request):
         response = await RestaurantService.get_supplier_restaurant_info(data=data)
         status = response.pop('status', ResponseStatus.ERROR.value)
         if status == ResponseStatus.SUCCESS.value:
-            print(GetRestaurantInfoResponse(
-                id=response.get('id'),
-                owner_user_id=response.get('owner_user_id'),
-                name=response.get("name"),
-                postal_code=response.get("postal_code"),
-                address=response.get("address"),
-                address_lat=response.get("address_lat"),
-                address_lng=response.get("address_lng"),
-                restaurant_licence_id=response.get("restaurant_licence_id")
-            ))
             return GetRestaurantInfoResponse(
                 id=response.get('id'),
                 owner_user_id=response.get('owner_user_id'),

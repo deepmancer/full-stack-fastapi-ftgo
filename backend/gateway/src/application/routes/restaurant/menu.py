@@ -19,9 +19,10 @@ logger = get_logger()
 
 
 @router.post("/add", response_model=AddMenuItemResponse)
-async def add_item(request: Request, request_data: AddMenuItemRequest):
+async def add_item(request_data: AddMenuItemRequest):
     try:
         data = request_data.dict()
+
         response = await MenuService.add_item(data)
         status = response.pop('status', ResponseStatus.ERROR.value)
 
@@ -35,7 +36,7 @@ async def add_item(request: Request, request_data: AddMenuItemRequest):
             payload=data,
         )
     except Exception as e:
-        await handle_exception(request, e, default_failure_message="Adding menu item failed")
+        await handle_exception(request_data, e, default_failure_message="Adding menu item failed")
         raise
 
 
@@ -105,7 +106,7 @@ async def delete_item(request: Request, request_data: DeleteMenuItemRequest):
         await handle_exception(request, e, default_failure_message="Delete menu item info failed")
         raise
 
-@router.get("/get_all_menu_item", response_model=GetAllMenuItemResponse)
+@router.post("/get_all_menu_item", response_model=GetAllMenuItemResponse)
 async def get_all_menu_item(request: Request, request_data: GetAllMenuItemRequest):
     try:
         data = request_data.dict()
@@ -120,7 +121,7 @@ async def get_all_menu_item(request: Request, request_data: GetAllMenuItemReques
         raise BaseError(
             error_code=ErrorCodes.get_error_code(response.get('error_code')),
             message="Getting all menus failed",
-            payload={"user_id": user.user_id},
+            payload={"data": data},
         )
     except Exception as e:
         await handle_exception(request, e, default_failure_message="Getting all menus failed")

@@ -9,6 +9,7 @@ class AddMenuItemRequest(BaseModel):
     restaurant_id: str = uuid_field()
     name: str = Field(..., min_length=1, max_length=100)
     price: float
+    count: int
     description: str = Field(..., min_length=1, max_length=500)
 
 
@@ -21,6 +22,7 @@ class GetMenuItemInfoRequest(BaseModel):
     restaurant_id: str = uuid_field()
     name: str = Field(..., min_length=1, max_length=100)
     price: float
+    count: int = Field(..., gt=0)
     description: str = Field(..., min_length=1, max_length=500)
 
 
@@ -29,6 +31,7 @@ class GetMenuItemInfoResponse(BaseModel):
     restaurant_id: str = uuid_field()
     name: str = Field(..., min_length=1, max_length=100)
     price: float
+    count: int = Field(..., gt=0)
     description: str = Field(..., min_length=1, max_length=500)
 
 
@@ -36,6 +39,7 @@ class UpdateMenuItemRequest(BaseModel):
     item_id: str = uuid_field()
     name: str = Field(..., min_length=1, max_length=100)
     price: float
+    count: int = Field(..., gt=0)
     description: str = Field(..., min_length=1, max_length=500)
 
 
@@ -53,6 +57,7 @@ class DeleteMenuItemResponse(BaseModel):
 
 class GetAllMenuItemRequest(BaseModel):
     restaurant_id: str = uuid_field()
+
 
 
 class GetAllMenuItemResponse(BaseModel):
