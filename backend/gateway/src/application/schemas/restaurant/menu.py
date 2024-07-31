@@ -7,13 +7,13 @@ from ftgo_utils.schemas import (
 
 class AddMenuItemRequest(BaseModel):
     restaurant_id: str = uuid_field()
-
-
-class AddMenuItemResponse(BaseModel):
-    restaurant_id: str = uuid_field()
     name: str = Field(..., min_length=1, max_length=100)
     price: float
     description: str = Field(..., min_length=1, max_length=500)
+
+
+class AddMenuItemResponse(BaseModel):
+    item_id: str = uuid_field()
 
 
 class GetMenuItemInfoRequest(BaseModel):

@@ -9,7 +9,7 @@ class MenuItem(Base):
     __tablename__ = "menu_item"
 
     item_id = Column(String, primary_key=True, default=lambda: uuid4())
-    restaurant_id = Column(String, ForeignKey("supplier.id"), nullable=False)
+    restaurant_id = Column(String, ForeignKey("supplier_profile.id"), nullable=False)
     name = Column(String, nullable=False)
     price = Column(Float, nullable=False)
     description = Column(String, nullable=False)

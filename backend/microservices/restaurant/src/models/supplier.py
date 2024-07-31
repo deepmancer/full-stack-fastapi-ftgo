@@ -8,7 +8,7 @@ from ftgo_utils.uuid_gen import uuid4
 from models.base import Base
 
 class Supplier(Base):
-    __tablename__ = "supplier"
+    __tablename__ = "supplier_profile"
 
     id = Column(String, primary_key=True, default=lambda: uuid4())
     owner_user_id = Column(String, nullable=False)

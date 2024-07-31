@@ -24,10 +24,10 @@ class MenuService:
         :param description: Description of the menu item.
         :return: Dictionary containing the menu item ID.
         """
-        menu_item = await MenuDomain.add_item(restaurant_id=restaurant_id, name=name, price=price,
+        item_id = await MenuDomain.add_item(restaurant_id=restaurant_id, name=name, price=price,
                                               description=description)
         return {
-            "item_id": menu_item.item_id
+            "item_id": item_id
         }
 
     @staticmethod

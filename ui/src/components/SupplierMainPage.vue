@@ -1,6 +1,14 @@
 <template>
   <div class="restaurant-main-page" style="background-image: url('/images/background.jpg');">
     <b-container>
+    <div class="user-id-box">
+        <b-alert variant="info" show>
+          <strong>your user_id is {{ userId }}</strong>
+        </b-alert>
+        <b-alert variant="info" show>
+          <strong>your token is {{ token }}</strong>
+        </b-alert>
+      </div>
       <div v-if="restaurant">
         <div class="restaurant-header">
           <h1>{{ restaurant.name }}</h1>

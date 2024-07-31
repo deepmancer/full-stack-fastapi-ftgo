@@ -9,6 +9,7 @@ export default new Vuex.Store({
     state: {
         userId: null,
         token: null,
+        authCode: null,
         restaurantInfo: null
     },
     mutations: {
@@ -20,6 +21,9 @@ export default new Vuex.Store({
         },
         setRestaurantInfo(state, restaurantInfo) {
             state.restaurantInfo = restaurantInfo;
+        },
+        setAuthCode(state, authCode) {
+            state.authCode = authCode;
         }
     },
     actions: {
@@ -31,11 +35,15 @@ export default new Vuex.Store({
         },
         updateRestaurantInfo({ commit }, restaurantInfo) {
             commit('setRestaurantInfo', restaurantInfo);
+        },
+        updateAuthCode({ commit }, restaurantInfo) {
+            commit('setAuthCode', restaurantInfo);
         }
     },
     getters: {
         getUserId: state => state.userId,
         getToken: state => state.token,
-        getRestaurantInfo: state => state.restaurantInfo
+        getRestaurantInfo: state => state.restaurantInfo,
+        getAuthCode: state => state.authCode,
     }
 });
