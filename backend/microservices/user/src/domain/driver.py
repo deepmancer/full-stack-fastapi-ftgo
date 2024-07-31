@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 from ftgo_utils.errors import ErrorCodes
 
 from domain import get_logger
-from domain.vehicle import VehicleDomain
+from domain.assets import VehicleDomain
 from domain.user import User
 from utils import handle_exception
 
@@ -47,7 +47,7 @@ class Driver(User):
             get_logger().error(ErrorCodes.VEHICLE_LOAD_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_LOAD_ERROR, payload=payload)
 
-    def get_vehicle_info(self) -> Optional[Dict[str, Any]]:
+    async def get_vehicle_info(self) -> Optional[Dict[str, Any]]:
         try:
             if self.vehicle:
                 return self.vehicle.get_info()

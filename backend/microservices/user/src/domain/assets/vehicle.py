@@ -51,11 +51,13 @@ class VehicleDomain:
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_GET_ERROR, payload=payload)
 
     @staticmethod
-    async def load_driver_vehicle(driver_id: str) -> Optional["VehicleDomain"]:
+    async def load_driver_vehicle(driver_id: str, raise_error_on_missing: bool = True) -> Optional["VehicleDomain"]:
         try:
             vehicle = await DatabaseRepository.fetch(VehicleDTO, query={"driver_id": driver_id}, one_or_none=True)
             if not vehicle:
-                raise BaseError(ErrorCodes.VEHICLE_NOT_FOUND_ERROR, payload={"driver_id": driver_id})
+                if raise_error_on_missing:
+                    raise BaseError(ErrorCodes.VEHICLE_NOT_FOUND_ERROR, payload={"driver_id": driver_id})
+                return None
             return VehicleDomain.from_dto(vehicle)
         except Exception as e:
             payload = {"driver_id": driver_id}

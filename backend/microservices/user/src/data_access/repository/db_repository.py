@@ -63,9 +63,10 @@ class DatabaseRepository(BaseRepository):
             await handle_exception(e=e, error_code=ErrorCodes.DB_FETCH_ERROR, payload=payload)
 
     @classmethod
-    async def insert(cls, dto_instances: List[BaseDTO], **kwargs) -> Union[BaseDTO, List[BaseDTO], None]:
+    async def insert(cls, dto_instances: Union[List[BaseDTO], BaseDTO], **kwargs) -> Union[BaseDTO, List[BaseDTO], None]:
         if not dto_instances:
             return None
+        dto_instances = [dto_instances] if not isinstance(dto_instances, list) else dto_instances
         model_class = cls._get_model_class(type(dto_instances[0]))
         model_instances = [model_class.from_dto(dto) for dto in dto_instances]
         try:

@@ -23,9 +23,11 @@ class UserManager:
         validate_verified: bool = True,
         raise_error_on_missing: bool = True,
         **kwargs,
-    ) -> Union[User, Customer, Driver]:
+    ) -> Optional[User]:
         try:
-            user_profile = User.load_profile(user_id=user_id, phone_number=phone_number, role=role, raise_error_on_missing=raise_error_on_missing)
+            user_profile = await User.load_profile(user_id=user_id, phone_number=phone_number, role=role, raise_error_on_missing=raise_error_on_missing)
+            if not user_profile:
+                return None
             user = UserManager._create_user_from_dto(user_profile)
             if validate_verified and not user.is_verified():
                 raise BaseError(error_code=ErrorCodes.USER_NOT_VERIFIED_ERROR, payload={"user_id": user.user_id})

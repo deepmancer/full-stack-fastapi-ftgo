@@ -14,7 +14,7 @@ def event_middleware(event_name: str, func: Callable) -> Callable:
     async def wrapper(*args, **kwargs) -> Dict[str, Any]:
         try:
             result = await func(*args, **kwargs)
-            if not isinstance(result, dict) or not result:
+            if not isinstance(result, dict) or result is None:
                 logger.warning(f"Expected result to be a dict, got {type(result)} instead.")
                 result = {}
 

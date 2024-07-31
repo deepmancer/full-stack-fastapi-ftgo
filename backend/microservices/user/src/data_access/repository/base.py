@@ -26,4 +26,6 @@ class BaseRepository:
 
     @classmethod
     async def terminate(cls) -> None:
-        raise NotImplementedError
+        if cls._data_access:
+            await cls._data_access.disconnect()
+            cls._data_access = None

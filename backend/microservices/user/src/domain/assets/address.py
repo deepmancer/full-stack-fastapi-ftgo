@@ -69,7 +69,7 @@ class AddressDomain:
             if not addresses:
                 if raise_error_on_missing:
                     raise BaseError(ErrorCodes.ADDRESS_NOT_FOUND_ERROR, payload={"user_id": user_id})
-                return None
+                return []
             return [AddressDomain.from_dto(address) for address in addresses]
         except Exception as e:
             payload = {"user_id": user_id}

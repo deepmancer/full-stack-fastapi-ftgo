@@ -136,22 +136,6 @@ class User:
     def update_from_dto(self, profile: ProfileDTO) -> None:
         self.__init__(**profile.to_dict())
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "user_id": self.user_id,
-            "role": self.role,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
-            "phone_number": self.phone_number,
-            "hashed_password": self.hashed_password,
-            "national_id": self.national_id,
-            "gender": self.gender,
-            "email": self.email,
-            "created_at": self.created_at,
-            "verified_at": self.verified_at,
-            "last_login_time": self.last_login_time,
-        }
-
     @classmethod
     def from_dto(cls, profile: ProfileDTO) -> "User":
         return cls(
@@ -171,3 +155,19 @@ class User:
 
     async def load_private_attributes(self) -> None:
         pass
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "user_id": self.user_id,
+            "role": self.role,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "phone_number": self.phone_number,
+            "hashed_password": self.hashed_password,
+            "national_id": self.national_id,
+            "gender": self.gender,
+            "email": self.email,
+            "created_at": self.created_at,
+            "verified_at": self.verified_at,
+            "last_login_time": self.last_login_time,
+        }

@@ -41,7 +41,7 @@ class Customer(User):
 
     async def load_private_attributes(self) -> None:
         try:
-            self.addresses = await AddressDomain.load_user_addresses(self.user_id)
+            self.addresses = await AddressDomain.load_user_addresses(self.user_id, raise_error_on_missing=False)
         except Exception as e:
             payload = {"user_id": self.user_id}
             get_logger().error(ErrorCodes.BATCH_LOAD_ADDRESS_ERROR.value, payload=payload)
@@ -50,18 +50,18 @@ class Customer(User):
     def get_addresses_info(self) -> List[Dict[str, Any]]:
         return [address.get_info() for address in self.addresses]
 
-    def get_address_info(self, address_id: str) -> Optional[Dict[str, Any]]:
+    async def get_address_info(self, address_id: str) -> Optional[Dict[str, Any]]:
         try:
-            address = self.get_address(address_id)
+            address = await self.get_address(address_id)
             if address:
                 return address.get_info()
             raise BaseError(error_code=ErrorCodes.ADDRESS_NOT_FOUND_ERROR, payload={"address_id": address_id})
         except Exception as e:
             payload = {"user_id": self.user_id, "address_id": address_id}
             get_logger().error(ErrorCodes.GET_ADDRESS_ERROR.value, payload=payload)
-            handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESS_ERROR, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESS_ERROR, payload=payload)
 
-    def get_address(self, address_id: str) -> Optional[AddressDomain]:
+    async def get_address(self, address_id: str) -> Optional[AddressDomain]:
         try:
             address = next((addr for addr in self.addresses if addr.address_id == address_id), None)
             if address:
@@ -78,7 +78,7 @@ class Customer(User):
         update_fields: Dict[str, Optional[str]],
     ) -> Dict[str, Any]:
         try:
-            address = self.get_address(address_id)
+            address = await self.get_address(address_id)
             if address:
                 await address.update_information(**update_fields)
                 self.addresses = await AddressDomain.load_user_addresses(self.user_id)
@@ -134,7 +134,7 @@ class Customer(User):
 
     async def delete_address(self, address_id: str) -> bool:
         try:
-            address = self.get_address(address_id)
+            address = await self.get_address(address_id)
             if address:
                 await address.delete()
                 self.addresses = [addr for addr in self.addresses if addr.address_id != address_id]
@@ -148,7 +148,7 @@ class Customer(User):
 
     async def set_address_as_default(self, address_id: str) -> Dict[str, Any]:
         try:
-            address = self.get_address(address_id)
+            address = await self.get_address(address_id)
             if address and not address.is_default:
                 default_address = next((addr for addr in self.addresses if addr.is_default), None)
 
