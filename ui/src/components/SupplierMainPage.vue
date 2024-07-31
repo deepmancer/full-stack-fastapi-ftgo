@@ -1,17 +1,6 @@
 <template>
   <div class="restaurant-main-page" style="background-image: url('/images/background.jpg');">
     <b-container>
-      <div class="user-id-box">
-        <b-alert variant="info" show>
-          <strong>your user_id is {{ userId }}</strong>
-        </b-alert>
-        <b-alert variant="info" show>
-          <strong>your restaurant is {{ restaurant.id }}</strong>
-        </b-alert>
-        <b-alert variant="info" show>
-          <strong>your token is {{ token }}</strong>
-        </b-alert>
-      </div>
       <div v-if="restaurant">
         <div class="restaurant-header">
           <h1>{{ restaurant.name }}</h1>
@@ -35,9 +24,9 @@
         </b-row>
         <b-row>
           <b-col>
-            <h2 class="mt-4">افزودن محصول جدید به منو</h2>
+            <h2 class="mt-4">{{ editMode ? 'به‌روزرسانی محصول' : 'افزودن محصول جدید به منو' }}</h2>
             <b-card>
-              <b-form @submit.prevent="addFood">
+              <b-form @submit.prevent="editMode ? updateFood() : addFood()">
                 <b-form-group>
                   <b-form-input v-model="newItem.name" placeholder="نام محصول" class="rtl-text"></b-form-input>
                 </b-form-group>
@@ -50,33 +39,34 @@
                 <b-form-group>
                   <b-form-input v-model="newItem.description" placeholder="توضیحات" class="rtl-text"></b-form-input>
                 </b-form-group>
-                <b-button type="submit">افزودن محصول</b-button>
+                <b-button type="submit">{{ editMode ? 'به‌روزرسانی محصول' : 'افزودن محصول' }}</b-button>
+                <b-button v-if="editMode" @click="cancelEdit" variant="secondary">لغو</b-button>
               </b-form>
             </b-card>
 
             <h2 class="mt-4">منو</h2>
             <b-card>
-            <b-list-group>
-              <b-list-group-item v-for="item in menu" :key="item.item_id" class="rtl-text">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <div><strong>آیدی غذا:</strong> {{ item.item_id }}</div>
-                    <div><strong>آیدی رستوران:</strong> {{ item.restaurant_id }}</div>
-                    <div><strong>نام محصول:</strong> {{ item.name }}</div>
-                    <div><strong>قیمت:</strong> {{ item.price }}</div>
-                    <div><strong>موجودی:</strong> {{ item.count }}</div>
-                    <div><strong>توضیحات:</strong> {{ item.description }}</div>
+              <b-list-group>
+                <b-list-group-item v-for="item in menu" :key="item.item_id" class="rtl-text">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div><strong>نام محصول:</strong> {{ item.name }}</div>
+                      <div><strong>قیمت:</strong> {{ item.price }}</div>
+                      <div><strong>موجودی:</strong> {{ item.count }}</div>
+                      <div><strong>توضیحات:</strong> {{ item.description }}</div>
+                    </div>
+                    <div v-if="!editMode">
+                      <b-button variant="danger" @click="confirmDeleteItem(item.item_id)">
+                        حذف محصول
+                      </b-button>
+                      <b-button variant="warning" @click="editItem(item)">
+                        ویرایش محصول
+                      </b-button>
+                    </div>
                   </div>
-                  <div>
-                    <b-button variant="danger" @click="confirmDeleteItem(item.item_id)">
-                      حذف محصول
-                    </b-button>
-                  </div>
-                </div>
-              </b-list-group-item>
-            </b-list-group>
-          </b-card>
-
+                </b-list-group-item>
+              </b-list-group>
+            </b-card>
           </b-col>
         </b-row>
       </div>
@@ -98,15 +88,15 @@ export default {
   data() {
     return {
       menu: [],
-      selectedFood: null,
-      isEditing: false,
       newItem: {
         restaurant_id: '',
         name: '',
         price: '',
         count: '',
         description: '',
-      }
+      },
+      editMode: false,
+      currentItem: null,
     };
   },
   computed: {
@@ -160,19 +150,65 @@ export default {
           { headers: { Authorization: `Bearer ${this.token}` } }
         );
 
-        this.newItem = {
-          restaurant_id: this.restaurant.id,
-          name: '',
-          price: '',
-          count: '',
-          description: '',
-        };
+        this.resetNewItem();
 
         await this.fetchMenu();
       } catch (error) {
         console.error('Error adding food:', error);
       }
-    }
+    },
+    async updateFood() {
+      try {
+        await axios.put(
+          'http://localhost:8000/api/v1/menu/update',
+          this.newItem,
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+
+        this.resetNewItem();
+        this.editMode = false;
+        this.currentItem = null;
+
+        await this.fetchMenu();
+      } catch (error) {
+        console.error('Error updating food:', error);
+      }
+    },
+    resetNewItem() {
+      this.newItem = {
+        restaurant_id: this.restaurant.id,
+        name: '',
+        price: '',
+        count: '',
+        description: '',
+      };
+    },
+    async deleteItem(itemId) {
+      try {
+        await axios.delete('http://localhost:8000/api/v1/menu/delete', {
+          data: {item_id: itemId },
+          headers: { Authorization: `Bearer ${this.token}` }
+        });
+        this.fetchMenu();
+      } catch (error) {
+        console.error('Error deleting item:', error);
+      }
+    },
+    async confirmDeleteItem(itemId) {
+      if (confirm('آیا از حذف این محصول اطمینان دارید؟')) {
+        this.deleteItem(itemId);
+      }
+    },
+    editItem(item) {
+      this.editMode = true;
+      this.currentItem = item;
+      this.newItem = { ...item };
+    },
+    cancelEdit() {
+      this.editMode = false;
+      this.currentItem = null;
+      this.resetNewItem();
+    },
   },
   async created() {
     await this.fetchMenu();
