@@ -19,9 +19,7 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt /tmp/requirements.txt
 
 
-RUN pip install -r /tmp/requirements.txt --no-cache-dir
-
-RUN pip install git+https://github.com/alirezaheidari-cs/ftgo-utils.git
+RUN pip install -r /tmp/requirements.txt --no-cache-dir --force-reinstall
 
 # Copy the application code to the container
 COPY . /user
