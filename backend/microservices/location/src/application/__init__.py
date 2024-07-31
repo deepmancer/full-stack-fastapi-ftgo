@@ -1,0 +1,11 @@
+from ftgo_utils.logger import get_logger as _get_logger
+
+from config import ServiceConfig, LayerNames
+
+layer = LayerNames.APP.value
+
+def get_logger(layer: str = layer):
+    return _get_logger(layer=layer, env=ServiceConfig.load_environment())
+
+from application.driver import DriverService
+from application.tracking import TrackerService
