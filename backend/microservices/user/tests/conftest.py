@@ -32,7 +32,6 @@ async def cache_repository(fake_redis):
 
 @pytest_asyncio.fixture
 async def setup_and_teardown_cache(cache_repository):
-    """Setup and teardown for each test using CacheRepository."""
     async with cache_repository._data_access.get_or_create_session() as session:
         await session.flushdb()
     yield

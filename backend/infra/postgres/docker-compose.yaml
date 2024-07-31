@@ -23,15 +23,31 @@ services:
       - POSTGRES_PASSWORD=restaurant_password
       - POSTGRES_DB=restaurant_database
     ports:
-      - "5439:5432"
+      - "5440:5432"
     volumes:
       - restaurant_postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+  location_postgres:
+    image: postgres:16.3
+    container_name: "location_postgres"
+    hostname: "location_postgres"
+    environment:
+      - POSTGRES_USER=location_user
+      - POSTGRES_PASSWORD=location_password
+      - POSTGRES_DB=location_database
+    ports:
+      - "5439:5432"
+    volumes:
+      - location_postgres_data:/var/lib/postgresql/data
     networks:
       - backend-network
 
 volumes:
   user_postgres_data:
   restaurant_postgres_data:
+  location_postgres_data:
 
 networks:
   backend-network:

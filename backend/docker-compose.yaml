@@ -83,6 +83,33 @@ services:
       - backend-network
 
 
+  location_service:
+    build:
+      context: ./microservices/location
+      dockerfile: Dockerfile
+    container_name: "location_service"
+    env_file:
+      - ./microservices/location/.env
+    environment:
+      - ENVIRONMENT=test
+      - DEBUG=true
+      - RABBITMQ_USER=rabbitmq_user
+      - RABBITMQ_PASS=rabbitmq_password
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - REDIS_HOST=location_redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=location_password
+      - POSTGRES_HOST=location_postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=location_user
+      - POSTGRES_PASSWORD=location_password
+      - POSTGRES_DB=location_database
+    networks:
+      - backend-network
+
 networks:
   backend-network:
     external: true
