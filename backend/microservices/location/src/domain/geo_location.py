@@ -85,11 +85,10 @@ class GeoLocation:
         return get_hexagon_id(lat=self.latitude, lng=self.longitude, resolution=resolution)
 
     def to_dict(self) -> dict:
-        timestamp = datetime.datetime.fromtimestamp(self.timestamp) if isinstance(self.timestamp, (float, int)) else self.timestamp 
         return {
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "timestamp": timestamp,
+            "timestamp": self.timestamp,
             "accuracy": self.accuracy,
             "speed": self.speed,
             "bearing": self.bearing,

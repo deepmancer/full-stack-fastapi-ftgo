@@ -21,7 +21,8 @@ class DriverLocation:
     async def get_valid_locations(self) -> List[GeoLocation]:
         valid_locations = [loc for loc in self.locations if loc.is_valid()]
         last_location = await self.load_last_location()
-        valid_locations.append(last_location)
+        if last_location:
+            valid_locations.append(last_location)
         sorted_locations = sorted(valid_locations, key=lambda x: x.timestamp, reverse=True)
         return sorted_locations[:self.config.keep_last_locations_count]
 
@@ -77,11 +78,13 @@ class DriverLocation:
             get_logger().error(ErrorCodes.LOCATION_SAVE_ERROR.value, payload=payload)
             await handle_exception(e, ErrorCodes.LOCATION_SAVE_ERROR, payload=payload)
 
-    async def load_last_location(self) -> GeoLocation:
+    async def load_last_location(self) -> Optional[GeoLocation]:
         try:
             cache_key = self.config.cache_key
             cache = CacheRepository.get_cache(cache_key)
             location_dict = await cache.fetch(self.driver_id)
+            if location_dict is None:
+                return None
             location = GeoLocation.from_dict(location_dict)
             return location
         except Exception as e:
