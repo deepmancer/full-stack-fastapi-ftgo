@@ -35,6 +35,25 @@ services:
     networks:
       - backend-network
 
+
+  restaurant_redis:
+    image: redis:7.2.5
+    restart: always
+    container_name: "restaurant_redis"
+    hostname: "restaurant_redis"
+    ports:
+      - "6236:6379"
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=restaurant_password
+    command: [ "redis-server", "--requirepass", "restaurant_password", "--loglevel", "notice", "--maxmemory", "500mb" ]
+    volumes:
+      - restaurant_redis_data:/data
+    networks:
+      - backend-network
+
   location_redis:
     image: redis:7.2.5
     restart: always
@@ -56,6 +75,7 @@ services:
 volumes:
   gateway_redis_data:
   user_redis_data:
+  restaurant_redis_data:
   location_redis_data:
 
 networks:

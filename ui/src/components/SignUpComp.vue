@@ -61,41 +61,6 @@
                                     <b-form-input placeholder="شماره پلاک" v-model="plateNumber"></b-form-input>
                                 </b-input-group>
                             </div>
-                            <div v-if="userRole === 'restaurant'">
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-store"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="نام رستوران" v-model="restaurantName"></b-form-input>
-                                </b-input-group>
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="آدرس رستوران" v-model="restaurantAddress"></b-form-input>
-                                </b-input-group>
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="شهر رستوران" v-model="restaurantCity"></b-form-input>
-                                </b-input-group>
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-map-marker-alt"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="کدپستی رستوران" v-model="postalCode"></b-form-input>
-                                </b-input-group>
-                            </div>
-
                             <div class="form-group form-button mt-5">
                                 <b-button variant="secondary" @click="signup()">
                                     <b-spinner v-if="loading" label="Spinning"></b-spinner>
@@ -143,7 +108,7 @@ export default {
             userRoles: [
                 { value: 'customer', text: 'مشتری' },
                 { value: 'courier', text: 'پیک' },
-                { value: 'restaurant', text: 'رستوران' }
+                { value: 'restaurant_admin', text: 'رستوران' }
             ],
             loading: false
         };
@@ -154,30 +119,13 @@ export default {
             this.loading = true;
             let api = "http://localhost:8000/api/v1/auth/register";
             const data = {
+                national_id: this.nationalId,
+                role: this.userRole,
                 first_name: this.firstName,
                 last_name: this.lastName,
                 phone_number: this.phone,
                 password: this.password,
-                role: this.userRole,
-                national_id: this.nationalId,
             };
-            // if (this.userRole === 'restaurant') {
-            //     api = "http://localhost:5021/restaurant/restaurant/register";
-            //     const data = {
-            //     name: this.restaurantName,
-            //     address_line: this.restaurantAddress,
-            //     city: this.restaurantCity,
-            //     postal_code: this.postalCode,
-            //     holder_first_name: this.firstName,
-            //     holder_last_name: this.lastName,
-            //     holder_national_id: this.nationalId,
-            //     holder_phone_number: this.phone,
-            //     role: this.userRole,
-            //     password: this.password,
-            // };
-            // }
-
-
             Vue.axios.post(api, data)
                 .then(response => {
                     console.log(response);

@@ -1,18 +1,13 @@
-import os
 from fastapi import APIRouter, status, HTTPException, Request
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 from application import get_logger
 from application.exceptions import handle_exception
-from application.schemas.auth.registration import (
-    UserAuthCodeSchema, UpdateProfileSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
-)
 from application.schemas.common import EmptyResponse, SuccessResponse
 from ftgo_utils.schemas import (
     UserIdMixin, UserInfoMixin, UserMixin
 )
 from ftgo_utils.errors import BaseError, ErrorCodes
 from application.schemas.user import UserStateSchema
+from application.schemas.account.profile import UserInfo
 from ftgo_utils.enums import ResponseStatus
 from services.user import UserService
 
@@ -36,7 +31,7 @@ async def logout(request: Request):
     except Exception as e:
         await handle_exception(request, e, default_failure_message="Logout failed")
 
-@router.get("/user_info", response_model=UserInfoMixin)
+@router.get("/user_info", response_model=UserInfo)
 async def get_info(request: Request):
     try:
         user: UserStateSchema = request.state.user
@@ -44,14 +39,14 @@ async def get_info(request: Request):
         response = await UserService.get_profile_info(data={"user_id": user.user_id})
         
         if response.get('status') == ResponseStatus.SUCCESS.value:
-            return UserInfoMixin(
+            return UserInfo(
                 first_name=response.get("first_name"),
                 last_name=response.get("last_name"),
                 phone_number=response.get("phone_number"),
                 national_id=response.get("national_id"),
                 role=response.get("role"),
                 gender=response.get("gender"),
-                email=response.get("email"),
+                # email=response.get("email"),
             )
         
         raise BaseError(

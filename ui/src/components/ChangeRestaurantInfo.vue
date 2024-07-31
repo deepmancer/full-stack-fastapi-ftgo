@@ -3,10 +3,9 @@
     <section class="change-restaurant-info">
       <div class="container">
         <div class="change-restaurant-info-content">
-
           <div class="change-restaurant-info-form">
             <h2 class="form-title">اطلاعات رستوران</h2>
-            <form class="register-form" id="register-form" @submit.prevent="registerRestaurant">
+            <form class="register-form" id="register-form" @submit.prevent="updateRestaurant">
               <b-input-group class="mt-3">
                 <template #prepend>
                   <b-input-group-text>
@@ -47,25 +46,27 @@
                 </template>
                 <b-form-input placeholder="طول جغرافیایی رستوران" v-model="restaurantLng" required></b-form-input>
               </b-input-group>
-              <b-input-group class="mt-3">
-                <template #prepend>
-                  <b-input-group-text>
-                    <font-awesome-icon icon="fa-solid fa-id-card" />
-                  </b-input-group-text>
-                </template>
-                <b-form-input placeholder="شناسه مجوز رستوران" v-model="restaurantLicenceId" required></b-form-input>
-              </b-input-group>
 
               <div class="form-group form-button mt-5">
-                <b-button variant="secondary" type="submit">
-                  <b-spinner v-if="loading" label="Spinning"></b-spinner>
-                  <span v-else>ثبت‌نام</span>
+                <b-button variant="secondary" type="submit" :disabled="loading">
+                  <b-spinner v-if="loading" small></b-spinner>
+                  <span v-else>به‌روزرسانی</span>
                 </b-button>
               </div>
             </form>
             <div class="form-group form-button mt-3">
               <b-button variant="primary" @click="navigateBack">
                 بازگشت
+              </b-button>
+            </div>
+            <div class="form-group form-button mt-3">
+              <b-button variant="danger" @click="showDeleteRestaurantModal">
+                حذف رستوران
+              </b-button>
+            </div>
+            <div class="form-group form-button mt-3">
+              <b-button variant="danger" @click="showDeleteAccountModal">
+                حذف حساب کاربری
               </b-button>
             </div>
           </div>
@@ -75,6 +76,30 @@
         </div>
       </div>
     </section>
+
+    <!-- Delete Restaurant Modal -->
+    <b-modal
+      id="delete-restaurant-modal"
+      title="حذف رستوران"
+      @ok="deleteRestaurant"
+      ok-variant="danger"
+      ok-title="حذف"
+      cancel-title="لغو"
+    >
+      <p>آیا از حذف رستوران اطمینان دارید؟</p>
+    </b-modal>
+
+    <!-- Delete Account Modal -->
+    <b-modal
+      id="delete-account-modal"
+      title="حذف حساب کاربری"
+      @ok="deleteAccount"
+      ok-variant="danger"
+      ok-title="حذف"
+      cancel-title="لغو"
+    >
+      <p>آیا از حذف حساب کاربری و رستوران خود، اطمینان دارید؟</p>
+    </b-modal>
   </div>
 </template>
 
@@ -85,6 +110,7 @@ import VueAxios from "vue-axios";
 Vue.use(VueAxios, axios);
 import { BVToastPlugin } from "bootstrap-vue";
 Vue.use(BVToastPlugin);
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   data() {
@@ -94,41 +120,140 @@ export default {
       restaurantAddress: '',
       restaurantLat: '',
       restaurantLng: '',
-      restaurantLicenceId: '',
       loading: false
     };
   },
+  computed: {
+    ...mapGetters(['getUserId', 'getToken', 'getRestaurantInfo']),
+    userId() {
+      return this.getUserId;
+    },
+    token() {
+      return this.getToken;
+    },
+    restaurant() {
+      return this.getRestaurantInfo;
+    }
+  },
   methods: {
-    registerRestaurant() {
+    ...mapActions(['updateRestaurantInfo']),
+    async updateRestaurant() {
       this.loading = true;
-      const api = "http://localhost:8000/api/v1/restaurants";
-      const data = {
-        name: this.restaurantName,
-        postal_code: this.postalCode,
-        address: this.restaurantAddress,
-        lat: this.restaurantLat,
-        lng: this.restaurantLng,
-        licence_id: this.restaurantLicenceId,
-      };
-
-      Vue.axios.post(api, data)
-        .then(response => {
-          console.log(response);
-          this.loading = false;
-          this.$router.push({ name: 'SupplierMainPage' });
-        }).catch((e) => {
-          console.log(e);
-          this.$bvToast.toast(e.response.data.message, {
-            title: 'پیام خطا',
-            autoHideDelay: 5000,
-            appendToast: true
-          });
-          this.loading = false;
+      try {
+        const updateInfo = {
+          restaurant_id: this.restaurant.id,
+          name: this.restaurantName,
+          postal_code: this.postalCode,
+          address: this.restaurantAddress,
+          address_lat: this.restaurantLat,
+          address_lng: this.restaurantLng,
+        };
+        await axios.put(
+          'http://localhost:8000/api/v1/restaurant/update',
+          updateInfo,
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+        this.$bvToast.toast('اطلاعات رستوران با موفقیت به‌روزرسانی شد!', {
+          title: 'Success',
+          variant: 'success',
+          solid: true
         });
+
+        await this.fetchAndStoreRestaurantInfo();
+        this.$router.push({ name: 'SupplierMainPage' });
+      } catch (error) {
+        console.error('Error updating restaurant:', error);
+        this.$bvToast.toast('Error updating restaurant. Please try again.', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchAndStoreRestaurantInfo() {
+      try {
+        const response = await Vue.axios.get('http://localhost:8000/api/v1/restaurant/get_supplier_restaurant_info', {
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
+        });
+        if (response.data && response.data.id) {
+          this.updateRestaurantInfo(response.data);
+        } else {
+          this.updateRestaurantInfo(null);
+        }
+      } catch (error) {
+        this.updateRestaurantInfo(null);
+        console.error('Failed to fetch restaurant info:', error);
+      }
+    },
+    async deleteRestaurant() {
+      try {
+        await axios.delete('http://localhost:8000/api/v1/restaurant/delete', {
+          data: {restaurant_id: this.restaurant.id},
+          headers: { Authorization: `Bearer ${this.token}` }
+        });
+        this.$bvToast.toast('رستوران با موفقیت حذف شد!', {
+          title: 'Success',
+          variant: 'success',
+          solid: true
+        });
+        await this.fetchAndStoreRestaurantInfo();
+        this.$router.push({ name: 'SupplierMainPage' });
+      } catch (error) {
+        console.error('Error deleting restaurant:', error);
+        this.$bvToast.toast('Error deleting restaurant. Please try again.', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+      }
+    },
+    async deleteAccount() {
+      try {
+        await this.deleteRestaurant();
+        await this.fetchAndStoreRestaurantInfo();
+        await axios.delete('http://localhost:8000/api/v1/profile/delete', {
+          headers: { Authorization: `Bearer ${this.token}` }
+        });
+        this.$bvToast.toast('حساب کاربری با موفقیت حذف شد!', {
+          title: 'Success',
+          variant: 'success',
+          solid: true
+        });
+
+        this.$store.dispatch('logout');
+        this.$router.push({ name: '/' });
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        this.$bvToast.toast('Error deleting account. Please try again.', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+      }
+    },
+    showDeleteRestaurantModal() {
+      this.$bvModal.show('delete-restaurant-modal');
+    },
+    showDeleteAccountModal() {
+      this.$bvModal.show('delete-account-modal');
     },
     navigateBack() {
       this.$router.push({ name: 'SupplierMainPage' });
+    },
+    initializeForm() {
+      this.restaurantName = this.restaurant.name || '';
+      this.postalCode = this.restaurant.postal_code || '';
+      this.restaurantAddress = this.restaurant.address || '';
+      this.restaurantLat = this.restaurant.address_lat || '';
+      this.restaurantLng = this.restaurant.address_lng || '';
     }
+  },
+  created() {
+    this.initializeForm();
   }
 }
 </script>
