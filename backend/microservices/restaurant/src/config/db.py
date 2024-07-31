@@ -13,7 +13,7 @@ class PostgresConfig(BaseConfig):
         enable_expire_on_commit: bool = None,
     ):
         self.host = host or env_var("POSTGRES_HOST", default="localhost")
-        self.port = port or env_var("POSTGRES_PORT", default=5439, cast_type=int)
+ّ        self.port = port or env_var("POSTGRES_PORT", default=5440, cast_type=int)
         self.db = db or env_var("POSTGRES_DB", default="restaurant_database")
         self.user = user or env_var("POSTGRES_USER", default="restaurant_user")
         self.password = password or env_var("POSTGRES_PASSWORD", default="restaurant_password")
