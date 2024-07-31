@@ -67,16 +67,30 @@ class RestaurantService:
         return restaurant.get_info()
 
     @staticmethod
-    async def update_information(restaurant_id: str, update_data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+    async def update_information(restaurant_id: str,
+                                 name: str,
+                                 postal_code: str,
+                                 address: str,
+                                 address_lat: float,
+                                 address_lng: float,
+                                 **kwargs) -> Dict[str, Any]:
         """
         Updates restaurant profile information.
 
         :param restaurant_id: ID of the restaurant.
-        :param update_data: Dictionary containing the updated restaurant information.
+        :param name: Name of the restaurant.
+        :param postal_code: Postal Code of the restaurant.
+        :param address: Address of the restaurant.
+        :param address_lat: Address's latitude.
+        :param address_lng: Address's longitude.''
         :return: Dictionary containing updated restaurant information.
         """
-        restaurant = await RestaurantDomain.load(restaurant_id=restaurant_id)
-        return await restaurant.update_profile_information(update_data)
+        return await RestaurantDomain.update_profile_information(restaurant_id=restaurant_id,
+                                                                 name=name,
+                                                                 postal_code=postal_code,
+                                                                 address=address,
+                                                                 address_lat=address_lat,
+                                                                 address_lng=address_lng)
 
     @staticmethod
     async def delete_restaurant(restaurant_id: str, **kwargs) -> Dict[str, str]:

@@ -6,7 +6,9 @@ from application import get_logger
 
 from application.schemas.restaurant.restaurant import (
     RegisterRestaurantRequest, RegisterRestaurantResponse,
-    GetRestaurantInfoResponse, DeleteRestaurantResponse
+    DeleteRestaurantRequest, DeleteRestaurantResponse,
+    UpdateRestaurantRequest, UpdateRestaurantResponse,
+    GetRestaurantInfoResponse,
 )
 from application.schemas.user import UserStateSchema
 from application.exceptions import handle_exception
@@ -69,19 +71,44 @@ async def get_supplier_restaurant_info(request: Request):
         await handle_exception(request, e, default_failure_message="Get restaurant info failed")
 
 @router.delete("/delete", response_model=DeleteRestaurantResponse)
-async def delete_account(request: Request):
+async def delete_restaurant(request: Request, request_data: DeleteRestaurantRequest):
     try:
-        user: UserSchema = request.state.user
-        response = await RestaurantService.delete_restaurant(data={"restaurant_id": user.restaurant_id})
-        if response.get('status') == ResponseStatus.ERROR.value:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response.get('error_message', 'Restaurant deletion failed')
+        data = request_data.dict()
+        response = await RestaurantService.delete_restaurant(data=data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
+
+        if status == ResponseStatus.SUCCESS.value:
+            return DeleteRestaurantResponse(
+                **response,
             )
-        return DeleteRestaurantResponse(success=True)
-    except Exception as e:
-        logger.error(f"Error occurred while deleting the restaurant: {e}", exc_info=True)
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder({"detail": str(e)})
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Delete restaurant failed",
+            payload=data,
         )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Delete restaurant failed")
+        raise
+
+
+@router.put("/update", response_model=UpdateRestaurantResponse)
+async def update_information(request: Request, request_data: UpdateRestaurantRequest):
+    try:
+        data = request_data.dict()
+        response = await RestaurantService.update_information(data=data)
+        status = response.pop('status', ResponseStatus.ERROR.value)
+
+        if status == ResponseStatus.SUCCESS.value:
+            return UpdateRestaurantResponse(
+                **response,
+            )
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Update restaurant info failed",
+            payload=data,
+        )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Update restaurant info failed")
+        raise

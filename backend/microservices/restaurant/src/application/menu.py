@@ -51,7 +51,7 @@ class MenuService:
         :param description: New description of the menu item.
         :return: Dictionary containing updated menu item information.
         """
-        return await MenuDomain.update_item(item_id=item_id, name=name, price=price,
+        return await MenuDomain.update_item(item_id=item_id, name=name, price=price, count=count,
                                             description=description)
 
     @staticmethod

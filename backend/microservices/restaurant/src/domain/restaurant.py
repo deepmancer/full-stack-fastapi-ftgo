@@ -56,7 +56,7 @@ class RestaurantDomain:
                     #TODO change error code
                     raise BaseError(error_code=ErrorCodes.USER_NOT_FOUND_ERROR, payload=query_dict)
                 return None
-            return RestaurantDomain._from_profile(restaurant_profile)
+            return RestaurantDomain._from_schema(restaurant_profile)
         except Exception as e:
             payload = dict(query=query_dict)
             #TODO change error code
@@ -102,38 +102,38 @@ class RestaurantDomain:
             get_logger().error(ErrorCodes.USER_REGISTRATION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.USER_REGISTRATION_ERROR, payload=payload)
 
-    async def update_profile_information(self, update_fields: Dict[str, Optional[str]]):
+    @staticmethod
+    async def update_profile_information(
+            restaurant_id: str,
+            name: Optional[str] = None,
+            postal_code: Optional[str] = None,
+            address: Optional[str] = None,
+            address_lat: Optional[float] = None,
+            address_lng: Optional[float] = None,
+    ):
+        update_fields = {}
+        if name:
+            update_fields["name"] = name
+        if postal_code:
+            update_fields["postal_code"] = postal_code
+        if address:
+            update_fields["address"] = address
+        if address_lat:
+            update_fields["address_lat"] = address_lat
+        if address_lng:
+            update_fields["address_lng"] = address_lng
+
+        if not update_fields:
+            return restaurant_id
         try:
-            name = update_fields.get("name")
-            postal_code = update_fields.get("postal_code")
-            address = update_fields.get("address")
-            address_lat = update_fields.get("address_lat")
-            address_lng = update_fields.get("address_lng")
-
-            new_fields = {}
-            if name:
-                new_fields["name"] = name
-            if postal_code:
-                new_fields["postal_code"] = postal_code
-            if address:
-                new_fields["address"] = address
-            if address_lat:
-                new_fields["address_lat"] = address_lat
-            if address_lng:
-                new_fields["address_lng"] = address_lng
-
-            if not new_fields:
-                return {}
-
-            updated_profile = await DatabaseRepository.update_by_query(
+            updated_item = await DatabaseRepository.update_by_query(
                 Supplier,
-                query={"id": self.restaurant_id},
-                update_fields=new_fields,
+                query={"id": restaurant_id},
+                update_fields=update_fields,
             )
-            self._update_from_schema(updated_profile[0])
-            return self.get_info()
+            return RestaurantDomain._from_schema(updated_item[0]).to_dict()
         except Exception as e:
-            payload = dict(restaurant_id=self.restaurant_id, update_fields=update_fields)
+            payload = dict(restaurant_id=restaurant_id, update_fields=update_fields)
             #TODO change error code
             get_logger().error(ErrorCodes.USER_PROFILE_UPDATE_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.USER_PROFILE_UPDATE_ERROR, payload=payload)
@@ -162,7 +162,7 @@ class RestaurantDomain:
         return {key: value for key, value in info_dict.items() if value is not None}
 
     def _update_from_schema(self, profile: Supplier):
-        updated_restaurant = RestaurantDomain._from_profile(profile)
+        updated_restaurant = RestaurantDomain._from_schema(profile)
         if not updated_restaurant:
             return
         self.name = updated_restaurant.name
@@ -174,9 +174,7 @@ class RestaurantDomain:
         self.updated_at = updated_restaurant.updated_at
 
     @staticmethod
-    def _from_profile(profile: Supplier):
-        if not profile:
-            return None
+    def _from_schema(profile: Supplier):
         return RestaurantDomain(
             restaurant_id=profile.id,
             owner_user_id=profile.owner_user_id,
@@ -213,3 +211,17 @@ class RestaurantDomain:
             #TODO change error code
             get_logger().error(ErrorCodes.GET_ADDRESSES_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.GET_ADDRESSES_ERROR, payload=payload)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "restaurant_id": self.restaurant_id,
+            "owner_user_id": self.owner_user_id,
+            "name": self.name,
+            "postal_code": self.postal_code,
+            "address": self.address,
+            "address_lat": self.address_lat,
+            "address_lng": self.address_lng,
+            "restaurant_licence_id": self.restaurant_licence_id,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
