@@ -32,7 +32,7 @@ WORKDIR /location
 # Set the PYTHONPATH environment variable
 ENV PYTHONPATH=/location/src
 
-# RUN python -m pytest -v
+RUN python -m pytest -v
 # Copy the Alembic configuration file
 COPY alembic.ini /location/alembic.ini
 
