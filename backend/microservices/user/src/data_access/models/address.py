@@ -33,7 +33,6 @@ class Address(Base):
             postal_code=dto.postal_code,
             country=dto.country,
             is_default=dto.is_default,
-            created_at=dto.created_at,
         )
 
     def to_dto(self) -> AddressDTO:

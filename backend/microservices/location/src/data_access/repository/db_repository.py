@@ -6,17 +6,15 @@ from ftgo_utils.errors import ErrorCodes
 from config import PostgresConfig
 from data_access import get_logger
 from data_access.repository.base import BaseRepository
-from data_access.models import Profile, Address, VehicleInfo, Base
+from data_access.models import Base, DriverLocation
 from utils import handle_exception
-from dto import BaseDTO, AddressDTO, ProfileDTO, VehicleDTO
+from dto import BaseDTO, DriverLocationDTO
 
 class DatabaseRepository(BaseRepository):
     _data_access: Optional[AsyncPostgres] = None
 
     _dto_model_mapping: Dict[Type[BaseDTO], Type[Base]] = {
-        ProfileDTO: Profile,
-        AddressDTO: Address,
-        VehicleDTO: VehicleInfo,
+        DriverLocationDTO: DriverLocation,
     }
 
     @classmethod

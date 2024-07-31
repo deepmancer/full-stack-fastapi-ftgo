@@ -4,13 +4,12 @@ asyncio
 asyncpg
 black
 docker
+dataclasses
 freezegun
 greenlet
 loguru
 mypy
 psycopg2-binary
-pydantic
-pydantic-settings
 pytest
 pytest-asyncio
 python-decouple
@@ -23,6 +22,7 @@ uvloop
 pytest
 pytest-asyncio 
 pytest-cov
+git+https://github.com/alirezaheidari-cs/ftgo-utils.git
 git+https://github.com/alirezaheidari-cs/aredis-client.git
 git+https://github.com/alirezaheidari-cs/asyncpg-client.git
 git+https://github.com/alirezaheidari-cs/rabbitmq-rpc.git

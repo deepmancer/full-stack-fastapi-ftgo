@@ -24,17 +24,17 @@ RUN pip install -r /tmp/requirements.txt --no-cache-dir
 RUN pip install git+https://github.com/alirezaheidari-cs/ftgo-utils.git
 
 # Copy the application code to the container
-COPY . /user
+COPY . /location
 
 # Set the working directory
-WORKDIR /user
+WORKDIR /location
 
 # Set the PYTHONPATH environment variable
-ENV PYTHONPATH=/user/src
+ENV PYTHONPATH=/location/src
 
-RUN python -m pytest -v
+# RUN python -m pytest -v
 # Copy the Alembic configuration file
-COPY alembic.ini /user/alembic.ini
+COPY alembic.ini /location/alembic.ini
 
 # Run Alembic migrations and start the application
 CMD alembic upgrade head && python -u src/main.py

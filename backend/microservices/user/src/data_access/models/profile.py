@@ -1,4 +1,3 @@
-import email
 from typing import Optional, List
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import relationship, mapped_column, Mapped
@@ -41,7 +40,6 @@ class Profile(Base):
             gender=dto.gender,
             email=dto.email,
             role=dto.role,
-            created_at=dto.created_at,
             verified_at=dto.verified_at,
             last_login_time=dto.last_login_time,
         )

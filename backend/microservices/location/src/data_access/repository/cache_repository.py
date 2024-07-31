@@ -188,7 +188,7 @@ class CacheRepository(BaseRepository):
     @classmethod
     def _deserialize_value(cls, value: str) -> Union[str, dict]:
         try:
-            return json.loads(value)
+            return json.loads(str(value))
         except Exception as e:
             return value
 

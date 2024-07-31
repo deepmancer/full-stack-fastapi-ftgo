@@ -20,7 +20,6 @@ class VehicleInfo(Base):
             driver_id=dto.driver_id,
             plate_number=dto.plate_number,
             license_number=dto.license_number,
-            created_at=dto.created_at,
         )
 
     def to_dto(self) -> VehicleDTO:
