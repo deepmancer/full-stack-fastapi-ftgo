@@ -75,35 +75,35 @@ export default {
     //     }
     // },
     methods: {
-        verify() {
-            this.loading = true;
-            const api = "http://localhost:8000/api/v1/auth/verify";
-            const data = {
-              user_id: this.userId,
-              auth_code: this.authCodeInput,
-            };
-          Vue.axios.post(api, data)
-              .then(response => {
-                this.loading = false;
+      verify() {
+        this.loading = true;
+        const api = "http://localhost:8000/api/v1/auth/verify";
+        const data = {
+          user_id: this.userId,
+          auth_code: this.authCodeInput,
+        };
+        Vue.axios.post(api, data)
+            .then(response => {
+              this.loading = false;
+              this.$router.push('/');
+              if (response.data.success) {
+                // Clear userId and authCode from local storage
+                localStorage.removeItem('userId');
+                localStorage.removeItem('authCode');
+                // Redirect to SignIn page
                 this.$router.push('/');
-                if (response.data.success) {
-                  // Clear userId and authCode from local storage
-                  localStorage.removeItem('userId');
-                  localStorage.removeItem('authCode');
-                  // Redirect to SignIn page
-                  this.$router.push('/');
-                } else {
-                  this.$router.push('/');
-                  this.error = "کد تایید اشتباه است";
-                }
-              })
-              .catch(e => {
+              } else {
                 this.$router.push('/');
-                this.loading = false;
-                this.error = e.response.data.detail || "خطایی رخ داده است";
-              });
+                this.error = "کد تایید اشتباه است";
+              }
+            })
+            .catch(e => {
+              this.$router.push('/');
+              this.loading = false;
+              this.error = e.response.data.detail || "خطایی رخ داده است";
+            });
 
-        }
+      }
     }
 }
 </script>

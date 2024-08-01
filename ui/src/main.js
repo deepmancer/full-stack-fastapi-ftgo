@@ -5,7 +5,7 @@ import store from './store'
 
 import axios from 'axios'
 import VueAxios from 'vue-axios'
-
+import 'leaflet/dist/leaflet.css';
 
 import { BootstrapVue, IconsPlugin, ToastPlugin } from "bootstrap-vue";
 

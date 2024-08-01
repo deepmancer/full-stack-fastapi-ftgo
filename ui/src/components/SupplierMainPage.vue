@@ -113,26 +113,26 @@ export default {
   },
   methods: {
     navigateToEditSupplierInfo() {
-      this.$router.push({name: 'ChangeRestaurantInfo'});
+      this.$router.push({ name: 'ChangeRestaurantInfo' });
     },
     navigateToSupplierOrdersHistory() {
-      this.$router.push({name: 'SupplierOrdersHistory'});
+      this.$router.push({ name: 'SupplierOrdersHistory' });
     },
     navigateToSupplierActiveOrders() {
-      this.$router.push({name: 'SupplierActiveOrders'});
+      this.$router.push({ name: 'SupplierActiveOrders' });
     },
     navigateToRegisterRestaurant() {
-      this.$router.push({name: 'RegisterRestaurantPage'});
+      this.$router.push({ name: 'RegisterRestaurantPage' });
     },
     async fetchMenu() {
       if (this.restaurant) {
         try {
           const response = await axios.post(
-              'http://localhost:8000/api/v1/menu/get_all_menu_item',
-              {restaurant_id: this.restaurant.id},
-              {
-                headers: {Authorization: `Bearer ${this.token}`},
-              }
+            'http://localhost:8000/api/v1/menu/get_all_menu_item',
+            {restaurant_id: this.restaurant.id},
+            {
+              headers: { Authorization: `Bearer ${this.token}` },
+            }
           );
           this.menu = response.data.menu;
         } catch (error) {
@@ -145,9 +145,9 @@ export default {
         this.newItem.restaurant_id = this.restaurant.id;
 
         await axios.post(
-            'http://localhost:8000/api/v1/menu/add',
-            this.newItem,
-            {headers: {Authorization: `Bearer ${this.token}`}}
+          'http://localhost:8000/api/v1/menu/add',
+          this.newItem,
+          { headers: { Authorization: `Bearer ${this.token}` } }
         );
 
         this.resetNewItem();
@@ -160,9 +160,9 @@ export default {
     async updateFood() {
       try {
         await axios.put(
-            'http://localhost:8000/api/v1/menu/update',
-            this.newItem,
-            {headers: {Authorization: `Bearer ${this.token}`}}
+          'http://localhost:8000/api/v1/menu/update',
+          this.newItem,
+          { headers: { Authorization: `Bearer ${this.token}` } }
         );
 
         this.resetNewItem();
@@ -186,8 +186,8 @@ export default {
     async deleteItem(itemId) {
       try {
         await axios.delete('http://localhost:8000/api/v1/menu/delete', {
-          data: {item_id: itemId},
-          headers: {Authorization: `Bearer ${this.token}`}
+          data: {item_id: itemId },
+          headers: { Authorization: `Bearer ${this.token}` }
         });
         this.fetchMenu();
       } catch (error) {
@@ -202,7 +202,7 @@ export default {
     editItem(item) {
       this.editMode = true;
       this.currentItem = item;
-      this.newItem = {...item};
+      this.newItem = { ...item };
     },
     cancelEdit() {
       this.editMode = false;
@@ -238,7 +238,6 @@ export default {
   display: flex;
   align-items: center;
 }
-
 .rtl-text {
   direction: rtl;
 }

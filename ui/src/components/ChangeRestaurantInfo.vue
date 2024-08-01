@@ -30,23 +30,23 @@
                 </template>
                 <b-form-input placeholder="آدرس رستوران" v-model="restaurantAddress" required></b-form-input>
               </b-input-group>
-              <b-input-group class="mt-3">
-                <template #prepend>
-                  <b-input-group-text>
-                    <font-awesome-icon icon="fa-solid fa-map-marker-alt" />
-                  </b-input-group-text>
-                </template>
-                <b-form-input placeholder="عرض جغرافیایی رستوران" v-model="restaurantLat" required></b-form-input>
-              </b-input-group>
-              <b-input-group class="mt-3">
-                <template #prepend>
-                  <b-input-group-text>
-                    <font-awesome-icon icon="fa-solid fa-map-marker-alt" />
-                  </b-input-group-text>
-                </template>
-                <b-form-input placeholder="طول جغرافیایی رستوران" v-model="restaurantLng" required></b-form-input>
-              </b-input-group>
-
+              <div class="mt-3 l-map">
+                <l-map
+                  :zoom="13"
+                  :center="[restaurantLat, restaurantLng]"
+                  @update:center="updateLatLng"
+                >
+                  <l-tile-layer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <l-marker
+                    :lat-lng="[restaurantLat, restaurantLng]"
+                    :icon="customIcon"
+                    :draggable="true"
+                    @update:lat-lng="updateLatLng"
+                  />
+                </l-map>
+              </div>
               <div class="form-group form-button mt-5">
                 <b-button variant="secondary" type="submit" :disabled="loading">
                   <b-spinner v-if="loading" small></b-spinner>
@@ -77,7 +77,6 @@
       </div>
     </section>
 
-    <!-- Delete Restaurant Modal -->
     <b-modal
       id="delete-restaurant-modal"
       title="حذف رستوران"
@@ -89,7 +88,6 @@
       <p>آیا از حذف رستوران اطمینان دارید؟</p>
     </b-modal>
 
-    <!-- Delete Account Modal -->
     <b-modal
       id="delete-account-modal"
       title="حذف حساب کاربری"
@@ -107,20 +105,31 @@
 import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
-Vue.use(VueAxios, axios);
 import { BVToastPlugin } from "bootstrap-vue";
-Vue.use(BVToastPlugin);
 import { mapGetters, mapActions } from 'vuex';
+import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import markerIcon from "../assets/images/location-logo.png";
+
+Vue.use(VueAxios, axios);
+Vue.use(BVToastPlugin);
 
 export default {
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker
+  },
   data() {
     return {
       restaurantName: '',
       postalCode: '',
       restaurantAddress: '',
-      restaurantLat: '',
-      restaurantLng: '',
-      loading: false
+      restaurantLat: 35.6892, // default to Tehran
+      restaurantLng: 51.3890, // default to Tehran
+      loading: false,
+      customIcon: null
     };
   },
   computed: {
@@ -223,9 +232,8 @@ export default {
           variant: 'success',
           solid: true
         });
-
         this.$store.dispatch('logout');
-        this.$router.push({ name: '/' });
+        this.$router.push({ name: 'LandingPage' });
       } catch (error) {
         console.error('Error deleting account:', error);
         this.$bvToast.toast('Error deleting account. Please try again.', {
@@ -235,151 +243,76 @@ export default {
         });
       }
     },
+    navigateBack() {
+      this.$router.go(-1);
+    },
     showDeleteRestaurantModal() {
       this.$bvModal.show('delete-restaurant-modal');
     },
     showDeleteAccountModal() {
       this.$bvModal.show('delete-account-modal');
     },
-    navigateBack() {
-      this.$router.push({ name: 'SupplierMainPage' });
-    },
-    initializeForm() {
-      this.restaurantName = this.restaurant.name || '';
-      this.postalCode = this.restaurant.postal_code || '';
-      this.restaurantAddress = this.restaurant.address || '';
-      this.restaurantLat = this.restaurant.address_lat || '';
-      this.restaurantLng = this.restaurant.address_lng || '';
+    updateLatLng({ lat, lng }) {
+      this.restaurantLat = lat;
+      this.restaurantLng = lng;
     }
   },
-  created() {
-    this.initializeForm();
+  async mounted() {
+    await this.fetchAndStoreRestaurantInfo();
+    if (this.restaurant) {
+      this.restaurantName = this.restaurant.name;
+      this.postalCode = this.restaurant.postal_code;
+      this.restaurantAddress = this.restaurant.address;
+      this.restaurantLat = this.restaurant.address_lat;
+      this.restaurantLng = this.restaurant.address_lng;
+    }
+
+    // Create custom icon
+    this.customIcon = L.icon({
+      iconUrl: markerIcon,
+      iconSize: [32, 32], // adjust size as needed
+      iconAnchor: [32, 32], // point of the icon which will correspond to marker's location
+      popupAnchor: [0, -32] // point from which the popup should open relative to the iconAnchor
+    });
   }
-}
+};
 </script>
+
 
 <style scoped>
 .change-restaurant-info-page {
-  padding-top: 80px;
+  background: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-
+.change-restaurant-info .container {
+  max-width: 900px;
+}
 .change-restaurant-info-content {
   display: flex;
-  display: -webkit-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between;
 }
-
-a:focus,
-a:active,
-a:hover {
-  text-decoration: none;
-  outline: none;
-  transition: all 300ms ease 0s;
-  -moz-transition: all 300ms ease 0s;
-  -webkit-transition: all 300ms ease 0s;
-  -o-transition: all 300ms ease 0s;
-  -ms-transition: all 300ms ease 0s;
+.change-restaurant-info-form {
+  width: 50%;
 }
-
-.input-group-text {
-  border-top-left-radius: 0px !important;
-  border-top-right-radius: 5px !important;
-  border-bottom-right-radius: 5px !important;
-  border-bottom-left-radius: 0px !important;
+.change-restaurant-info-image {
+  width: 50%;
 }
-
-.form-control {
-  border-top-left-radius: 5px !important;
-  border-top-right-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
-  border-bottom-left-radius: 5px !important;
+.change-restaurant-info-image figure {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
 }
-
-img {
+.change-restaurant-info-image img {
   max-width: 100%;
   height: auto;
 }
-
-figure {
-  margin: 0;
-}
-
-p {
-  margin-bottom: 0px;
-  font-size: 15px;
-  color: #777;
-}
-
-h2 {
-  line-height: 1.66;
-  margin: 0;
-  padding: 0;
-  font-weight: bold;
-  color: #222;
-  font-family: Poppins;
-  font-size: 36px;
-}
-
-body {
-  font-size: 13px;
-  line-height: 1.8;
-  color: #222;
-  background: #f8f8f8;
-  font-weight: 400;
-  font-family: Poppins;
-}
-
-.container {
-  width: 900px;
-  background: #fff;
-  margin: 0 auto;
-  box-shadow: 0px 15px 16.83px 0.17px rgba(0, 0, 0, 0.05);
-  -moz-box-shadow: 0px 15px 16.83px 0.17px rgba(0, 0, 0, 0.05);
-  -webkit-box-shadow: 0px 15px 16.83px 0.17px rgba(0, 0, 0, 0.05);
-  -o-box-shadow: 0px 15px 16.83px 0.17px rgba(0, 0, 0, 0.05);
-  -ms-box-shadow: 0px 15px 16.83px 0.17px rgba(0, 0, 0, 0.05);
-  border-radius: 20px;
-  -moz-border-radius: 20px;
-  -webkit-border-radius: 20px;
-  -o-border-radius: 20px;
-  -ms-border-radius: 20px;
-}
-
-.change-restaurant-info {
-  margin-bottom: 150px;
-}
-
-.change-restaurant-info-content {
-  padding: 75px 0;
-  display: flex;
-  align-items: center;
-}
-
-.change-restaurant-info-image {
-  width: 50%;
-  text-align: center;
-}
-
-.change-restaurant-info-image img {
-  max-width: 80%;
-  height: auto;
-}
-
-.change-restaurant-info-form {
-  width: 50%;
-  padding-left: 34px;
-}
-
-.register-form {
-  width: 100%;
-}
-
-.form-group {
-  position: relative;
-  margin-bottom: 25px;
-  overflow: hidden;
-}
-
-.form-group:last-child {
-  margin-bottom: 0px;
+.l-map {
+  height: 400px;
 }
 </style>
