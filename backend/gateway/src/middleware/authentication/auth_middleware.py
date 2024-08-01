@@ -1,5 +1,5 @@
 import time
-
+from typing import Callable, Coroutine, Any
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.datastructures import Headers
