@@ -34,13 +34,13 @@ app.include_router(init_router(), prefix=service_config.api_prefix)
 
 middleware_builder = (
     MiddlewareBuilder()
-    .add_cors()
     .add_rate_limit()
     .add_authentication()
     .add_logger()
     .add_request_id()
     .add_exception_handling()
     .add_timing()
+    .add_cors()
 )
 
 middleware_builder.build(app=app)
