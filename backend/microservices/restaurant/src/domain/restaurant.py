@@ -63,6 +63,16 @@ class RestaurantDomain:
             get_logger().error(ErrorCodes.USER_LOAD_ACCOUNT_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.USER_LOAD_ACCOUNT_ERROR, payload=payload)
 
+    @staticmethod
+    async def load_all() -> List["RestaurantDomain"]:
+        try:
+            all_restaurants = await DatabaseRepository.fetch_by_query(Supplier, query={})
+            return [RestaurantDomain._from_schema(restaurant) for restaurant in all_restaurants]
+        except Exception as e:
+            payload = {}
+            # TODO change error code
+            get_logger().error(ErrorCodes.USER_LOAD_ACCOUNT_ERROR.value, payload=payload)
+            await handle_exception(e=e, error_code=ErrorCodes.USER_LOAD_ACCOUNT_ERROR, payload=payload)
 
     @staticmethod
     async def register(

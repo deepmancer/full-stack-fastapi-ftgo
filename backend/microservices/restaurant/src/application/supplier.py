@@ -56,6 +56,18 @@ class RestaurantService:
         return restaurant.get_info()
 
     @staticmethod
+    async def get_all_restaurant_info(**kwargs) -> Dict[str, Any]:
+        """
+        Retrieves restaurant information.
+
+        :return: List of dictionary containing each restaurant information.
+        """
+        restaurants = await RestaurantDomain.load_all()
+        return {
+            "restaurants": [restaurant.get_info() for restaurant in restaurants],
+        }
+
+    @staticmethod
     async def get_supplier_restaurant_info(user_id: str, **kwargs) -> Dict[str, Any]:
         """
         Retrieves restaurant information.

@@ -8,7 +8,7 @@ from application.schemas.restaurant.restaurant import (
     RegisterRestaurantRequest, RegisterRestaurantResponse,
     DeleteRestaurantRequest, DeleteRestaurantResponse,
     UpdateRestaurantRequest, UpdateRestaurantResponse,
-    GetRestaurantInfoResponse,
+    GetRestaurantInfoResponse, GetAllRestaurantInfoResponse
 )
 from application.schemas.user import UserStateSchema
 from application.exceptions import handle_exception
@@ -69,6 +69,26 @@ async def get_supplier_restaurant_info(request: Request):
         )
     except Exception as e:
         await handle_exception(request, e, default_failure_message="Get restaurant info failed")
+
+
+@router.get("/get_all_restaurant_info", response_model=GetAllRestaurantInfoResponse)
+async def get_all_restaurant_info(request: Request):
+    try:
+        response = await RestaurantService.get_all_restaurant_info(data={'tmp': "tmp"})
+
+        status = response.pop('status', ResponseStatus.ERROR.value)
+        if status == ResponseStatus.SUCCESS.value:
+            return GetAllRestaurantInfoResponse(
+                **response,
+            )
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Get all restaurant info failed",
+            payload={},
+        )
+    except Exception as e:
+        await handle_exception(request, e, default_failure_message="Get all restaurant info failed")
 
 @router.delete("/delete", response_model=DeleteRestaurantResponse)
 async def delete_restaurant(request: Request, request_data: DeleteRestaurantRequest):

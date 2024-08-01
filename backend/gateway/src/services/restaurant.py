@@ -13,6 +13,10 @@ class RestaurantService(Microservice):
         return await cls._call_rpc('restaurant.supplier.get_restaurant_info', data=data)
 
     @classmethod
+    async def get_all_restaurant_info(cls, data: Dict) -> Dict:
+        return await cls._call_rpc('restaurant.supplier.get_all_restaurant_info', data=data)
+
+    @classmethod
     async def get_supplier_restaurant_info(cls, data: Dict) -> Dict:
         return await cls._call_rpc('restaurant.supplier.get_supplier_restaurant_info', data=data)
 
