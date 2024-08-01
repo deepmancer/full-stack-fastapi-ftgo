@@ -166,8 +166,12 @@ export default {
                     }
                 })
                 .catch(e => {
-                    console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
+                  console.log(e.response.data.detail);
+                  this.$bvToast.toast(e.response.data.detail[0].msg, {
+                    title: 'Verification Error',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                  });
                 });
         }
     }

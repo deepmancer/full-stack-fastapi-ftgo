@@ -9,6 +9,7 @@ import SupplierMainPage from '../views/SupplierMainPage.vue'
 import VerifyAccountPage from '../views/VerifyAccountPage.vue'
 import ChangeRestaurantInfo from '../views/ChangeRestaurantInfo.vue'
 import RegisterRestaurantPage from '../views/RegisterRestaurantPage.vue'
+import MenuPage from '../views/MenuPage.vue'
 
 
 Vue.use(VueRouter)
@@ -42,6 +43,11 @@ const routes = [{
         path: '/ChangeRestaurantInfo',
         name: 'ChangeRestaurantInfo',
         component: ChangeRestaurantInfo
+    },
+    {
+        path: '/MenuPage',
+        name: 'MenuPage',
+        component: MenuPage
     },
     {
         path: '/SignUp',
