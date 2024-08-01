@@ -8,12 +8,16 @@ from ftgo_utils.schemas import (
 
 
 class RegistrationSchema(UserInfoMixin):
+    #TODO fix max_length in ftgo_utils
+    role: str = Field(..., min_length=1, max_length=20)
     password: str = Field(..., min_length=8, max_length=128)
 
 class UserAuthCodeSchema(UserIdMixin):
     auth_code: str = Field(..., min_length=1, max_length=10)
 
 class LoginSchema(PhoneNumberMixin, RoleMixin):
+    # TODO fix max_length in ftgo_utils
+    role: str = Field(..., min_length=1, max_length=20)
     password: str = Field(..., min_length=8, max_length=128)
 
 class ChangePasswordSchema(UserIdMixin):
@@ -25,4 +29,6 @@ class UpdateProfileSchema(UserIdMixin, GenderMixin):
     last_name: Optional[str] = Field(None, min_length=1, max_length=50)
 
 class LoggedInUserSchema(UserMixin, TokenMixin):
+    # TODO fix max_length in ftgo_utils
+    role: str = Field(..., min_length=1, max_length=20)
     pass

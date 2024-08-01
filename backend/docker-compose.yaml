@@ -55,6 +55,34 @@ services:
     networks:
       - backend-network
 
+  restaurant_service:
+    build:
+      context: ./microservices/restaurant
+      dockerfile: Dockerfile
+    container_name: "restaurant_service"
+    env_file:
+      - ./microservices/restaurant/.env
+    environment:
+      - ENVIRONMENT=test
+      - DEBUG=true
+      - RABBITMQ_USER=rabbitmq_user
+      - RABBITMQ_PASS=rabbitmq_password
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - REDIS_HOST=restaurant_redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=restaurant_password
+      - POSTGRES_HOST=restaurant_postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=restaurant_user
+      - POSTGRES_PASSWORD=restaurant_password
+      - POSTGRES_DB=restaurant_database
+    networks:
+      - backend-network
+
+
   location_service:
     build:
       context: ./microservices/location

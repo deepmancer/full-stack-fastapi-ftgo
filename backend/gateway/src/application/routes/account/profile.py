@@ -39,7 +39,7 @@ async def logout(request: Request):
     except Exception as e:
         await handle_exception(request, e, default_failure_message="Logout failed")
 
-@router.get("/user_info", response_model=UserInfoMixin)
+@router.get("/user_info", response_model=UserInfo)
 async def get_info(request: Request):
     try:
         user: UserStateSchema = request.state.user
@@ -47,14 +47,14 @@ async def get_info(request: Request):
         response = await UserService.get_profile_info(data={"user_id": user.user_id})
         
         if response.get('status') == ResponseStatus.SUCCESS.value:
-            return UserInfoMixin(
+            return UserInfo(
                 first_name=response.get("first_name"),
                 last_name=response.get("last_name"),
                 phone_number=response.get("phone_number"),
                 national_id=response.get("national_id"),
                 role=response.get("role"),
                 gender=response.get("gender"),
-                email=response.get("email"),
+                # email=response.get("email"),
             )
         
         raise BaseError(

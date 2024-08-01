@@ -74,7 +74,7 @@ export default {
             userRoles: [
                 { value: 'customer', text: 'مشتری' },
                 { value: 'courier', text: 'پیک' },
-                { value: 'restaurant', text: 'رستوران' }
+                { value: 'restaurant_admin', text: 'رستوران' }
             ],
             loading: false,
             showVerificationCode: false,
@@ -83,52 +83,73 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['updateUserId', 'updateToken']),
-        signin() {
+        ...mapActions(['updateUserId', 'updateToken', 'updateRestaurantInfo']),
+        async signin() {
             this.loading = true;
             let api = "http://localhost:8000/api/v1/auth/login";
             const data = {
-                phone_number: this.phone,
                 role: this.userRole,
+                phone_number: this.phone,
                 password: this.password,
             };
-            Vue.axios.post(api, data)
-                .then(response => {
-                    localStorage.removeItem('token');
-                    localStorage.setItem('token', response.data.user_id);
-                    this.updateUserId(response.data.user_id);  // Store the user ID in Vuex
-                    this.updateToken(response.data.token);  // Store the user ID in Vuex
+            try {
+                const response = await Vue.axios.post(api, data);
+                localStorage.removeItem('token');
+                localStorage.setItem('token', response.data.user_id);
+                this.updateUserId(response.data.user_id);
+                this.updateToken(response.data.token);
+                this.phone = '';
+                this.password = '';
+                this.loading = false;
+
+                // If the user role is restaurant_admin, fetch restaurant info
+                if (this.userRole === 'restaurant_admin') {
+                    await this.fetchAndStoreRestaurantInfo(response.data.token);
+                }
+
+                // Redirect based on user role
+                switch (this.userRole) {
+                    case 'customer':
+                        this.$router.push('/CustomerMainPage');
+                        break;
+                    case 'courier':
+                        this.$router.push('/DeliveryMainPage');
+                        break;
+                    case 'restaurant_admin':
+                        this.$router.push('/SupplierMainPage');
+                        break;
+                    default:
+                        this.$router.push('/');
+                }
+            } catch (e) {
+                if (e.response && e.response.data.detail === "Account not verified") {
+                    this.showVerificationCode = true;
+                    this.userId = e.response.data.user_id;
+                } else {
+                    console.log(e.response.data.detail);
+                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'پیام خطا', autoHideDelay: 5000, appendToast: true });
                     this.phone = '';
                     this.password = '';
                     this.loading = false;
-
-                    // Redirect based on user role
-                    switch (this.userRole) {
-                        case 'customer':
-                            this.$router.push('/CustomerMainPage');
-                            break;
-                        case 'courier':
-                            this.$router.push('/DeliveryMainPage');
-                            break;
-                        case 'restaurant':
-                            this.$router.push('/SupplierMainPage');
-                            break;
-                        default:
-                            this.$router.push('/');
-                    }
-                })
-                .catch(e => {
-                    if (e.response && e.response.data.detail === "Account not verified") {
-                        this.showVerificationCode = true;
-                        this.userId = e.response.data.user_id; // Store the user ID for verification
-                    } else {
-                        console.log(e.response.data.detail);
-                        this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'پیام خطا', autoHideDelay: 5000, appendToast: true });
-                        this.phone = '';
-                        this.password = '';
-                        this.loading = false;
+                }
+            }
+        },
+        async fetchAndStoreRestaurantInfo(token) {
+            try {
+                const response = await Vue.axios.get('http://localhost:8000/api/v1/restaurant/get_supplier_restaurant_info', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
                 });
+                if (response.data && response.data.id) {
+                    this.updateRestaurantInfo(response.data);
+                } else {
+                    this.updateRestaurantInfo(null);
+                }
+            } catch (error) {
+                this.updateRestaurantInfo(null);
+                console.error('Failed to fetch restaurant info:', error);
+            }
         },
         verifyAccount() {
             let api = "http://localhost:5020/user/profile/verify";
@@ -139,19 +160,18 @@ export default {
             Vue.axios.post(api, data)
                 .then(response => {
                     if (response.data.success) {
-                        // Retry login after successful verification
                         this.signin();
                     } else {
                         this.$bvToast.toast("Verification failed. Please try again.", { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
                     }
                 })
                 .catch(e => {
-                    console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, {
-                      title: 'Verification Error',
-                      autoHideDelay: 5000,
-                      appendToast: true
-                    });
+                  console.log(e.response.data.detail);
+                  this.$bvToast.toast(e.response.data.detail[0].msg, {
+                    title: 'Verification Error',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                  });
                 });
         }
     }
