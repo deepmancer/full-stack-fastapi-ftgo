@@ -31,6 +31,7 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
 
+
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -67,13 +68,16 @@ def do_run_migrations(connection: Connection) -> None:
         connection=connection,
         target_metadata=target_metadata,
     )
-    
+
     with context.begin_transaction():
         context.run_migrations()
+
+
 import asyncio
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy import MetaData, Table
+
 
 async def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
@@ -101,6 +105,9 @@ async def run_migrations_online() -> None:
 
     await connectable.dispose()
 
+
+# print(PostgresConfig().host)
+# print(PostgresConfig().async_url)
 if context.is_offline_mode():
     run_migrations_offline()
 else:
