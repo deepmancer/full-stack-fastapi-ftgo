@@ -18,6 +18,7 @@ async def register_events():
         'restaurant.supplier.get_supplier_restaurant_info': RestaurantService.get_supplier_restaurant_info,
         'restaurant.supplier.update_information': RestaurantService.update_information,
         'restaurant.supplier.delete_restaurant': RestaurantService.delete_restaurant,
+        'restaurant.supplier.get_all_restaurant_info': RestaurantService.get_all_restaurant_info,
         'restaurant.menu.add_item': MenuService.add_item,
         'restaurant.menu.update_item': MenuService.update_item,
         'restaurant.menu.delete_item': MenuService.delete_item,

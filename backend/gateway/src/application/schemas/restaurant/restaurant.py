@@ -29,6 +29,10 @@ class GetRestaurantInfoResponse(BaseModel):
     restaurant_licence_id: str = Field(..., min_length=1, max_length=100)
 
 
+class GetAllRestaurantInfoResponse(BaseModel):
+    restaurants: list[GetRestaurantInfoResponse] = Field(...)
+
+
 class DeleteRestaurantRequest(BaseModel):
     restaurant_id: str = uuid_field()
 
