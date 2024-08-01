@@ -1,6 +1,6 @@
 # FTGO
 
-## Project setup
+## Backend Setup
 
 ### Create Dockers Networks
 ```
@@ -18,4 +18,17 @@ docker compose up --build
 ```
 cd backend/
 docker compose up --build
+```
+
+## Fronted Setup
+
+### Requirements Installation
+```
+cd ui/
+npm install
+```
+
+### Compiles and hot-reloads for development
+```
+npm run serve
 ```
