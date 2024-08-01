@@ -1,14 +1,6 @@
 <template>
   <div class="customer-main-page" style="background-image: url('/images/UserMainPage-image.jpg');">
     <b-container>
-      <div class="user-id-box">
-        <b-alert variant="info" show>
-          <strong>your user_id is {{ userId }}</strong>
-        </b-alert>
-        <b-alert variant="info" show>
-          <strong>your token is {{ token }}</strong>
-        </b-alert>
-      </div>
       <div class="customer-main-page-content">
         <b-container>
           <b-row>
