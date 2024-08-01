@@ -9,7 +9,6 @@ envVars.txt
 **/.vscode/**
 **/testFiles/**/.cache/**
 *.noseids
-simulator/*
 .nyc_output
 .vscode-test
 __pycache__
