@@ -5,6 +5,7 @@ bcrypt
 black
 colorama
 fastapi
+pydantic>=2.0.0,<3.0.0
 greenlet
 httpx
 isort
@@ -14,7 +15,6 @@ passlib
 pathlib
 pre-commit
 pyotp
-pydantic
 pytest
 pytest-asyncio
 pytest-cov
@@ -30,7 +30,6 @@ trio
 uvicorn
 uvloop
 starlette
-fastapi-versioning
 git+https://github.com/alirezaheidari-cs/ftgo-utils.git
 git+https://github.com/alirezaheidari-cs/aredis-client.git
 git+https://github.com/alirezaheidari-cs/rabbitmq-rpc.git

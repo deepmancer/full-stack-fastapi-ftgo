@@ -1,28 +1,26 @@
-from datetime import timedelta
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Request, status, Depends
 
 from application.exceptions import handle_exception
 from application.schemas.auth.registration import (
     UserAuthCodeSchema, UpdateProfileSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
 )
 from application.schemas.common import EmptyResponse, SuccessResponse
-from ftgo_utils.schemas import (
-    UserIdMixin, UserInfoMixin, UserMixin
-)
-
+from application.dependencies import AccessManager
 from config import AuthConfig
 from data_access.repository import CacheRepository
-from ftgo_utils.enums import ResponseStatus
+from domain.token_manager import TokenManager
+from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
 from ftgo_utils.jwt_auth import encode
-from ftgo_utils.logger import get_logger
 from services import UserService
 
-router = APIRouter(prefix='/auth', tags=["user_profile"])
-logger = get_logger()
+router = APIRouter(
+    prefix='/auth',
+    tags=["user_profile"],
+    dependencies=[Depends(AccessManager([Roles.CUSTOMER, Roles.ADMIN, Roles.DRIVER, Roles.RESTAURANT_ADMIN]))],
+)
 
 @router.post("/register", response_model=UserAuthCodeSchema, status_code=status.HTTP_201_CREATED)
 async def register(request: Request, request_data: RegistrationSchema):
@@ -89,28 +87,12 @@ async def login(request: Request, request_data: LoginSchema):
         status = response.pop('status', ResponseStatus.ERROR.value)
 
         if status == ResponseStatus.SUCCESS.value:
-            payload = {
-                "user_id": response['user_id'],
-                "phone_number": response['phone_number'],
-                "role": response["role"],
-                "hashed_password": response["hashed_password"],
-            }
-            auth_config = AuthConfig()
-            access_token_expires = timedelta(minutes=auth_config.access_token_expire_minutes)
-            token = encode(
-                payload=payload,
-                secret=auth_config.secret,
-                algorithm=auth_config.algorithm,
-                expiration=access_token_expires.total_seconds()
+            token = await TokenManager().generate_token(
+                user_id=response['user_id'],
+                phone_number=response['phone_number'],
+                role=response["role"],
+                hashed_password=response["hashed_password"],
             )
-  
-            token_cache = CacheRepository.get_cache(auth_config.cache_key_prefix)
-            await token_cache.set(
-                key=token,
-                value=payload,
-                ttl=int(access_token_expires.total_seconds()),
-            )
-
             return LoggedInUserSchema(**response, token=token)
         
         raise BaseError(

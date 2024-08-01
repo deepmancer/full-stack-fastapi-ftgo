@@ -41,7 +41,7 @@ class Driver(User):
 
     async def load_private_attributes(self) -> None:
         try:
-            self.vehicle = await VehicleDomain.load_driver_vehicle(driver_id=self.user_id)
+            self.vehicle = await VehicleDomain.load_driver_vehicle(driver_id=self.user_id, raise_error_on_missing=False)
         except Exception as e:
             payload = {"user_id": self.user_id}
             get_logger().error(ErrorCodes.VEHICLE_LOAD_ERROR.value, payload=payload)

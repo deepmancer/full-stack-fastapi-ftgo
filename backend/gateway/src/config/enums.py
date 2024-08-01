@@ -5,3 +5,4 @@ class LayerNames(str, enum.Enum):
     DOMAIN = "domain"
     DATA_ACCESS = "data_access"
     MESSAGE_BROKER = "message_broker"
+    MIDDLEWARE = "middleware"

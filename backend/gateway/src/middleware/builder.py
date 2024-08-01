@@ -8,6 +8,9 @@ from middleware.cors import mount_middleware as mount_cors
 from middleware.exception_handling import mount_middleware as mount_exception_handling
 from middleware.rate_limit import mount_middleware as mount_rate_limit
 from middleware.https_redirect import mount_middleware as mount_https_redirect
+from middleware.timing import mount_middleware as mount_timing
+from middleware.logger import mount_middleware as mount_logger
+from middleware.request_id import mount_middleware as mount_request_id
 
 class MiddlewareBuilder:
     def __init__(self) -> None:
@@ -31,6 +34,18 @@ class MiddlewareBuilder:
 
     def add_https_redirect(self) -> 'MiddlewareBuilder':
         self._middlewares.append(mount_https_redirect)
+        return self
+
+    def add_timing(self) -> 'MiddlewareBuilder':
+        self._middlewares.append(mount_timing)
+        return self
+
+    def add_logger(self) -> 'MiddlewareBuilder':
+        self._middlewares.append(mount_logger)
+        return self
+
+    def add_request_id(self) -> 'MiddlewareBuilder':
+        self._middlewares.append(mount_request_id)
         return self
 
     def build(self, app: FastAPI) -> None:
