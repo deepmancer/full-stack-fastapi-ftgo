@@ -55,7 +55,7 @@ class AddressService:
     @staticmethod
     async def get_all_addresses(user_id: str, **kwargs) -> Dict[str, Any]:
         user = await UserManager.load(user_id)
-        addresses = await user.get_addresses_info()
+        addresses = user.get_addresses_info()
         return {
             "addresses": addresses,
         }

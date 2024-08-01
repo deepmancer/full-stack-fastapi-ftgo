@@ -1,14 +1,6 @@
 <template>
   <div class="customer-change-info">
     <b-container>
-      <div class="user-id-box">
-        <b-alert variant="info" show>
-          <strong>your user_id is {{ userId }}</strong>
-        </b-alert>
-        <b-alert variant="info" show>
-          <strong>your token is {{ token }}</strong>
-        </b-alert>
-      </div>
       <h2>اطلاعات کاربری</h2>
       <b-card>
         <b-list-group flush>
@@ -39,7 +31,6 @@
           <b-list-group-item v-for="address in addresses" :key="address.address_id" class="rtl-text">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <div><strong>ایدی</strong> {{ address.address_id }}</div>
                 <div><strong>آدرس 1:</strong> {{ address.address_line_1 }}</div>
                 <div><strong>آدرس 2:</strong> {{ address.address_line_2 }}</div>
                 <div><strong>شهر:</strong> {{ address.city }}</div>
@@ -64,12 +55,6 @@
       <b-card>
         <b-form @submit.prevent="addAddress">
           <b-form-group>
-            <b-form-input v-model="newAddress.latitude" placeholder="عرض جغرافیایی" class="rtl-text"></b-form-input>
-          </b-form-group>
-          <b-form-group>
-            <b-form-input v-model="newAddress.longitude" placeholder="طول جغرافیایی" class="rtl-text"></b-form-input>
-          </b-form-group>
-          <b-form-group>
             <b-form-input v-model="newAddress.address_line_1" placeholder="آدرس خط 1" class="rtl-text"></b-form-input>
           </b-form-group>
           <b-form-group>
@@ -84,6 +69,23 @@
           <b-form-group>
             <b-form-input v-model="newAddress.country" placeholder="کشور" class="rtl-text"></b-form-input>
           </b-form-group>
+          <div class="mt-3 l-map">
+                <l-map
+                  :zoom="13"
+                  :center="[newAddress.latitude, newAddress.longitude]"
+                  @update:center="updateLatLng"
+                >
+                  <l-tile-layer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <l-marker
+                    :lat-lng="[newAddress.latitude, newAddress.longitude]"
+                    :icon="customIcon"
+                    :draggable="true"
+                    @update:lat-lng="updateLatLng"
+                  />
+                </l-map>
+              </div>
           <b-button type="submit">افزودن آدرس</b-button>
         </b-form>
       </b-card>
@@ -93,9 +95,19 @@
 
 <script>
 import axios from 'axios';
-import {mapGetters} from 'vuex';
+import { mapGetters } from 'vuex';
+
+import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import markerIcon from "../assets/images/location-logo.png";
 
 export default {
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker
+  },
   name: 'CustomerChangeInfoComp',
   data() {
     return {
@@ -129,8 +141,8 @@ export default {
     async fetchUserInfo() {
       try {
         const response = await axios.get(
-            'http://localhost:8000/api/v1/profile/user_info',
-            {headers: {Authorization: `Bearer ${this.token}`}}
+          'http://localhost:8000/api/v1/profile/user_info',
+          { headers: { Authorization: `Bearer ${this.token}` } }
         );
         this.userInfo = response.data;
       } catch (error) {
@@ -140,8 +152,8 @@ export default {
     async fetchAddresses() {
       try {
         const response = await axios.get(
-            'http://localhost:8000/api/v1/address/get_all_info',
-            {headers: {Authorization: `Bearer ${this.token}`}}
+          'http://localhost:8000/api/v1/address/get_all_info',
+          { headers: { Authorization: `Bearer ${this.token}` } }
         );
         this.addresses = response.data.addresses;
       } catch (error) {
@@ -151,9 +163,9 @@ export default {
     async addAddress() {
       try {
         await axios.post(
-            'http://localhost:8000/api/v1/address/add',
-            this.newAddress,
-            {headers: {Authorization: `Bearer ${this.token}`}}
+          'http://localhost:8000/api/v1/address/add',
+          this.newAddress,
+          { headers: { Authorization: `Bearer ${this.token}` } }
         );
         this.newAddress = {
           latitude: 0,
@@ -172,8 +184,8 @@ export default {
     async deleteAddress(addressId) {
       try {
         await axios.delete('http://localhost:8000/api/v1/address/delete', {
-          data: {address_id: addressId},
-          headers: {Authorization: `Bearer ${this.token}`}
+          data: {address_id: addressId },
+          headers: { Authorization: `Bearer ${this.token}` }
         });
         this.fetchAddresses();
       } catch (error) {
@@ -185,7 +197,7 @@ export default {
         await axios.post('http://localhost:8000/api/v1/address/set-preferred', {
           address_id: addressId
         }, {
-          headers: {Authorization: `Bearer ${this.token}`}
+          headers: { Authorization: `Bearer ${this.token}` }
         });
         this.fetchAddresses();
       } catch (error) {
@@ -206,8 +218,8 @@ export default {
     async deleteAccount() {
       try {
         await axios.delete('http://localhost:8000/api/v1/profile/delete', {
-          data: {user_id: this.userId},
-          headers: {Authorization: `Bearer ${this.token}`}
+          data: { user_id: this.userId },
+          headers: { Authorization: `Bearer ${this.token}` }
         });
       } catch (error) {
         console.error('Error deleting user account:', error);
@@ -216,6 +228,22 @@ export default {
     backToUserPage() {
       this.$router.push('/CustomerMainPage');
     },
+    updateLatLng({ lat, lng }) {
+      this.newAddress.latitude = lat;
+      this.newAddress.longitude = lng;
+    }
+  },
+  async mounted() {
+
+    this.newAddress.latitude = 35.6892;
+    this.newAddress.longitude = 51.3890;
+
+    this.customIcon = L.icon({
+      iconUrl: markerIcon,
+      iconSize: [32, 32],
+      iconAnchor: [32, 32],
+      popupAnchor: [0, -32]
+    });
   }
 };
 </script>
@@ -224,13 +252,14 @@ export default {
 .customer-change-info {
   padding: 20px;
 }
-
 .user-id-box {
   margin-top: 20px;
   text-align: center;
 }
-
 .rtl-text {
   direction: rtl;
+}
+.l-map {
+  height: 400px;
 }
 </style>

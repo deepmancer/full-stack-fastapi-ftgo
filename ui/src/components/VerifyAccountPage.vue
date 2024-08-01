@@ -8,11 +8,6 @@
                         <strong>your auth_code is {{ authCode }}</strong>
                     </b-alert>
                     </div>
-                    <div class="user-id-box">
-                    <b-alert variant="info" show>
-                        <strong>your user_id is {{ userId }}</strong>
-                    </b-alert>
-                    </div>
                     <div class="verification-form">
                         <h2 class="form-title">تایید حساب کاربری</h2>
                         <p>لطفا کد تاییدی که دریافت کرده‌اید را در کادر زیر وارد کنید:</p>
@@ -68,40 +63,33 @@ export default {
             error: ''
         };
     },
-    // mounted() {
-    //     // Retrieve the userId from local storage
-    //     if (!user_id) {
-    //         this.$router.push('/SignUp'); // Redirect to SignUp if userId is not found
-    //     }
-    // },
     methods: {
         verify() {
             this.loading = true;
             const api = "http://localhost:8000/api/v1/auth/verify";
             const data = {
-              user_id: this.userId,
-              auth_code: this.authCodeInput,
+                user_id: this.userId,
+                auth_code: this.authCodeInput,
             };
-          Vue.axios.post(api, data)
-              .then(response => {
-                this.loading = false;
-                this.$router.push('/');
-                if (response.data.success) {
-                  // Clear userId and authCode from local storage
-                  localStorage.removeItem('userId');
-                  localStorage.removeItem('authCode');
-                  // Redirect to SignIn page
-                  this.$router.push('/');
-                } else {
-                  this.$router.push('/');
-                  this.error = "کد تایید اشتباه است";
-                }
-              })
-              .catch(e => {
-                this.$router.push('/');
-                this.loading = false;
-                this.error = e.response.data.detail || "خطایی رخ داده است";
-              });
+            Vue.axios.post(api, data)
+                .then(response => {
+                    this.loading = false;
+                    this.$router.push('/');
+                    if (response.data.success) {
+                        localStorage.removeItem('userId');
+                        localStorage.removeItem('authCode');
+
+                        this.$router.push('/');
+                    } else {
+                        this.$router.push('/');
+                        this.error = "کد تایید اشتباه است";
+                    }
+                })
+                .catch(e => {
+                    this.$router.push('/');
+                    this.loading = false;
+                    this.error = e.response.data.detail || "خطایی رخ داده است";
+                });
 
         }
     }

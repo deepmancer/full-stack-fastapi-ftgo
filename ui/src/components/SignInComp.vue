@@ -92,6 +92,7 @@ export default {
                 phone_number: this.phone,
                 password: this.password,
             };
+            const response = null;
             try {
                 const response = await Vue.axios.post(api, data);
                 localStorage.removeItem('token');
@@ -122,16 +123,11 @@ export default {
                         this.$router.push('/');
                 }
             } catch (e) {
-                if (e.response && e.response.data.detail === "Account not verified") {
-                    this.showVerificationCode = true;
-                    this.userId = e.response.data.user_id;
-                } else {
-                    console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'پیام خطا', autoHideDelay: 5000, appendToast: true });
-                    this.phone = '';
-                    this.password = '';
-                    this.loading = false;
-                }
+                console.log(response.data.detail);
+                this.$bvToast.toast(response.content.detail, { title: 'پیام خطا', autoHideDelay: 5000, appendToast: true });
+                this.phone = '';
+                this.password = '';
+                this.loading = false;
             }
         },
         async fetchAndStoreRestaurantInfo(token) {
@@ -166,12 +162,8 @@ export default {
                     }
                 })
                 .catch(e => {
-                  console.log(e.response.data.detail);
-                  this.$bvToast.toast(e.response.data.detail[0].msg, {
-                    title: 'Verification Error',
-                    autoHideDelay: 5000,
-                    appendToast: true
-                  });
+                    console.log(e.response.data.detail);
+                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
                 });
         }
     }
