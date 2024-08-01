@@ -78,13 +78,20 @@ class DriverLocation:
             get_logger().error(ErrorCodes.LOCATION_SAVE_ERROR.value, payload=payload)
             await handle_exception(e, ErrorCodes.LOCATION_SAVE_ERROR, payload=payload)
 
-    async def load_last_location(self) -> Optional[GeoLocation]:
+    async def load_last_location(self, raise_error_on_missing: Optional[bool] = False) -> Optional[GeoLocation]:
         try:
             cache_key = self.config.cache_key
             cache = CacheRepository.get_cache(cache_key)
+
             location_dict = await cache.fetch(self.driver_id)
             if location_dict is None:
+                if raise_error_on_missing:
+                    raise BaseError(
+                        error_code=ErrorCodes.LOCATION_NOT_FOUND_ERROR,
+                        payload={"driver_id": self.driver_id},
+                    )
                 return None
+
             location = GeoLocation.from_dict(location_dict)
             return location
         except Exception as e:

@@ -18,6 +18,8 @@ async def register_events():
         'driver.status.offline': DriverService.change_status_offline,
         'driver.availability.available': DriverService.set_driver_available,
         'driver.availability.occupied': DriverService.set_driver_occupied,
+        'driver.location.get': DriverService.get_last_location,
+        'driver.status.get': DriverService.get_driver_status,
         'location.drivers.get_nearest': TrackerService.get_nearest_drivers,
     }
 

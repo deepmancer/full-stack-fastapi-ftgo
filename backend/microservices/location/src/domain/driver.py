@@ -125,11 +125,21 @@ class Driver:
     async def get_location(self) -> GeoLocation:
         try:
             driver_location = DriverLocation(driver_id=self.driver_id)
-            return await driver_location.load_last_location()
+            return await driver_location.load_last_location(raise_error_on_missing=True)
         except Exception as e:
             payload = {"driver_id": self.driver_id, "error": str(e)}
             get_logger().error(ErrorCodes.LOCATION_LOAD_ERROR.value, payload=payload)
             await handle_exception(e, ErrorCodes.LOCATION_LOAD_ERROR, payload=payload)
+
+    def get_status(self) -> str:
+        return self.status
+
+    def get_availability(self) -> str:
+        return self.availability
+
+    async def get_last_location(self) -> dict:
+        location = await self.get_location()
+        return location.to_dict()
 
     def get_info(self) -> dict:
         return {

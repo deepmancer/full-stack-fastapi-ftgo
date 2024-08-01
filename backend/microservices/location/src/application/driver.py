@@ -40,3 +40,19 @@ class DriverService:
         driver = await Driver.load(driver_id)
         await driver.change_availability(DriverAvailabilityStatus.OCCUPIED.value)
         return {}
+
+    @staticmethod
+    async def get_last_location(driver_id: str, **kwargs) -> Dict[str, Any]:
+        driver = await Driver.load(driver_id)
+        location = await driver.get_last_location()
+        return {
+            "latitude": location["latitude"],
+            "longitude": location["longitude"],
+        }
+    
+    @staticmethod
+    async def get_driver_status(driver_id: str, **kwargs) -> Dict[str, bool]:
+        driver = await Driver.load(driver_id)
+        status = driver.get_status()
+        is_online = status == DriverStatus.ONLINE.value
+        return {"is_online": is_online}
