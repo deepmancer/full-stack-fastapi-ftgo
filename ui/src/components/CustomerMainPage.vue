@@ -17,11 +17,6 @@
                 ویرایش اطلاعات کاربر
               </b-button>
             </b-col>
-            <b-col>
-              <b-button variant="primary" @click="navigateToShoppingCart">
-                سبد خرید
-              </b-button>
-            </b-col>
           </b-row>
           <b-row>
             <b-col>
@@ -73,9 +68,6 @@ export default {
     ...mapActions(['updateRestaurantInfo']),
     navigateToEditUserInfo() {
       this.$router.push({ name: 'CustomerChangeInfo' });
-    },
-    navigateToShoppingCart() {
-      this.$router.push({ name: 'ShoppingCart' });
     },
     async selectRestaurant(restaurant) {
       await this.updateRestaurantInfo(restaurant);
