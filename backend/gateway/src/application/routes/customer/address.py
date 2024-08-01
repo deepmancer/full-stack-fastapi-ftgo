@@ -1,5 +1,4 @@
-import os
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from application.schemas.account.address import (
     AddressIdSchema, AddressesSchema, AddressIdPreferencySchema
 )
@@ -8,13 +7,17 @@ from ftgo_utils.schemas import (
 )
 from application.schemas.user import UserStateSchema
 from application.exceptions import handle_exception
-from ftgo_utils.enums import ResponseStatus
+from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
 from application.schemas.common import SuccessResponse
 from services.user import UserService
-from application import get_logger
+from application.dependencies import AccessManager
 
-router = APIRouter(prefix='/address', tags=["user_address"])
+router = APIRouter(
+    prefix='/address',
+    tags=["user_address"],
+    dependencies=[Depends(AccessManager([Roles.CUSTOMER]))],
+)
 
 @router.get("/get_all_info", response_model=AddressesSchema)
 async def get_all_addresses(request: Request):

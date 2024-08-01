@@ -7,13 +7,13 @@ from fastapi.encoders import jsonable_encoder
 from ftgo_utils.errors import ErrorCodes, BaseError, ErrorCategory, ErrorCategories
 from application import get_logger
 
-logger = get_logger()
 
 async def handle_exception(
     request: Request,
     exc: Exception,
     default_failure_message: Optional[str] = "An error occurred while processing the request",
 ) -> None:
+    logger = get_logger()
     try:
         if isinstance(exc, BaseError):
             route_exc = exc
@@ -24,12 +24,13 @@ async def handle_exception(
             )
 
         error_code = route_exc.error_code
-        logger.exception(
-            f"Error processing request at {request.url}",
+        logger.error(
+            f"Error processing request at {request.url} with request_id {request.state.request_id}",
             payload=route_exc.to_dict(),
         )
 
         common_fields = {
+            "request_id": request.state.request_id,
             "path": request.url.path,
             "method": request.method,
             "timestamp": route_exc.timestamp,
@@ -60,12 +61,13 @@ async def handle_exception(
 
     except Exception as unexpected_exc:
         logger.exception(
-            f"Unexpected error processing request at {request.url}",
+            f"Unexpected error processing request at {request.url} with request_id {request.state.request_id}",
             payload={"error": str(unexpected_exc), "detail": default_failure_message},
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=jsonable_encoder({
+                "request_id": request.state.request_id,
                 "path": request.url.path,
                 "method": request.method,
                 "timestamp": int(time.time()),

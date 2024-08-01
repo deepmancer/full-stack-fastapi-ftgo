@@ -1,19 +1,18 @@
-from __future__ import annotations
-
-from typing import Any, Callable, Coroutine, Dict, Optional
+import time
 
 from fastapi import Request
-from jwt import exceptions as jwt_errors
+from fastapi.responses import JSONResponse
 from starlette.datastructures import Headers
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from starlette.types import ASGIApp
-
+from domain.token_manager import TokenManager
 from application.schemas.user import UserStateSchema
 from config.auth import AuthConfig
 from data_access.repository.cache_repository import CacheRepository
 from ftgo_utils.errors import BaseError, ErrorCodes
 from ftgo_utils.jwt_auth import decode
+from middleware import get_logger
 
 
 class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
@@ -66,12 +65,13 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             user = await self._authenticate(token)
             request.state.user = UserStateSchema.model_validate(user.dict())
         except BaseError as e:
-            raise e
+            return self._handle_authentication_exception(request, e)
         except Exception as e:
-            raise BaseError(
-                error_code=ErrorCodes.UNKNOWN_ERROR,
-                message="An unexpected error occurred. Please try again later."
+            error = BaseError(
+                error_code=ErrorCodes.INTERNAL_AUTHENTICATION_ERROR,
+                message="An unexpected error occurred while processing the authentication token."
             )
+            return self._handle_authentication_exception(request, error)
 
         return await call_next(request)
 
@@ -81,7 +81,7 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
             if not payload:
                 raise BaseError(
                     error_code=ErrorCodes.INVALID_TOKEN_ERROR,
-                    message="The provided token is invalid"
+                    message="The provided token is not correct."
                 )
 
             try:
@@ -90,21 +90,13 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
                 raise BaseError(
                     error_code=ErrorCodes.INTERNAL_AUTHENTICATION_ERROR,
                     message="There was an error validating your session."
-                )
-
-            cached_user = await self._fetch_user(token)
-            if not cached_user:
-                raise BaseError(
-                    error_code=ErrorCodes.TOKEN_NOT_FOUND_ERROR,
-                    message="Session not found."
-                )
-
+                )    
             try:
-                user = UserStateSchema.model_validate(cached_user)
+                user = await TokenManager().fetch_user(token)
             except Exception as e:
                 raise BaseError(
                     error_code=ErrorCodes.INTERNAL_AUTHENTICATION_ERROR,
-                    message="There was an error validating your session."
+                    message="There was an error validating your token."
                 )
 
             if user.user_id != request_token_user.user_id:
@@ -119,15 +111,37 @@ class JWTAuthenticationMiddleware(BaseHTTPMiddleware):
                 error_code=ErrorCodes.INVALID_TOKEN_ERROR,
                 message="The provided token is invalid."
             )
+        except jwt_errors.ExpiredSignatureError as e:
+            raise BaseError(
+                error_code=ErrorCodes.USER_SESSION_EXPIRED_ERROR,
+                message="The provided token is expired."
+            )
         except Exception as e:
             raise e
 
-    async def _fetch_user(self, token: str) -> Optional[Dict[str, Any]]:
-        cache_key = token
-        user_data = await self.cache.get(cache_key)
-        if user_data is None:
-            raise BaseError(
-                error_code=ErrorCodes.CACHE_KEY_NOT_FOUND_ERROR,
-                message="Session not found."
-            )
-        return user_data
+    def _handle_authentication_exception(self, request: Request, error: BaseError) -> None:
+        get_logger().error(
+            error.error_code.value,
+            payload={
+                "request_id": request.state.request_id,
+                "path": request.url.path,
+                "method": request.method,
+                "status_code": error.error_code.status_code or 401,
+                "error": error.error_code.value,
+                "detail": error.message,
+                "timestamp": int(time.time()),
+            }
+        )
+        error_details = {
+            "request_id": request.state.request_id,
+            "path": request.url.path,
+            "method": request.method,
+            "status_code": error.error_code.status_code or 401,
+            "error": error.error_code.value,
+            "detail": error.message,
+            "timestamp": int(time.time()),
+        }
+        return JSONResponse(
+            status_code=error_details["status_code"],
+            content=error_details,
+        )
