@@ -8,6 +8,7 @@ from domain import get_logger
 from domain.authentication import Authenticator
 from data_access.repository import DatabaseRepository, CacheRepository
 from dto import ProfileDTO
+from utils import handle_exception
 
 class User:
     def __init__(

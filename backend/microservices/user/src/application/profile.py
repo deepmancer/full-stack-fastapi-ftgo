@@ -78,7 +78,13 @@ class ProfileService:
         return {}
 
     @staticmethod
-    async def update_profile(user_id: str, update_data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+    async def update_profile(user_id: str,
+                             first_name: str,
+                             last_name: str,
+                             **kwargs) -> Dict[str, Any]:
         user = await UserManager.load(user_id=user_id)
-        user_info = await user.update_profile_information(update_data)
+        user_info = await user.update_profile_information(update_fields={
+            "first_name": first_name,
+            "last_name": last_name,
+        })
         return user_info
