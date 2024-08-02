@@ -6,6 +6,7 @@ from application import get_logger
 from application.exceptions import handle_exception
 from application.schemas.common import EmptyResponse, SuccessResponse
 from application.schemas.user import UserStateSchema
+from application.schemas.account.profile import UpdateUserRequest, UserInfo
 from config import AuthConfig
 from domain.token_manager import TokenManager
 from ftgo_utils.enums import ResponseStatus, Roles
@@ -82,3 +83,28 @@ async def delete_account(request: Request):
         )
     except Exception as e:
         await handle_exception(request, e, default_failure_message="Account deletion failed")
+
+
+
+@router.put("/update", response_model=UserInfo)
+async def update_profile(request: Request, request_data: UpdateUserRequest):
+    try:
+        user: UserStateSchema = request.state.user
+        data = request_data.dict()
+        data.update({"user_id": user.user_id})
+        response = await UserService.update_profile(data=data)
+
+        status = response.pop('status', ResponseStatus.ERROR.value)
+
+        if status == ResponseStatus.SUCCESS.value:
+            return UserInfo(
+                **response,
+            )
+
+        raise BaseError(
+            error_code=ErrorCodes.get_error_code(response.get('error_code')),
+            message="Update user info failed",
+            payload=data,
+        )
+    except Exception as e:
+        await handle_exception(Request, e, default_failure_message="Update user info failed")

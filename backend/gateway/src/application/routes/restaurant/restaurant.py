@@ -131,4 +131,3 @@ async def update_information(request: Request, request_data: UpdateRestaurantReq
         )
     except Exception as e:
         await handle_exception(request, e, default_failure_message="Update restaurant info failed")
-        raise
