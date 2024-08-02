@@ -13,6 +13,8 @@ from data_access.repository.cache_repository import CacheRepository
 from ftgo_utils.errors import BaseError, ErrorCodes
 from ftgo_utils.jwt_auth import decode
 from middleware import get_logger
+import jwt.exceptions as jwt_errors
+
 
 
 class JWTAuthenticationMiddleware(BaseHTTPMiddleware):

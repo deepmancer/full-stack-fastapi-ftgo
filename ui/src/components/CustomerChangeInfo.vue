@@ -3,20 +3,33 @@
     <b-container>
       <h2>اطلاعات کاربری</h2>
       <b-card>
+
         <b-list-group flush>
           <b-list-group-item class="rtl-text">
             <strong>کدملی:</strong> {{ userInfo.national_id }}
           </b-list-group-item>
           <b-list-group-item class="rtl-text">
-            <strong>نام:</strong> {{ userInfo.first_name }}
-          </b-list-group-item>
-          <b-list-group-item class="rtl-text">
-            <strong>نام خانوادگی:</strong> {{ userInfo.last_name }}
-          </b-list-group-item>
-          <b-list-group-item class="rtl-text">
             <strong>تلفن:</strong> {{ userInfo.phone_number }}
           </b-list-group-item>
         </b-list-group>
+
+        <form class="register-form" id="register-form" @submit.prevent="updateUser">
+          <b-input-group class="mt-3 rtl-text">
+            <strong>نام:</strong>
+            <b-form-input class="rtl-text" placeholder="نام" v-model="userInfo.first_name" required></b-form-input>
+          </b-input-group>
+          <b-input-group class="mt-3 rtl-text">
+            <strong>نام خانوادگی:</strong>
+            <b-form-input class="rtl-text" placeholder="نام خانوادگی" v-model="userInfo.last_name" required></b-form-input>
+          </b-input-group>
+          <div class="form-group form-button mt-5">
+            <b-button variant="secondary" type="submit" :disabled="loading">
+              <b-spinner v-if="loading" small></b-spinner>
+              <span v-else>به‌روزرسانی</span>
+            </b-button>
+          </div>
+        </form>
+
         <div class="text-right mt-3">
           <b-button variant="danger" @click="confirmDeleteAccount">حذف حساب کاربری من</b-button>
         </div>
@@ -121,7 +134,8 @@ export default {
         city: '',
         postal_code: '',
         country: ''
-      }
+      },
+      loading: false,
     };
   },
   computed: {
@@ -138,6 +152,33 @@ export default {
     this.fetchAddresses();
   },
   methods: {
+    async updateUser() {
+      this.loading = true;
+      try {
+        await axios.put(
+          'http://localhost:8000/api/v1/profile/update',
+          { first_name: this.userInfo.first_name, last_name: this.userInfo.last_name },
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+        this.$bvToast.toast('اطلاعات کاربر با موفقیت به‌روزرسانی شد!', {
+          title: 'Success',
+          variant: 'success',
+          solid: true
+        });
+
+        await this.fetchUserInfo();
+        this.$router.push({ name: 'CustomerMainPage' });
+      } catch (error) {
+        console.error('Error updating restaurant:', error);
+        this.$bvToast.toast('Error updating user. Please try again.', {
+          title: 'Error',
+          variant: 'danger',
+          solid: true
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
     async fetchUserInfo() {
       try {
         const response = await axios.get(

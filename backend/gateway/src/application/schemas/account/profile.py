@@ -1,4 +1,5 @@
 from typing import Optional
+from pydantic import BaseModel
 
 from pydantic import Field
 
@@ -26,3 +27,8 @@ class UpdateProfileSchema(UserIdMixin, GenderMixin):
 
 class UserInfo(UserInfoMixin):
     role: str = Field(..., min_length=1, max_length=20)
+
+
+class UpdateUserRequest(BaseModel):
+    first_name: str = Field(..., min_length=1, max_length=100)
+    last_name: str = Field(..., min_length=1, max_length=100)
