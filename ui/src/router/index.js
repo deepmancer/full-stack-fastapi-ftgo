@@ -20,7 +20,7 @@ const routes = [{
         component: CustomerMainPage
     },
     {
-        path: '/DeliveryMain',
+        path: '/DeliveryMainPage',
         name: 'DeliveryMainPage',
         component: DeliveryMainPage
     },

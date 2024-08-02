@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from application.routes.auth import authentication_router
 from application.routes.account import profile_router
 from application.routes.customer import address_router
-from application.routes.driver import driver_status_router, driver_location_router
+from application.routes.driver import driver_status_router, driver_location_router, driver_vehicle_router
 from application.routes.restaurant import restaurant_router, menu_router
 
 def init_router() -> APIRouter:
@@ -13,6 +13,7 @@ def init_router() -> APIRouter:
     router.include_router(address_router)
     router.include_router(driver_location_router)
     router.include_router(driver_status_router)
+    router.include_router(driver_vehicle_router)
     router.include_router(restaurant_router)
     router.include_router(menu_router)
     return router
