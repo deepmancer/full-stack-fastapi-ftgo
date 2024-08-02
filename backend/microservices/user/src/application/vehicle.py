@@ -15,7 +15,7 @@ class VehicleService:
     @staticmethod
     async def get_vehicle_info(user_id: str, **kwargs) -> Dict[str, Any]:
         driver = await UserManager.load(user_id)
-        vehicle_info = await driver.get_vehicle_info()
+        vehicle_info = driver.get_vehicle_info()
         return vehicle_info
         
     @staticmethod

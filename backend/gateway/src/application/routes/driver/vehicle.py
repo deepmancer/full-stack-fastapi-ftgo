@@ -15,8 +15,8 @@ router = APIRouter(prefix='/vehicle', tags=["vehicle"])
 logger = get_logger()
 
 
-@router.post("/register", response_model=RegisterVehicleRequest)
-async def register(request: Request, request_data: RegisterVehicleResponse):
+@router.post("/register", response_model=RegisterVehicleResponse)
+async def register(request: Request, request_data: RegisterVehicleRequest):
     try:
         user: UserStateSchema = request.state.user
 
