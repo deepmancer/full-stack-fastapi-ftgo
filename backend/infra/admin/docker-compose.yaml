@@ -1,35 +1,97 @@
 services:
-  postgres_admin:
-    image: dpage/pgadmin4
-    container_name: pgadmin4_container
-    hostname: pgadmin4
-    restart: always
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    hostname: metabase
     ports:
-      - "8888:80"
+      - "3000:3000"
     environment:
-      - PGADMIN_DEFAULT_EMAIL=alirezaheidari.cs@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=pgadmin_password
+      MB_DB_TYPE: "postgres"
+      MB_DB_DBNAME: "metabase_db"
+      MB_DB_PORT: "5432"
+      MB_DB_USER: "metabase_user"
+      MB_DB_PASS: "metabase_password"
+      MB_DB_HOST: "metabase_db"
+      MB_PASSWORD_COMPLEXITY: "weak"
+      MB_PASSWORD_LENGTH: "8"
+      MB_ADMIN_EMAIL: "alirezaheidari.cs@gmail.com"
+      MB_USER_EMAIL: "alirezaheidari.cs@gmail.com"
+      MB_USER_PASSWORD: "Alireza1qaz"
+      MAX_SESSION_AGE: "20160"
+      MB_DISABLE_SESSION_THROTTLE: "true"
+      MB_SOURCE_ADDRESS_HEADER: NULL
+      MB_SHOW_LIGHTHOUSE_ILLUSTRATION: "false"
+      MB_NO_SURVEYS: "true"
+      MB_LOAD_ANALYTICS_CONTENT: "false"
+      MB_ANON_TRACKING_ENABLED: "false"
+      MB_CHECK_FOR_UPDATES: "false"
+      MB_SETUP_TOKEN: ""
     volumes:
-      - postgres_admin_data:/var/lib/pgadmin
+      - metabase_data:/metabase-data
+    depends_on:
+      - metabase_db
     networks:
       - backend-network
 
-  redis_admin:
+  redis_insight:
     image: "redislabs/redisinsight:latest"
     container_name: redisinsight
     ports:
       - "5540:5540"
     volumes:
-      - redis_admin_data:/data
-    links:
-      - gateway_redis
-      - user_redis
+      - redis_insight_data:/data
+    networks:
+      - backend-network
+
+  mongo_express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin_user
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin_pass
+      ME_CONFIG_MONGODB_URL: mongodb://admin_user:admin_pass@mongo_admin_db:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongo_admin_db
+    networks:
+      - backend-network
+
+  metabase_db:
+    image: postgres:16.3
+    container_name: "metabase_db"
+    hostname: "metabase_db"
+    ports:
+      - "5858:5432"
+    environment:
+      POSTGRES_DB: "metabase_db"
+      POSTGRES_USER: "metabase_user"
+      POSTGRES_PASSWORD: "metabase_password"
+    volumes:
+      - metabase_db_data:/var/lib/postgresql/data
+    networks:
+      - backend-network
+
+  mongo_admin_db:
+    image: mongo
+    container_name: "mongo_admin_db"
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin_user
+      MONGO_INITDB_ROOT_PASSWORD: admin_pass
+    volumes:
+      - mongo_admin_db_data:/data/db
     networks:
       - backend-network
 
 volumes:
-  postgres_admin_data:
-  redis_admin_data:
+  metabase_data:
+  metabase_db_data:
+  redis_insight_data:
+  mongo_admin_db_data:
 
 networks:
   backend-network:

@@ -2,5 +2,3 @@ include:
   - ./postgres/docker-compose.yaml
   - ./redis/docker-compose.yaml
   - ./rabbitmq/docker-compose.yaml
-  - ./monitoring/docker-compose.yaml
-  - ./admin/docker-compose.yaml
