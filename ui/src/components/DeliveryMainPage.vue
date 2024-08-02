@@ -1,69 +1,77 @@
 <template>
   <div class="driver-main-page"> 
     <b-container>
-      <!-- Driver Profile Section -->
-      <div class="driver-profile">
-        <b-button variant="primary" @click="navigateToEditDriverInfo">
-          ویرایش اطلاعات
-        </b-button>
-        <b-button variant="primary" @click="navigateToDeliveryActiveOrder">
-          مشاهده سفارش فعال
-        </b-button>
-        <div class="profile-info">
-          <img
-            src="/images/default-avatar.png"
-            alt="Driver Avatar"
-            class="driver-avatar"
-          />
-          <div>
-            <h3>نام: {{ driver.name }}</h3>
-            <p>شماره تماس: {{ driver.phone }}</p>
+      <div v-if="vehicle">
+        <!-- Driver Profile Section -->
+        <div class="driver-profile">
+          <b-button variant="primary" @click="navigateToEditDriverInfo">
+            ویرایش اطلاعات
+          </b-button>
+          <b-button variant="primary" @click="navigateToDeliveryActiveOrder">
+            مشاهده سفارش فعال
+          </b-button>
+          <div class="profile-info">
+            <img
+              src="/images/default-avatar.png"
+              alt="Driver Avatar"
+              class="driver-avatar"
+            />
+            <div>
+              <h3>نام: {{ driver.name }}</h3>
+              <p>شماره تماس: {{ driver.phone }}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Map Section -->
-      <div v-if="isActive" class="driver-map">
-        <h2 class="mt-4 text-center">نقشه رستوران‌ها</h2>
-        <!-- Leaflet Map -->
-        <l-map
-          style="height: 400px; width: 100%"
-          :zoom="12"
-          :center="[35.6892, 51.389]"
-        >
-          <l-tile-layer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-          ></l-tile-layer>
-
-          <l-marker
-            v-for="restaurant in restaurants"
-            :key="restaurant.id"
-            :lat-lng="[restaurant.lat, restaurant.lng]"
-            @click="navigateToRestaurant(restaurant.id)"
+        <!-- Map Section -->
+        <div v-if="isActive" class="driver-map">
+          <h2 class="mt-4 text-center">نقشه رستوران‌ها</h2>
+          <!-- Leaflet Map -->
+          <l-map
+            style="height: 400px; width: 100%"
+            :zoom="12"
+            :center="[35.6892, 51.389]"
           >
-            <l-popup>
-              <div class="restaurant-popup">
-                <img
-                  :src="restaurant.logo"
-                  alt="Logo"
-                  class="restaurant-logo"
-                />
-                <div><strong>نام:</strong> {{ restaurant.name }}</div>
-                <div><strong>آدرس:</strong> {{ restaurant.address }}</div>
-              </div>
-            </l-popup>
-          </l-marker>
-        </l-map>
-      </div>
+            <l-tile-layer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+            ></l-tile-layer>
 
-      <!-- Active/Inactive Button -->
-      <div class="driver-controls">
-        <b-button
-          :variant="isActive ? 'success' : 'secondary'"
-          @click="toggleActive"
-        >
-          {{ isActive ? "فعال" : "غیرفعال" }}
+            <l-marker
+              v-for="restaurant in restaurants"
+              :key="restaurant.id"
+              :lat-lng="[restaurant.lat, restaurant.lng]"
+              @click="navigateToRestaurant(restaurant.id)"
+            >
+              <l-popup>
+                <div class="restaurant-popup">
+                  <img
+                    :src="restaurant.logo"
+                    alt="Logo"
+                    class="restaurant-logo"
+                  />
+                  <div><strong>نام:</strong> {{ restaurant.name }}</div>
+                  <div><strong>آدرس:</strong> {{ restaurant.address }}</div>
+                </div>
+              </l-popup>
+            </l-marker>
+          </l-map>
+        </div>
+
+        <!-- Active/Inactive Button -->
+        <div class="driver-controls">
+          <b-button
+            :variant="isActive ? 'success' : 'secondary'"
+            @click="toggleActive"
+          >
+            {{ isActive ? "فعال" : "غیرفعال" }}
+          </b-button>
+        </div>
+      </div>
+      <div v-else class="no-vehivle">
+        <p>لطفا ابتدا اطلاعات ماشین خود را ثبت کنید.</p>
+        <b-button variant="primary" @click="navigateToRegisterVehicle">
+          ثبت اطلاعات ماشین
         </b-button>
       </div>
     </b-container>
@@ -73,6 +81,7 @@
 <script>
 import { LMap, LTileLayer, LMarker, LPopup } from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
+import { mapGetters } from 'vuex';
 
 export default {
   components: {
@@ -120,7 +129,22 @@ export default {
       ],
     };
   },
+  computed: {
+    ...mapGetters(['getVehicleInfo', 'getUserId', 'getToken']),
+    vehicle() {
+      return this.getVehicleInfo;
+    },
+    userId() {
+      return this.getUserId;
+    },
+    token() {
+      return this.getToken;
+    }
+  },
   methods: {
+    navigateToRegisterVehicle() {
+      this.$router.push({ name: 'RegisterVehiclePage' });
+    },
     toggleActive() {
       this.isActive = !this.isActive;
     },

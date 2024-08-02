@@ -9,6 +9,7 @@ import SupplierMainPage from '../views/SupplierMainPage.vue'
 import VerifyAccountPage from '../views/VerifyAccountPage.vue'
 import ChangeRestaurantInfo from '../views/ChangeRestaurantInfo.vue'
 import RegisterRestaurantPage from '../views/RegisterRestaurantPage.vue'
+import RegisterVehiclePage from '../views/RegisterVehiclePage.vue'
 import MenuPage from '../views/MenuPage.vue'
 
 
@@ -33,6 +34,11 @@ const routes = [{
         path: '/RegisterRestaurantPage',
         name: 'RegisterRestaurantPage',
         component: RegisterRestaurantPage
+    },
+    {
+        path: '/RegisterVehiclePage',
+        name: 'RegisterVehiclePage',
+        component: RegisterVehiclePage
     },
     {
         path: '/CustomerChangeInfo',

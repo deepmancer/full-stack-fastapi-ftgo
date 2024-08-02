@@ -66,126 +66,134 @@ Vue.use(BVToastPlugin);
 import { mapActions } from 'vuex';
 
 export default {
-    data() {
-        return {
-            phone: "",
-            password: "",
-            userRole: 'customer',
-            userRoles: [
-                { value: 'customer', text: 'مشتری' },
-                { value: 'driver', text: 'پیک' },
-                { value: 'restaurant_admin', text: 'رستوران' }
-            ],
-            loading: false,
-            showVerificationCode: false,
-            verificationCode: '',
-            userId: null,
-        }
-    },
-    methods: {
-        ...mapActions(['updateUserId', 'updateToken', 'updateRestaurantInfo', 'updateVehicleInfo']),
-        async signin() {
-            this.loading = true;
-            let api = "http://localhost:8000/api/v1/auth/login";
-            const data = {
-                role: this.userRole,
-                phone_number: this.phone,
-                password: this.password,
-            };
-            const response = null;
-            try {
-                const response = await Vue.axios.post(api, data);
-                localStorage.removeItem('token');
-                localStorage.setItem('token', response.data.user_id);
-                this.updateUserId(response.data.user_id);
-                this.updateToken(response.data.token);
-                this.phone = '';
-                this.password = '';
-                this.loading = false;
-
-                if (this.userRole === 'restaurant_admin') {
-                    await this.fetchAndStoreRestaurantInfo(response.data.token);
-                }
-
-                if (this.userRole === 'driver') {
-                    await this.fetchAndStoreVehicleInfo(response.data.token);
-                }
-
-                switch (this.userRole) {
-                    case 'customer':
-                        this.$router.push('/CustomerMainPage');
-                        break;
-                    case 'driver':
-                        this.$router.push('/DeliveryMainPage');
-                        break;
-                    case 'restaurant_admin':
-                        this.$router.push('/SupplierMainPage');
-                        break;
-                    default:
-                        this.$router.push('/');
-                }
-            } catch (e) {
-                console.log(response.data.detail);
-                this.$bvToast.toast(response.content.detail, { title: 'پیام خطا', autoHideDelay: 5000, appendToast: true });
-                this.phone = '';
-                this.password = '';
-                this.loading = false;
-            }
-        },
-        async fetchAndStoreRestaurantInfo(token) {
-            try {
-                const response = await Vue.axios.get('http://localhost:8000/api/v1/restaurant/get_supplier_restaurant_info', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                if (response.data && response.data.id) {
-                    this.updateRestaurantInfo(response.data);
-                } else {
-                    this.updateRestaurantInfo(null);
-                }
-            } catch (error) {
-                this.updateRestaurantInfo(null);
-                console.error('Failed to fetch restaurant info:', error);
-            }
-        },
-        async fetchAndStoreVehicleInfo(token) {
-            try {
-                const response = await Vue.axios.get('http://localhost:8000/api/v1/vehicle/get_driver_vehicle_info', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                if (response.data && response.data.id) {
-                    this.updateVehicleInfo(response.data);
-                } else {
-                    this.updateVehicleInfo(null);
-                }
-            } catch (error) {
-                this.updateVehicleInfo(null);
-                console.error('Failed to fetch restaurant info:', error);
-            }
-        },
-        verifyAccount() {
-            let api = "http://localhost:5020/user/profile/verify";
-            const data = {
-                user_id: this.userId,
-                auth_code: this.verificationCode,
-            };
-            Vue.axios.post(api, data)
-                .then(response => {
-                    if (response.data.success) {
-                        this.signin();
-                    } else {
-                        this.$bvToast.toast("Verification failed. Please try again.", { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
-                    }
-                })
-                .catch(e => {
-                    console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
-                });
-        }
+  data() {
+    return {
+      phone: "",
+      password: "",
+      userRole: 'customer',
+      userRoles: [
+        {value: 'customer', text: 'مشتری'},
+        {value: 'driver', text: 'پیک'},
+        {value: 'restaurant_admin', text: 'رستوران'}
+      ],
+      loading: false,
+      showVerificationCode: false,
+      verificationCode: '',
+      userId: null,
     }
+  },
+  methods: {
+    ...mapActions(['updateUserId', 'updateToken', 'updateRestaurantInfo', 'updateVehicleInfo']),
+    async signin() {
+      this.loading = true;
+      let api = "http://localhost:8000/api/v1/auth/login";
+      const data = {
+        role: this.userRole,
+        phone_number: this.phone,
+        password: this.password,
+      };
+      const response = null;
+      try {
+        const response = await Vue.axios.post(api, data);
+        localStorage.removeItem('token');
+        localStorage.setItem('token', response.data.user_id);
+        this.updateUserId(response.data.user_id);
+        this.updateToken(response.data.token);
+        this.phone = '';
+        this.password = '';
+        this.loading = false;
+
+        if (this.userRole === 'restaurant_admin') {
+          await this.fetchAndStoreRestaurantInfo(response.data.token);
+        }
+
+        if (this.userRole === 'driver') {
+          await this.fetchAndStoreVehicleInfo(response.data.token);
+        }
+
+        switch (this.userRole) {
+          case 'customer':
+            this.$router.push('/CustomerMainPage');
+            break;
+          case 'driver':
+            this.$router.push('/DeliveryMainPage');
+            break;
+          case 'restaurant_admin':
+            this.$router.push('/SupplierMainPage');
+            break;
+          default:
+            this.$router.push('/');
+        }
+      } catch (e) {
+        console.log(response.data.detail);
+        this.$bvToast.toast(response.content.detail, {title: 'پیام خطا', autoHideDelay: 5000, appendToast: true});
+        this.phone = '';
+        this.password = '';
+        this.loading = false;
+      }
+    },
+    async fetchAndStoreRestaurantInfo(token) {
+      try {
+        const response = await Vue.axios.get('http://localhost:8000/api/v1/restaurant/get_supplier_restaurant_info', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (response.data && response.data.id) {
+          this.updateRestaurantInfo(response.data);
+        } else {
+          this.updateRestaurantInfo(null);
+        }
+      } catch (error) {
+        this.updateRestaurantInfo(null);
+        console.error('Failed to fetch restaurant info:', error);
+      }
+    },
+    async fetchAndStoreVehicleInfo(token) {
+      try {
+        const response = await Vue.axios.get('http://localhost:8000/api/v1/vehicle/get_info', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (response.data && response.data.vehicle_id) {
+          this.updateVehicleInfo(response.data);
+        } else {
+          this.updateVehicleInfo(null);
+        }
+      } catch (error) {
+        this.updateVehicleInfo(null);
+        console.error('Failed to fetch restaurant info:', error);
+      }
+    },
+    verifyAccount() {
+      let api = "http://localhost:5020/user/profile/verify";
+      const data = {
+        user_id: this.userId,
+        auth_code: this.verificationCode,
+      };
+      Vue.axios.post(api, data)
+          .then(response => {
+            if (response.data.success) {
+              this.signin();
+            } else {
+              this.$bvToast.toast("Verification failed. Please try again.", {
+                title: 'Verification Error',
+                autoHideDelay: 5000,
+                appendToast: true
+              });
+            }
+          })
+          .catch(e => {
+            console.log(e.response.data.detail);
+            this.$bvToast.toast(e.response.data.detail[0].msg, {
+              title: 'Verification Error',
+              autoHideDelay: 5000,
+              appendToast: true
+            });
+          });
+    }
+  }
 }
 </script>
 
