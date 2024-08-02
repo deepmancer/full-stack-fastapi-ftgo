@@ -21,5 +21,5 @@ class VehicleService:
     @staticmethod
     async def delete_vehicle(user_id: str, **kwargs) -> Dict[str, Any]:
         driver = await UserManager.load(user_id)
-        await driver.delete_vehicle()
-        return {}
+        vehicle_id = await driver.delete_vehicle()
+        return {"vehicle_id": vehicle_id}

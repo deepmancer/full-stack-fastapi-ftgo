@@ -20,3 +20,7 @@ class GetVehicleInfoResponse(BaseModel):
     driver_id: str = uuid_field()
     plate_number: str = Field(..., min_length=1, max_length=100)
     license_number: str = Field(..., min_length=1, max_length=100)
+
+
+class DeleteVehicleResponse(BaseModel):
+    vehicle_id: str = uuid_field()

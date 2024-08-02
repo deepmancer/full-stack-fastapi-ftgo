@@ -85,10 +85,10 @@ class VehicleDomain:
             get_logger().error(ErrorCodes.VEHICLE_SUBMISSION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
 
-    async def delete(self) -> bool:
+    async def delete(self) -> str:
         try:
-            await DatabaseRepository.delete_by_query(VehicleDTO, query={"id": self.vehicle_id})
-            return True
+            await DatabaseRepository.delete(VehicleDTO, query={"id": self.vehicle_id})
+            return self.vehicle_id
         except Exception as e:
             payload = {"vehicle_id": self.vehicle_id}
             get_logger().error(ErrorCodes.VEHICLE_REMOVE_ERROR.value, payload=payload)

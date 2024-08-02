@@ -194,7 +194,7 @@ export default {
         console.error('Error deleting user account:', error);
       }
     },
-    async deleteRestaurant() {
+    async deleteVehicle() {
       try {
         await axios.delete('http://localhost:8000/api/v1/vehicle/delete', {
           data: {vehicle_id: this.vehicle.vehicle_id},

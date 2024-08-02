@@ -71,13 +71,14 @@ class Driver(User):
             get_logger().error(ErrorCodes.VEHICLE_SUBMISSION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
 
-    async def delete_vehicle(self) -> bool:
+    async def delete_vehicle(self) -> Dict:
         try:
             if self.vehicle:
                 await self.vehicle.delete()
+                vehicle_id = self.vehicle.vehicle_id
                 self.vehicle = None
-                return True
-            return False
+                return vehicle_id
+            return {}
         except Exception as e:
             payload = {'user_id': self.user_id}
             get_logger().error(ErrorCodes.VEHICLE_REMOVE_ERROR.value, payload=payload)
