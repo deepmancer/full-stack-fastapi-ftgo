@@ -7,6 +7,9 @@
           <b-button variant="primary" @click="navigateToEditDriverInfo">
             ویرایش اطلاعات
           </b-button>
+          <div>
+            <h3>شماره پلاک {{ vehicle.plate_number }}</h3>
+          </div>
         </div>
 
         <!-- Map Section -->
@@ -32,50 +35,14 @@
   </div>
 </template>
 
+
 <script>
 import { mapGetters } from 'vuex';
 
 export default {
-  components: {
-
-  },
   data() {
     return {
       isActive: false,
-      driver: {
-        name: "علی احمدی",
-        phone: "09123456789",
-        avatar: "/images/default-avatar.png",
-      },
-      restaurants: [
-        {
-          id: 1,
-          logo: "/images/McDonalds.png",
-          name: "مک دونالد 1",
-          address: "تهران، شریعتی، بالاتر از سه راه قلهک",
-          lat: 35.7615,
-          lng: 51.409,
-          status: "نیازمند پیک",
-        },
-        {
-          id: 2,
-          logo: "/images/McDonalds.png",
-          name: "مک دونالد 2",
-          address: "تهران، شریعتی، بالاتر از سه راه قلهک",
-          lat: 35.7128,
-          lng: 51.388,
-          status: "نیازمند پیک",
-        },
-        {
-          id: 3,
-          logo: "/images/McDonalds.png",
-          name: "مک دونالد 3",
-          address: "تهران، شریعتی، بالاتر از سه راه قلهک",
-          lat: 35.6892,
-          lng: 51.389,
-          status: "نیازمند پیک",
-        },
-      ],
     };
   },
   computed: {
@@ -97,11 +64,8 @@ export default {
     toggleActive() {
       this.isActive = !this.isActive;
     },
-    navigateToDeliveryActiveOrder() {
-      this.$router.push({ name: "DeliveryActiveOrder" });
-    },
     navigateToEditDriverInfo() {
-      this.$router.push({ name: "DriverChangeInfo" });
+      this.$router.push({ name: "ChangeVehicleInfo" });
     },
     navigateToRestaurant(restaurantId) {
       this.$router.push({ name: "Restaurant", params: { id: restaurantId } });

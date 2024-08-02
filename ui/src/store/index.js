@@ -1,81 +1,57 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import SignUp from '../views/SignUp.vue'
-import SignIn from '../views/SignIn.vue'
-import CustomerMainPage from '../views/CustomerMainPage.vue'
-import CustomerChangeInfo from '../views/CustomerChangeInfo.vue'
-import DeliveryMainPage from '../views/DeliveryMainPage.vue'
-import SupplierMainPage from '../views/SupplierMainPage.vue'
-import VerifyAccountPage from '../views/VerifyAccountPage.vue'
-import ChangeRestaurantInfo from '../views/ChangeRestaurantInfo.vue'
-import RegisterRestaurantPage from '../views/RegisterRestaurantPage.vue'
-import RegisterVehiclePage from '../views/RegisterVehiclePage.vue'
-import MenuPage from '../views/MenuPage.vue'
+// store/index.js
 
+import Vue from 'vue';
+import Vuex from 'vuex';
 
-Vue.use(VueRouter)
+Vue.use(Vuex);
 
-const routes = [{
-        path: '/CustomerMainPage',
-        name: 'CustomerMainPage',
-        component: CustomerMainPage
+export default new Vuex.Store({
+    state: {
+        userId: null,
+        token: null,
+        authCode: null,
+        restaurantInfo: null,
+        vehicleInfo: null,
     },
-    {
-        path: '/DeliveryMainPage',
-        name: 'DeliveryMainPage',
-        component: DeliveryMainPage
+    mutations: {
+        setUserId(state, userId) {
+            state.userId = userId;
+        },
+        setToken(state, token) {
+            state.token = token;
+        },
+        setRestaurantInfo(state, restaurantInfo) {
+            state.restaurantInfo = restaurantInfo;
+        },
+        setVehicleInfo(state, vehicleInfo) {
+            state.vehicleInfo = vehicleInfo;
+        },
+        setAuthCode(state, authCode) {
+            state.authCode = authCode;
+        },
     },
-    {
-        path: '/SupplierMainPage',
-        name: 'SupplierMainPage',
-        component: SupplierMainPage
+    actions: {
+        updateUserId({ commit }, userId) {
+            commit('setUserId', userId);
+        },
+        updateToken({ commit }, token) {
+            commit('setToken', token);
+        },
+        updateRestaurantInfo({ commit }, restaurantInfo) {
+            commit('setRestaurantInfo', restaurantInfo);
+        },
+        updateVehicleInfo({ commit }, vehicleInfo) {
+            commit('setVehicleInfo', vehicleInfo);
+        },
+        updateAuthCode({ commit }, restaurantInfo) {
+            commit('setAuthCode', restaurantInfo);
+        }
     },
-    {
-        path: '/RegisterRestaurantPage',
-        name: 'RegisterRestaurantPage',
-        component: RegisterRestaurantPage
-    },
-    {
-        path: '/RegisterVehiclePage',
-        name: 'RegisterVehiclePage',
-        component: RegisterVehiclePage
-    },
-    {
-        path: '/CustomerChangeInfo',
-        name: 'CustomerChangeInfo',
-        component: CustomerChangeInfo
-    },
-    {
-        path: '/ChangeRestaurantInfo',
-        name: 'ChangeRestaurantInfo',
-        component: ChangeRestaurantInfo
-    },
-    {
-        path: '/MenuPage',
-        name: 'MenuPage',
-        component: MenuPage
-    },
-    {
-        path: '/SignUp',
-        name: 'SignUp',
-        component: SignUp
-    },
-    {
-        path: '/VerifyAccount',
-        name: 'VerifyAccount',
-        component: VerifyAccountPage
-    },
-    {
-        path: '/',
-        name: 'SignIn',
-        component: SignIn
-    },
-]
-
-const router = new VueRouter({
-    mode: 'history',
-    base: process.env.BASE_URL,
-    routes
-})
-
-export default router
+    getters: {
+        getUserId: state => state.userId,
+        getToken: state => state.token,
+        getRestaurantInfo: state => state.restaurantInfo,
+        getVehicleInfo: state => state.vehicleInfo,
+        getAuthCode: state => state.authCode,
+    }
+});
