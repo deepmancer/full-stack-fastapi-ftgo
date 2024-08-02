@@ -73,7 +73,7 @@ export default {
             userRole: 'customer',
             userRoles: [
                 { value: 'customer', text: 'مشتری' },
-                { value: 'courier', text: 'پیک' },
+                { value: 'driver', text: 'پیک' },
                 { value: 'restaurant_admin', text: 'رستوران' }
             ],
             loading: false,
@@ -83,7 +83,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['updateUserId', 'updateToken', 'updateRestaurantInfo']),
+        ...mapActions(['updateUserId', 'updateToken', 'updateRestaurantInfo', 'updateVehicleInfo']),
         async signin() {
             this.loading = true;
             let api = "http://localhost:8000/api/v1/auth/login";
@@ -103,17 +103,19 @@ export default {
                 this.password = '';
                 this.loading = false;
 
-                // If the user role is restaurant_admin, fetch restaurant info
                 if (this.userRole === 'restaurant_admin') {
                     await this.fetchAndStoreRestaurantInfo(response.data.token);
                 }
 
-                // Redirect based on user role
+                if (this.userRole === 'driver') {
+                    await this.fetchAndStoreVehicleInfo(response.data.token);
+                }
+
                 switch (this.userRole) {
                     case 'customer':
                         this.$router.push('/CustomerMainPage');
                         break;
-                    case 'courier':
+                    case 'driver':
                         this.$router.push('/DeliveryMainPage');
                         break;
                     case 'restaurant_admin':
@@ -144,6 +146,23 @@ export default {
                 }
             } catch (error) {
                 this.updateRestaurantInfo(null);
+                console.error('Failed to fetch restaurant info:', error);
+            }
+        },
+        async fetchAndStoreVehicleInfo(token) {
+            try {
+                const response = await Vue.axios.get('http://localhost:8000/api/v1/vehicle/get_info', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                if (response.data && response.data.vehicle_id) {
+                    this.updateVehicleInfo(response.data);
+                } else {
+                    this.updateVehicleInfo(null);
+                }
+            } catch (error) {
+                this.updateVehicleInfo(null);
                 console.error('Failed to fetch restaurant info:', error);
             }
         },

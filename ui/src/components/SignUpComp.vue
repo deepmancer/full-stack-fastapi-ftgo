@@ -49,18 +49,6 @@
                             <b-input-group class="mt-3">
                                 <b-form-select placeholder="نقش" v-model="userRole" :options="userRoles" class="w-100"></b-form-select>
                             </b-input-group>
-
-                            <!-- Conditional Fields -->
-                            <div v-if="userRole === 'courier'">
-                                <b-input-group class="mt-3">
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-car"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input placeholder="شماره پلاک" v-model="plateNumber"></b-form-input>
-                                </b-input-group>
-                            </div>
                             <div class="form-group form-button mt-5">
                                 <b-button variant="secondary" @click="signup()">
                                     <b-spinner v-if="loading" label="Spinning"></b-spinner>
@@ -100,14 +88,9 @@ export default {
             nationalId: '',
             password: '',
             userRole: 'customer',
-            plateNumber: '', // For couriers
-            restaurantName: '', // For restaurants
-            restaurantAddress: '', // For restaurants
-            restaurantCity: '', //For restaurants
-            postalCode: '', //For restaurants
             userRoles: [
                 { value: 'customer', text: 'مشتری' },
-                { value: 'courier', text: 'پیک' },
+                { value: 'driver', text: 'پیک' },
                 { value: 'restaurant_admin', text: 'رستوران' }
             ],
             loading: false

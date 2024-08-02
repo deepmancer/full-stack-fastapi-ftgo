@@ -8,7 +8,9 @@ import DeliveryMainPage from '../views/DeliveryMainPage.vue'
 import SupplierMainPage from '../views/SupplierMainPage.vue'
 import VerifyAccountPage from '../views/VerifyAccountPage.vue'
 import ChangeRestaurantInfo from '../views/ChangeRestaurantInfo.vue'
+import ChangeVehicleInfo from '../views/ChangeVehicleInfo.vue'
 import RegisterRestaurantPage from '../views/RegisterRestaurantPage.vue'
+import RegisterVehiclePage from '../views/RegisterVehiclePage.vue'
 import MenuPage from '../views/MenuPage.vue'
 
 
@@ -20,7 +22,7 @@ const routes = [{
         component: CustomerMainPage
     },
     {
-        path: '/DeliveryMain',
+        path: '/DeliveryMainPage',
         name: 'DeliveryMainPage',
         component: DeliveryMainPage
     },
@@ -35,6 +37,11 @@ const routes = [{
         component: RegisterRestaurantPage
     },
     {
+        path: '/RegisterVehiclePage',
+        name: 'RegisterVehiclePage',
+        component: RegisterVehiclePage
+    },
+    {
         path: '/CustomerChangeInfo',
         name: 'CustomerChangeInfo',
         component: CustomerChangeInfo
@@ -43,6 +50,11 @@ const routes = [{
         path: '/ChangeRestaurantInfo',
         name: 'ChangeRestaurantInfo',
         component: ChangeRestaurantInfo
+    },
+    {
+        path: '/ChangeVehicleInfo',
+        name: 'ChangeVehicleInfo',
+        component: ChangeVehicleInfo
     },
     {
         path: '/MenuPage',

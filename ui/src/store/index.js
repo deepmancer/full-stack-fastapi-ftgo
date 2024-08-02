@@ -10,7 +10,8 @@ export default new Vuex.Store({
         userId: null,
         token: null,
         authCode: null,
-        restaurantInfo: null
+        restaurantInfo: null,
+        vehicleInfo: null,
     },
     mutations: {
         setUserId(state, userId) {
@@ -22,9 +23,12 @@ export default new Vuex.Store({
         setRestaurantInfo(state, restaurantInfo) {
             state.restaurantInfo = restaurantInfo;
         },
+        setVehicleInfo(state, vehicleInfo) {
+            state.vehicleInfo = vehicleInfo;
+        },
         setAuthCode(state, authCode) {
             state.authCode = authCode;
-        }
+        },
     },
     actions: {
         updateUserId({ commit }, userId) {
@@ -36,6 +40,9 @@ export default new Vuex.Store({
         updateRestaurantInfo({ commit }, restaurantInfo) {
             commit('setRestaurantInfo', restaurantInfo);
         },
+        updateVehicleInfo({ commit }, vehicleInfo) {
+            commit('setVehicleInfo', vehicleInfo);
+        },
         updateAuthCode({ commit }, restaurantInfo) {
             commit('setAuthCode', restaurantInfo);
         }
@@ -44,6 +51,7 @@ export default new Vuex.Store({
         getUserId: state => state.userId,
         getToken: state => state.token,
         getRestaurantInfo: state => state.restaurantInfo,
+        getVehicleInfo: state => state.vehicleInfo,
         getAuthCode: state => state.authCode,
     }
 });

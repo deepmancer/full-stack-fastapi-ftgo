@@ -47,15 +47,11 @@ class Driver(User):
             get_logger().error(ErrorCodes.VEHICLE_LOAD_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_LOAD_ERROR, payload=payload)
 
-    async def get_vehicle_info(self) -> Optional[Dict[str, Any]]:
-        try:
-            if self.vehicle:
-                return self.vehicle.get_info()
-            return {}
-        except Exception as e:
-            payload = {"user_id": self.user_id}
-            get_logger().error(ErrorCodes.VEHICLE_GET_ERROR.value, payload=payload)
-            await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_GET_ERROR, payload=payload)
+    def get_vehicle_info(self) -> Optional[Dict[str, Any]]:
+        if self.vehicle:
+            return self.vehicle.get_info()
+        return {}
+
 
     async def register_vehicle(self, plate_number: str, license_number: str) -> Optional[Dict[str, Any]]:
         try:
@@ -75,13 +71,14 @@ class Driver(User):
             get_logger().error(ErrorCodes.VEHICLE_SUBMISSION_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.VEHICLE_SUBMISSION_ERROR, payload=payload)
 
-    async def delete_vehicle(self) -> bool:
+    async def delete_vehicle(self) -> Dict:
         try:
             if self.vehicle:
                 await self.vehicle.delete()
+                vehicle_id = self.vehicle.vehicle_id
                 self.vehicle = None
-                return True
-            return False
+                return vehicle_id
+            return {}
         except Exception as e:
             payload = {'user_id': self.user_id}
             get_logger().error(ErrorCodes.VEHICLE_REMOVE_ERROR.value, payload=payload)
