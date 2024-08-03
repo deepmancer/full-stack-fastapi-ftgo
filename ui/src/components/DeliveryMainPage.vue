@@ -15,6 +15,37 @@
         <!-- Map Section -->
 
 
+        <div class="mt-3 l-map">
+          <l-map
+            :zoom="11"
+            :center="[driverLocation.latitude, driverLocation.longitude]"
+            @update:center="updateLatLng"
+          >
+            <l-tile-layer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <l-marker
+              :lat-lng="[driverLocation.latitude, driverLocation.longitude]"
+              :icon="customIcon"
+              :draggable="false"
+              @update:lat-lng="updateLatLng"
+            />
+
+            <l-marker
+              :lat-lng="[35.7892, 51.4890]"
+              :icon="restaurantIcon"
+              :draggable="false"
+            />
+
+            <l-marker
+              :lat-lng="[35.6492, 51.4590]"
+              :icon="destinationtIcon"
+              :draggable="false"
+            />
+          </l-map>
+        </div>
+
+
         <!-- Active/Inactive Button -->
         <div class="driver-controls">
           <b-button
@@ -39,10 +70,26 @@
 <script>
 import { mapGetters } from 'vuex';
 
+import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import markerIcon from "../assets/images/location-logo.png";
+import destinationMarkerIcon from "../assets/images/destination-icon.png";
+import restauranMarkertIcon from "../assets/images/restaurant-icon.png";
+
 export default {
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker
+  },
   data() {
     return {
       isActive: false,
+      driverLocation: {
+        latitude: 0,
+        longitude: 0,
+      }
     };
   },
   computed: {
@@ -70,7 +117,37 @@ export default {
     navigateToRestaurant(restaurantId) {
       this.$router.push({ name: "Restaurant", params: { id: restaurantId } });
     },
+    updateLatLng({ lat, lng }) {
+      this.newAddress.latitude = lat;
+      this.newAddress.longitude = lng;
+    }
   },
+  async mounted() {
+
+    this.driverLocation.latitude = 35.6892;
+    this.driverLocation.longitude = 51.3890;
+
+    this.customIcon = L.icon({
+      iconUrl: markerIcon,
+      iconSize: [32, 32],
+      iconAnchor: [32, 32],
+      popupAnchor: [0, -32]
+    });
+
+    this.restaurantIcon = L.icon({
+      iconUrl: restauranMarkertIcon,
+      iconSize: [32, 32],
+      iconAnchor: [32, 32],
+      popupAnchor: [0, -32]
+    });
+
+    this.destinationtIcon = L.icon({
+      iconUrl: destinationMarkerIcon,
+      iconSize: [32, 32],
+      iconAnchor: [32, 32],
+      popupAnchor: [0, -32]
+    });
+  }
 };
 </script>
 
@@ -144,5 +221,9 @@ export default {
 .driver-controls .b-button {
   font-size: 1.5rem;
   padding: 15px 30px;
+}
+
+.l-map {
+  height: 700px;
 }
 </style>
