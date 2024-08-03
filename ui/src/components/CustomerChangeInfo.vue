@@ -83,22 +83,22 @@
             <b-form-input v-model="newAddress.country" placeholder="کشور" class="rtl-text"></b-form-input>
           </b-form-group>
           <div class="mt-3 l-map">
-                <l-map
-                  :zoom="13"
-                  :center="[newAddress.latitude, newAddress.longitude]"
-                  @update:center="updateLatLng"
-                >
-                  <l-tile-layer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <l-marker
-                    :lat-lng="[newAddress.latitude, newAddress.longitude]"
-                    :icon="customIcon"
-                    :draggable="true"
-                    @update:lat-lng="updateLatLng"
-                  />
-                </l-map>
-              </div>
+              <l-map
+                :zoom="13"
+                :center="[newAddress.latitude, newAddress.longitude]"
+                @update:center="updateLatLng"
+              >
+                <l-tile-layer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <l-marker
+                  :lat-lng="[newAddress.latitude, newAddress.longitude]"
+                  :icon="customIcon"
+                  :draggable="true"
+                  @update:lat-lng="updateLatLng"
+                />
+              </l-map>
+            </div>
           <b-button type="submit">افزودن آدرس</b-button>
         </b-form>
       </b-card>
@@ -209,8 +209,8 @@ export default {
           { headers: { Authorization: `Bearer ${this.token}` } }
         );
         this.newAddress = {
-          latitude: 0,
-          longitude: 0,
+          latitude: 35.6892,
+          longitude: 51.3890,
           address_line_1: '',
           address_line_2: '',
           city: '',
@@ -281,7 +281,7 @@ export default {
 
     this.customIcon = L.icon({
       iconUrl: markerIcon,
-      iconSize: [32, 32],
+      iconSize: [22, 32],
       iconAnchor: [32, 32],
       popupAnchor: [0, -32]
     });
