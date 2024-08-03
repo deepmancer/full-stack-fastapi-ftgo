@@ -25,17 +25,6 @@
                             <b-input-group class="mt-3">
                                 <b-form-select placeholder="نقش" v-model="userRole" :options="userRoles" class="w-100"></b-form-select>
                             </b-input-group>
-                            <div v-if="showVerificationCode" class="mt-3">
-                                <b-input-group>
-                                    <template #prepend>
-                                        <b-input-group-text>
-                                            <font-awesome-icon icon="fa-solid fa-key"/>
-                                        </b-input-group-text>
-                                    </template>
-                                    <b-form-input type="text" placeholder="کد تایید" v-model="verificationCode"></b-form-input>
-                                </b-input-group>
-                                <b-button variant="secondary" class="mt-3" @click="verifyAccount">تایید</b-button>
-                            </div>
                             <div class="form-group form-button mt-5">
                                 <b-button variant="secondary" @click="signin">
                                     <b-spinner v-if="loading" label="Spinning"></b-spinner>
@@ -65,6 +54,7 @@ import { BVToastPlugin } from "bootstrap-vue";
 Vue.use(BVToastPlugin);
 import { mapActions } from 'vuex';
 
+
 export default {
     data() {
         return {
@@ -77,8 +67,6 @@ export default {
                 { value: 'restaurant_admin', text: 'رستوران' }
             ],
             loading: false,
-            showVerificationCode: false,
-            verificationCode: '',
             userId: null,
         }
     },
@@ -92,9 +80,9 @@ export default {
                 phone_number: this.phone,
                 password: this.password,
             };
-            const response = null;
+            let response = null;
             try {
-                const response = await Vue.axios.post(api, data);
+                response = await Vue.axios.post(api, data);
                 localStorage.removeItem('token');
                 localStorage.setItem('token', response.data.user_id);
                 this.updateUserId(response.data.user_id);
@@ -125,8 +113,22 @@ export default {
                         this.$router.push('/');
                 }
             } catch (e) {
-                console.log(response.data.detail);
-                this.$bvToast.toast(response.content.detail, { title: 'پیام خطا', autoHideDelay: 5000, appendToast: true });
+                if (e.response) {
+                    this.$bvToast.toast(e.response.data.detail.detail, {
+                        title: 'Error',
+                        variant: 'danger',
+                        solid: true,
+                        autoHideDelay: 5000,
+                    });
+
+                } else {
+                    this.$bvToast.toast('مشکلی در ورود پیش آمد، لطفا مجددا تلاش کنید.', {
+                        title: 'Error',
+                        variant: 'danger',
+                        solid: true,
+                        autoHideDelay: 5000,
+                    });
+                }
                 this.phone = '';
                 this.password = '';
                 this.loading = false;
@@ -166,25 +168,6 @@ export default {
                 console.error('Failed to fetch restaurant info:', error);
             }
         },
-        verifyAccount() {
-            let api = "http://localhost:5020/user/profile/verify";
-            const data = {
-                user_id: this.userId,
-                auth_code: this.verificationCode,
-            };
-            Vue.axios.post(api, data)
-                .then(response => {
-                    if (response.data.success) {
-                        this.signin();
-                    } else {
-                        this.$bvToast.toast("Verification failed. Please try again.", { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
-                    }
-                })
-                .catch(e => {
-                    console.log(e.response.data.detail);
-                    this.$bvToast.toast(e.response.data.detail[0].msg, { title: 'Verification Error', autoHideDelay: 5000, appendToast: true });
-                });
-        }
     }
 }
 </script>

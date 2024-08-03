@@ -118,11 +118,22 @@ export default {
                     this.$router.push('/VerifyAccount');
                 }).catch((e) => {
                     console.log(e);
-                    this.$bvToast.toast(e.response.data.message, {
-                        title: 'پیام خطا',
-                        autoHideDelay: 5000,
-                        appendToast: true
-                    });
+                    if (e.response.data.detail.detail) {
+                        this.$bvToast.toast(e.response.data.detail.detail, {
+                            title: 'Error',
+                            variant: 'danger',
+                            solid: true,
+                            autoHideDelay: 5000,
+                        });
+
+                    } else {
+                        this.$bvToast.toast('مشکلی در ثبت نام پیش آمد، لطفا مقادیر ورودی را چک کنید و مجددا تلاش کنید.', {
+                            title: 'Error',
+                            variant: 'danger',
+                            solid: true,
+                            autoHideDelay: 5000,
+                        });
+                    }
                     this.loading = false;
                 });
         }
