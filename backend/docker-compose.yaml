@@ -110,6 +110,60 @@ services:
     networks:
       - backend-network
 
+  order_service:
+    build:
+      context: ./microservices/order
+      dockerfile: Dockerfile
+    container_name: "order_service"
+    env_file:
+      - ./microservices/order/.env
+    environment:
+      - ENVIRONMENT=dev
+      - DEBUG=true
+      - REDIS_HOST=order_redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=order_password
+      - RABBITMQ_USER=rabbitmq_user
+      - RABBITMQ_PASS=rabbitmq_password
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=order_mongo
+      - MONGO_PORT=27017
+      - MONGO_USERNAME=order_user
+      - MONGO_PASSWORD=order_password
+      - MONGO_DATABASE=order_database
+    networks:
+      - backend-network
+
+  feedback_service:
+    build:
+      context: ./microservices/feedback
+      dockerfile: Dockerfile
+    container_name: "feedback_service"
+    env_file:
+      - ./microservices/feedback/.env
+    environment:
+      - ENVIRONMENT=dev
+      - DEBUG=true
+      - REDIS_HOST=feedback_redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=feedback_password
+      - RABBITMQ_USER=rabbitmq_user
+      - RABBITMQ_PASS=rabbitmq_password
+      - RABBITMQ_VHOST=/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - MONGO_HOST=feedback_mongo
+      - MONGO_PORT=27017
+      - MONGO_USERNAME=feedback_user
+      - MONGO_PASSWORD=feedback_password
+      - MONGO_DATABASE=feedback_database
+    networks:
+      - backend-network
+
 networks:
   backend-network:
     external: true
