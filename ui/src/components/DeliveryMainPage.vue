@@ -10,6 +10,9 @@
           <div>
             <h3>شماره پلاک: {{ vehicle.plate_number }}</h3>
           </div>
+          <b-button @click="logout">
+              خروج
+            </b-button>
         </div>
 
         <!-- Map Section -->
@@ -176,6 +179,18 @@ export default {
           locationInfo,
           { headers: { Authorization: `Bearer ${this.token}` } }
         );
+    },
+    async logout() {
+      try {
+        await Vue.axios.post(
+          'http://localhost:8000/api/v1/profile/logout',
+          {},
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+      } catch (error) {
+        console.error('Error logout :', error);
+      }
+      this.$router.push('/');
     },
     async refreshData() {
       await this.fetchDriverOnlineStatus();
