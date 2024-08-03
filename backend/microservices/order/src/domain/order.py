@@ -3,6 +3,7 @@ from domain.entities import Order, OrderItem
 from domain.order_status import OrderStatusHandler
 from ftgo_utils.errors import ErrorCodes, BaseError
 from domain import get_logger
+from utils import handle_exception
 
 class OrderHandler:
     @staticmethod
