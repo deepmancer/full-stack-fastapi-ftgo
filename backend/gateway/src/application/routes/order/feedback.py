@@ -1,8 +1,17 @@
-import os
-from fastapi import APIRouter, Request, HTTPException
+from typing import Optional
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from application import get_logger
+from application.dependencies import AccessManager
 from application.exceptions import handle_exception
+from application.schemas.common import EmptyResponse, SuccessResponse
+from ftgo_utils.enums import ResponseStatus, Roles
+from ftgo_utils.errors import BaseError, ErrorCodes
+from services.feedback import FeedbackService
+
+from application.schemas.auth.registration import (
+    UserAuthCodeSchema, UpdateProfileSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
+)
 from application.schemas.order.feedback import (
     CreateDeliveryRatingRequest, CreateDeliveryRatingResponse, UpdateDeliveryRatingRequest, UpdateDeliveryRatingResponse,
     GetDeliveryRatingRequest, GetDeliveryRatingResponse, GetCustomerDeliveryRatingsRequest, GetCustomerDeliveryRatingsResponse,
@@ -11,19 +20,6 @@ from application.schemas.order.feedback import (
     GetOrderRatingRequest, GetOrderRatingResponse, GetCustomerOrderRatingsRequest, GetCustomerOrderRatingsResponse,
     GetRestaurantOrderRatingsRequest, GetRestaurantOrderRatingsResponse
 )
-from services.feedback import FeedbackService
-from ftgo_utils.enums import ResponseStatus
-from ftgo_utils.errors import BaseError, ErrorCodes
-from typing import Optional
-
-from fastapi import APIRouter, HTTPException, Request, status, Depends
-
-from application.exceptions import handle_exception
-from application.schemas.auth.registration import (
-    UserAuthCodeSchema, UpdateProfileSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
-)
-from application.schemas.common import EmptyResponse, SuccessResponse
-from application.dependencies import AccessManager
 
 router = APIRouter(
     prefix='/feedback',

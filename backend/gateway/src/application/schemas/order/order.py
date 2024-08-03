@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Optional, Any
 
-from pydantic import Field, Any
+from pydantic import Field
 
 from ftgo_utils.schemas import (
     uuid_field,

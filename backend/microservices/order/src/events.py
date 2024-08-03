@@ -19,7 +19,7 @@ async def register_events():
 
     events_handlers = {
         # Order Lifecycle Events
-        'order.history': OrderService.get_history,
+        # 'order.history': OrderService.get_history,
         'order.create': OrderService.create_order,
         'order.update': OrderService.update_order,
         'order.cancel': OrderStatusService.cancel_order,

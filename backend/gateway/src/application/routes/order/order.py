@@ -4,7 +4,7 @@ from application.exceptions import handle_exception
 from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
 from application.schemas.common import SuccessResponse
-from application.schemas.order import (
+from application.schemas.order.order import (
     CreateOrderRequest, GetOrderHistoryRequest, GetOrderHistoryResponse,
     UpdateOrderRequest, ConfirmOrderRequest, RejectOrderRequest
 )
