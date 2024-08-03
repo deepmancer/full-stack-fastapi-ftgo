@@ -44,7 +44,7 @@
 
 ## **📂 GUI Management Tools**
 
-- 📉 [**Metabase**](https://www.metabase.com/): PostgreSQL/MongoDB analytics and reporting. localhost:3000
+- 📉 [**Metabase**](https://www.metabase.com/): PostgreSQL/MongoDB analytics and reporting.
 - 📕 [**RedisInsight**](https://redis.io/insight/): Redis data visualization and management.
 - 🌿 [**Mongo-Express**](https://github.com/mongo-express/mongo-express): For MongoDB management.
 
