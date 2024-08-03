@@ -177,10 +177,10 @@ export default {
           { headers: { Authorization: `Bearer ${this.token}` } }
         );
     },
-    refreshData() {
-      this.fetchDriverOnlineStatus();
+    async refreshData() {
+      await this.fetchDriverOnlineStatus();
       if (this.isActive) {
-        this.submitLocation()
+        await this.submitLocation();
       }
 
     },
@@ -195,7 +195,7 @@ export default {
 
     this.customIcon = L.icon({
       iconUrl: markerIcon,
-      iconSize: [32, 32],
+      iconSize: [22, 32],
       iconAnchor: [32, 32],
       popupAnchor: [0, -32]
     });
