@@ -9,6 +9,9 @@
                 ویرایش اطلاعات کاربر
               </b-button>
             </b-col>
+            <b-button @click="logout">
+              خروج
+            </b-button>
           </b-row>
           <b-row>
             <b-col>
@@ -40,6 +43,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import axios from 'axios';
+import Vue from "vue";
 
 export default {
   data() {
@@ -60,6 +64,18 @@ export default {
     ...mapActions(['updateRestaurantInfo']),
     navigateToEditUserInfo() {
       this.$router.push({ name: 'CustomerChangeInfo' });
+    },
+    async logout() {
+      try {
+        await Vue.axios.post(
+          'http://localhost:8000/api/v1/profile/logout',
+          {},
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+      } catch (error) {
+        console.error('Error logout :', error);
+      }
+      this.$router.push('/');
     },
     async selectRestaurant(restaurant) {
       await this.updateRestaurantInfo(restaurant);

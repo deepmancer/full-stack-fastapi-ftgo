@@ -51,7 +51,7 @@ class TokenManager:
         token: str,
     ) -> None:
         await self.cache.delete(token)
-        get_logger().info(f"Deleted the session token for user_id {user_id}")
+        get_logger().info("Deleted the session token")
 
     async def fetch_user(
         self,
