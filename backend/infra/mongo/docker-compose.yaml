@@ -14,6 +14,21 @@ services:
     networks:
       - backend-network
 
+  feedback_mongo:
+    image: mongo:latest
+    container_name: feedback_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: feedback_user
+      MONGO_INITDB_ROOT_PASSWORD: feedback_password
+      MONGO_INITDB_DATABASE: feedback_database
+    ports:
+      - "7018:27017"
+    volumes:
+      - feedback_mongo_data:/data/db
+    networks:
+      - backend-network
+
 volumes:
   order_mongo_data:
 
