@@ -189,7 +189,7 @@ export default {
 
     this.customIcon = L.icon({
       iconUrl: markerIcon,
-      iconSize: [32, 32], // adjust size as needed
+      iconSize: [22, 32], // adjust size as needed
       iconAnchor: [32, 32], // point of the icon which will correspond to marker's location
       popupAnchor: [0, -32] // point from which the popup should open relative to the iconAnchor
     });

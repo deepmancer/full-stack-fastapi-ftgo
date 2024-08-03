@@ -12,7 +12,7 @@
                                         <font-awesome-icon icon="fa-solid fa-user"/>
                                     </b-input-group-text>
                                 </template>
-                                <b-form-input placeholder="نام" v-model="firstName"></b-form-input>
+                                <b-form-input placeholder="نام" v-model="firstName" required></b-form-input>
                             </b-input-group>
                             <b-input-group class="mt-3">
                                 <template #prepend>
@@ -20,7 +20,7 @@
                                         <font-awesome-icon icon="fa-solid fa-user"/>
                                     </b-input-group-text>
                                 </template>
-                                <b-form-input placeholder="نام‌خانوادگی" v-model="lastName"></b-form-input>
+                                <b-form-input placeholder="نام‌خانوادگی" v-model="lastName" required></b-form-input>
                             </b-input-group>
                             <b-input-group class="mt-3">
                                 <template #prepend>
@@ -28,7 +28,7 @@
                                         <font-awesome-icon icon="fa-solid fa-id-card"/>
                                     </b-input-group-text>
                                 </template>
-                                <b-form-input placeholder="کد ملی" v-model="nationalId"></b-form-input>
+                                <b-form-input placeholder="کد ملی" v-model="nationalId" required></b-form-input>
                             </b-input-group>
                             <b-input-group class="mt-3">
                                 <template #prepend>
@@ -36,7 +36,7 @@
                                         <font-awesome-icon icon="fa-solid fa-phone"/>
                                     </b-input-group-text>
                                 </template>
-                                <b-form-input placeholder="تلفن همراه" v-model="phone"></b-form-input>
+                                <b-form-input placeholder="تلفن همراه" v-model="phone" required></b-form-input>
                             </b-input-group>
                             <b-input-group class="mt-3">
                                 <template #prepend>
@@ -44,7 +44,7 @@
                                         <font-awesome-icon icon="fa-solid fa-lock"/>
                                     </b-input-group-text>
                                 </template>
-                                <b-form-input type="password" placeholder="رمزعبور" v-model="password"></b-form-input>
+                                <b-form-input type="password" placeholder="رمزعبور" v-model="password" required></b-form-input>
                             </b-input-group>
                             <b-input-group class="mt-3">
                                 <b-form-select placeholder="نقش" v-model="userRole" :options="userRoles" class="w-100"></b-form-select>

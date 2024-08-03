@@ -7,27 +7,15 @@
             <h2 class="form-title">اطلاعات رستوران</h2>
             <form class="register-form" id="register-form" @submit.prevent="updateRestaurant">
               <b-input-group class="mt-3">
-                <template #prepend>
-                  <b-input-group-text>
-                    <font-awesome-icon icon="fa-solid fa-store" />
-                  </b-input-group-text>
-                </template>
+                <strong>نام رستوران:</strong>
                 <b-form-input placeholder="نام رستوران" v-model="restaurantName" required></b-form-input>
               </b-input-group>
               <b-input-group class="mt-3">
-                <template #prepend>
-                  <b-input-group-text>
-                    <font-awesome-icon icon="fa-solid fa-map-marker-alt" />
-                  </b-input-group-text>
-                </template>
+                <strong>کد پستی رستوران:</strong>
                 <b-form-input placeholder="کد پستی رستوران" v-model="postalCode" required></b-form-input>
               </b-input-group>
               <b-input-group class="mt-3">
-                <template #prepend>
-                  <b-input-group-text>
-                    <font-awesome-icon icon="fa-solid fa-map-marker-alt" />
-                  </b-input-group-text>
-                </template>
+                <strong>آدرس رستوران:</strong>
                 <b-form-input placeholder="آدرس رستوران" v-model="restaurantAddress" required></b-form-input>
               </b-input-group>
               <div class="mt-3 l-map">
@@ -270,7 +258,7 @@ export default {
     // Create custom icon
     this.customIcon = L.icon({
       iconUrl: markerIcon,
-      iconSize: [32, 32], // adjust size as needed
+      iconSize: [22, 32], // adjust size as needed
       iconAnchor: [32, 32], // point of the icon which will correspond to marker's location
       popupAnchor: [0, -32] // point from which the popup should open relative to the iconAnchor
     });

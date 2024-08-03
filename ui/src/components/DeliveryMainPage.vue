@@ -1,5 +1,5 @@
 <template>
-  <div class="driver-main-page"> 
+  <div class="driver-main-page">
     <b-container>
       <div v-if="vehicle">
         <!-- Driver Profile Section -->
