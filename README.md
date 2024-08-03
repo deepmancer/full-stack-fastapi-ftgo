@@ -6,13 +6,14 @@ FTGO is a scalable, microservice-based food ordering application built with Pyth
 **💎 You can use this project as a template to build your backend microservice project in python 💎**
 🔨 New features and technologies will be added soon!
 
-## **💡 Backend Overview**
+# **💡 Backend Overview**
 
 The backend is composed of multiple microservices, each handling specific functionalities and communicating asynchronously via RabbitMQ. The application uses MongoDB, PostgreSQL, and Redis, with FastAPI serving as the API framework in the Gateway microservice.
 
-### **🔥 Technical Features**
+## **🔥 Technical Features**
+
   - ⚡ [**FastAPI**](https://fastapi.tiangolo.com):
-    -  [pydantic](https://docs.pydantic.dev) for setting and validation.
+    - 🔮 [pydantic](https://docs.pydantic.dev) for setting and validation.
     - 🔑 JWT middleware for secure authentication.
     - 🚧 Permission manager for role-based access control on routes.
     - 📛 Rate limiting for API protection.
@@ -44,7 +45,7 @@ The backend is composed of multiple microservices, each handling specific functi
 - ✅ [**Pytest**](https://github.com/pytest-dev/pytest):
   - Async tests for pytest.
 
-### **📂 GUI Management Tools**
+## **📂 GUI Management Tools**
 
 - 📉 [**Metabase**](https://www.metabase.com/): PostgreSQL/MongoDB analytics and reporting. localhost:3000
 - 📕 [**RedisInsight**](https://redis.io/insight/): Redis data visualization and management.
