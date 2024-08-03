@@ -17,8 +17,8 @@
             </b-button>
           </b-col>
           <b-col>
-            <b-button variant="primary" @click="navigateToSupplierOrdersHistory">
-              تاریخچه سفارشات
+            <b-button @click="logout">
+              خروج
             </b-button>
           </b-col>
         </b-row>
@@ -28,16 +28,16 @@
             <b-card>
               <b-form @submit.prevent="editMode ? updateFood() : addFood()">
                 <b-form-group>
-                  <b-form-input v-model="newItem.name" placeholder="نام محصول" class="rtl-text"></b-form-input>
+                  <b-form-input v-model="newItem.name" placeholder="نام محصول" class="rtl-text" required></b-form-input>
                 </b-form-group>
                 <b-form-group>
-                  <b-form-input v-model.number="newItem.price" placeholder="قیمت" class="rtl-text"></b-form-input>
+                  <b-form-input v-model.number="newItem.price" placeholder="قیمت" class="rtl-text" required></b-form-input>
                 </b-form-group>
                 <b-form-group>
-                  <b-form-input v-model.number="newItem.count" placeholder="تعداد موجود" class="rtl-text"></b-form-input>
+                  <b-form-input v-model.number="newItem.count" placeholder="تعداد موجود" class="rtl-text" required></b-form-input>
                 </b-form-group>
                 <b-form-group>
-                  <b-form-input v-model="newItem.description" placeholder="توضیحات" class="rtl-text"></b-form-input>
+                  <b-form-input v-model="newItem.description" placeholder="توضیحات" class="rtl-text" required></b-form-input>
                 </b-form-group>
                 <b-button type="submit">{{ editMode ? 'به‌روزرسانی محصول' : 'افزودن محصول' }}</b-button>
                 <b-button v-if="editMode" @click="cancelEdit" variant="secondary">لغو</b-button>
@@ -83,6 +83,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import axios from 'axios';
+import Vue from "vue";
 
 export default {
   data() {
@@ -208,6 +209,18 @@ export default {
       this.editMode = false;
       this.currentItem = null;
       this.resetNewItem();
+    },
+    async logout() {
+      try {
+        await Vue.axios.post(
+          'http://localhost:8000/api/v1/profile/logout',
+          {},
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+      } catch (error) {
+        console.error('Error logout :', error);
+      }
+      this.$router.push('/');
     },
   },
   async created() {
