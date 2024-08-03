@@ -8,14 +8,12 @@
             ویرایش اطلاعات
           </b-button>
           <div>
-            <h3>شماره پلاک {{ vehicle.plate_number }}</h3>
+            <h3>شماره پلاک: {{ vehicle.plate_number }}</h3>
           </div>
         </div>
 
         <!-- Map Section -->
-
-
-        <div class="mt-3 l-map">
+        <div class="mt-3 l-map" v-if="isActive">
           <l-map
             :zoom="11"
             :center="[driverLocation.latitude, driverLocation.longitude]"
@@ -45,14 +43,13 @@
           </l-map>
         </div>
 
-
         <!-- Active/Inactive Button -->
         <div class="driver-controls">
           <b-button
-            :variant="isActive ? 'success' : 'secondary'"
+            :variant="isActive ? 'secondary' : 'success'"
             @click="toggleActive"
           >
-            {{ isActive ? "فعال" : "غیرفعال" }}
+            {{ isActive ? "غیرفعال" : "فعال" }}
           </b-button>
         </div>
       </div>
@@ -66,16 +63,15 @@
   </div>
 </template>
 
-
 <script>
-import { mapGetters } from 'vuex';
-
 import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerIcon from "../assets/images/location-logo.png";
 import destinationMarkerIcon from "../assets/images/destination-icon.png";
 import restauranMarkertIcon from "../assets/images/restaurant-icon.png";
+import { mapGetters } from 'vuex';
+import Vue from "vue";
 
 export default {
   components: {
@@ -102,14 +98,18 @@ export default {
     },
     token() {
       return this.getToken;
+    },
+    activeStatus() {
+      return this.getActiveStatus;
     }
   },
   methods: {
     navigateToRegisterVehicle() {
       this.$router.push({ name: 'RegisterVehiclePage' });
     },
-    toggleActive() {
+    async toggleActive() {
       this.isActive = !this.isActive;
+      await this.setDriverOnlineStatus();
     },
     navigateToEditDriverInfo() {
       this.$router.push({ name: "ChangeVehicleInfo" });
@@ -120,12 +120,43 @@ export default {
     updateLatLng({ lat, lng }) {
       this.newAddress.latitude = lat;
       this.newAddress.longitude = lng;
-    }
+    },
+    async fetchDriverOnlineStatus() {
+      try {
+        const response = await Vue.axios.get('http://localhost:8000/api/v1/status/get', {
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
+        });
+        if (response.data) {
+            this.isActive = response.data.is_online;
+        }
+      } catch (error) {
+        this.updateRestaurantInfo(null);
+        console.error('Failed to get driver online status:', error);
+      }
+    },
+    async setDriverOnlineStatus() {
+      const url = this.isActive
+        ? 'http://localhost:8000/api/v1/status/online'
+        : 'http://localhost:8000/api/v1/status/offline';
+
+      try {
+        await Vue.axios.post(url, {}, {
+          headers: {
+            Authorization: `Bearer ${this.token}`
+          }
+        });
+        await this.fetchDriverOnlineStatus();
+      } catch (error) {
+        console.error(`Failed to set driver status to ${this.isActive ? 'Online' : 'Offline'}:`, error);
+      }
+    },
   },
   async mounted() {
-
     this.driverLocation.latitude = 35.6892;
     this.driverLocation.longitude = 51.3890;
+    await this.fetchDriverOnlineStatus();
 
     this.customIcon = L.icon({
       iconUrl: markerIcon,
