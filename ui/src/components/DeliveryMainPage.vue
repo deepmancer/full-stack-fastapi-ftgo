@@ -83,9 +83,12 @@ export default {
     return {
       isActive: false,
       driverLocation: {
-        latitude: 0,
-        longitude: 0,
-      }
+        latitude: 35.6892,
+        longitude: 51.3890,
+      },
+      customIcon: null,
+      restaurantIcon: null,
+      destinationtIcon: null,
     };
   },
   computed: {
@@ -138,8 +141,8 @@ export default {
     },
     async setDriverOnlineStatus() {
       const url = this.isActive
-        ? 'http://localhost:8000/api/v1/status/online'
-        : 'http://localhost:8000/api/v1/status/offline';
+          ? 'http://localhost:8000/api/v1/status/online'
+          : 'http://localhost:8000/api/v1/status/offline';
 
       try {
         await Vue.axios.post(url, {}, {
@@ -152,10 +155,36 @@ export default {
         console.error(`Failed to set driver status to ${this.isActive ? 'Online' : 'Offline'}:`, error);
       }
     },
+    refreshData() {
+      this.fetchDriverOnlineStatus();
+      this.customIcon = L.icon({
+        iconUrl: markerIcon,
+        iconSize: [32, 32],
+        iconAnchor: [32, 32],
+        popupAnchor: [0, -32]
+      });
+
+      this.restaurantIcon = L.icon({
+        iconUrl: restauranMarkertIcon,
+        iconSize: [32, 32],
+        iconAnchor: [32, 32],
+        popupAnchor: [0, -32]
+      });
+
+      this.destinationtIcon = L.icon({
+        iconUrl: destinationMarkerIcon,
+        iconSize: [32, 32],
+        iconAnchor: [32, 32],
+        popupAnchor: [0, -32]
+      });
+    },
+    startRefresh() {
+      setInterval(() => {
+        this.refreshData();
+      }, 5000);
+    }
   },
   async mounted() {
-    this.driverLocation.latitude = 35.6892;
-    this.driverLocation.longitude = 51.3890;
     await this.fetchDriverOnlineStatus();
 
     this.customIcon = L.icon({
@@ -178,6 +207,8 @@ export default {
       iconAnchor: [32, 32],
       popupAnchor: [0, -32]
     });
+
+    this.startRefresh(); // Start the data refresh interval
   }
 };
 </script>
