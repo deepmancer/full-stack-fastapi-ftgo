@@ -31,6 +31,7 @@ services:
 
 volumes:
   order_mongo_data:
+  feedback_mongo_data:
 
 networks:
   backend-network:

@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional, List
 from ftgo_utils.enums import DeliveryStatus
 from ftgo_utils.errors import ErrorCodes, BaseError
 from domain import get_logger

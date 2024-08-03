@@ -1,9 +1,7 @@
 from pydoc import doc
 from beanie import Document
-from config import RedisConfig
 from ftgo_utils.errors import ErrorCodes
 from typing import Any, Dict, Optional
-from data_access.cache_repository import CacheRepository
 
 
 class BaseEntity:

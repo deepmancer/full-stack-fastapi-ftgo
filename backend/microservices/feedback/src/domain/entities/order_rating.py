@@ -1,6 +1,7 @@
 from datetime import datetime
 from domain.entities.base import BaseEntity
 from models.order_rating import OrderRating as OrderRatingDocument
+from typing import Optional
 
 class OrderRating(BaseEntity):
     document_cls = OrderRatingDocument

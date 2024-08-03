@@ -7,7 +7,7 @@ from ftgo_utils.errors import ErrorCodes
 from config import MongoConfig
 from data_access import get_logger
 from data_access.base import BaseRepository
-from models import DeliveryDetail, Order, OrderItem, OrderStatus
+from models import OrderRating, DeliveryRating
 from utils import handle_exception
 
 class DatabaseRepository(BaseRepository):
@@ -26,7 +26,7 @@ class DatabaseRepository(BaseRepository):
             )
             await init_beanie(
                 database=mongo_data_access.get_database(),
-                document_models=[Order, OrderStatus, OrderItem, DeliveryDetail],
+                document_models=[OrderRating, DeliveryRating],
             )
             cls._data_access = mongo_data_access
 

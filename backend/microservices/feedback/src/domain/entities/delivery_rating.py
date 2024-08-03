@@ -1,7 +1,7 @@
 from datetime import datetime
 from domain.entities.base import BaseEntity
 from models.delivery_rating import DeliveryRating as DeliveryRatingDocument
-
+from typing import Optional
 class DeliveryRating(BaseEntity):
     document_cls = DeliveryRatingDocument
 

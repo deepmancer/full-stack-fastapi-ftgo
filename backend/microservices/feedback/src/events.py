@@ -3,8 +3,8 @@ import asyncio
 from ftgo_utils.logger import get_logger
 from ftgo_utils.errors import ErrorCodes
 
-from application.delivery_rating import DeliveryRatingService
-from application.order_rating import OrderRatingService
+from application.delivery import DeliveryRatingService
+from application.order import OrderRatingService
 
 from application.middleware import event_middleware
 from config import LayerNames

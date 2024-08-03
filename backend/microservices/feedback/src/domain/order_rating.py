@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from ftgo_utils.errors import ErrorCodes, BaseError
 from domain import get_logger
 from domain.entities.order_rating import OrderRating
