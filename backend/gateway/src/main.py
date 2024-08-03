@@ -22,7 +22,6 @@ async def lifespan(app: FastAPI):
     yield
 
     await teardown()
-    await RPCBroker.close()
 
 app = FastAPI(
     title="Food Delivery Server",

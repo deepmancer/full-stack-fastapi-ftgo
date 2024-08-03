@@ -37,7 +37,7 @@ class Order(BaseEntity):
             document: OrderDocument = await cls.fetch_document(**kwargs)
             return cls(document=document)
         except Exception as e:
-            payload = query
+            payload = "query"
             get_logger().error(ErrorCodes.ORDER_NOT_FOUND_ERROR.value, payload=payload)
             await handle_exception(e=e, error_code=ErrorCodes.ORDER_NOT_FOUND_ERROR, payload=payload)
 
