@@ -43,6 +43,10 @@ address_lines_2 = [
     "Apt 777", "Apt 888", "Apt 999",
 ]
 
+food_items = [pizza, burger, kebab, sushi, pasta, salad, sandwich, steak, taco, waffle, wrap, yogurt]
+
+prices = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+
 base_location = [
     "latitude": 35.741228,
     "longitude": 51.399940,
@@ -110,11 +114,11 @@ def generate_vehicle(driver_id) -> dict:
         "plate_number": plate_number,
     }
     
-def add_restaurant(restaurant_admin_id: str) -> dict:
+def generate_restaurant(restaurant_admin_id: str) -> dict:
     name = random.choice(first_names) + "'s " + random.choice(["Pizza", "Burger", "Kebab", "Sushi", "Pasta", "Salad", "Sandwich", "Steak", "Taco", "Waffle", "Wrap", "Yogurt", "Ziti"])
     location = generate_location()
     return {
-        "restaurant_id": restaurant_id,
+        "restaurant_id": restaurant_admin_id,
         "name": name,
         **location,
     }
@@ -134,3 +138,61 @@ def generate_address(user_id: str) -> dict:
         "postal_code": postal_code,
         **location,
     }
+
+def generate_menu(restaurant_id: str) -> dict:
+    menu = []
+    for _ in range(random.randint(5, 10)):
+        menu.append(generate_food_item())
+
+
+    return {
+        "restaurant_id": restaurant_id,
+        "menu": menu,
+    }
+
+def generate_food_item(restaurant_id: str) -> dict:
+    name = random.choice(food_items)
+    price = random.choice(prices)
+    count = random.randint(1, 10)
+    return {
+        "restaurant_id": restaurant_id,
+        "name": name,
+        "price": price,
+        "count": count,
+        "description": f"{name} with {random.choice(['extra cheese', 'extra sauce', 'extra meat', 'extra veggies', 'extra spice'])}",
+    }
+
+
+
+class Driver:
+    def __init__(self, user_id: str):
+        self.user_id = user_id
+        self.vehicles = []
+        self.location = generate_location()
+        self.current_order = None
+        self.status = 'deactive'
+        self.random_walk_step = 10
+
+    def random_walk(self, time_interval: int):
+        for _ in range(time_interval):
+            self.location['latitude'] = self.location['latitude'] + random.uniform(-1, 1) * (self.random_walk_step/6378137e3) * (180/math.pi)
+            self.location['longitude'] = self.location['latitude'] + random.uniform(-1, 1) * (self.random_walk_step/6378137e3) * (180/math.pi)
+
+    def take_steps_towards(self, destination: dict, step_size: float):
+        dx = destination["latitude"] - self.location["latitude"]
+        dy = destination["longitude"] - self.location["longitude"]
+
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+
+        if distance != 0:
+            step_lat = dx / distance * (step_size / 6378137) * (180 / math.pi)
+            step_lon = dy / distance * (step_size / 6378137) * (180 / math.pi) / math.cos(
+                self.location["latitude"] * math.pi / 180)
+        else:
+            step_lat = 0
+            step_lon = 0
+
+        self.location["latitude"] += step_lat
+        self.location["longitude"] += step_lon
+
+
