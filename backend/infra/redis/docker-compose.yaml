@@ -72,11 +72,30 @@ services:
     networks:
       - backend-network
 
+  order_redis:
+    image: redis:7.2.5
+    restart: always
+    container_name: "order_redis"
+    hostname: "order_redis"
+    ports:
+      - "6301:6379"
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=order_password
+    command: ["redis-server", "--requirepass", "order_password", "--loglevel", "notice", "--maxmemory", "500mb"]
+    volumes:
+      - order_redis_data:/data
+    networks:
+      - backend-network
+
 volumes:
   gateway_redis_data:
   user_redis_data:
   restaurant_redis_data:
   location_redis_data:
+  order_redis_data:
 
 networks:
   backend-network:

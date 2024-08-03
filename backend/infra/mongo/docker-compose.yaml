@@ -1,15 +1,14 @@
 services:
   order_mongo:
-    image: mongo
-    container_name: "order_mongo"
-    hostname: "order_mongo"
+    image: mongo:latest
+    container_name: order_mongo
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: order_user
       MONGO_INITDB_ROOT_PASSWORD: order_password
       MONGO_INITDB_DATABASE: order_database
     ports:
-      - 7017:27017
+      - "7017:27017"
     volumes:
       - order_mongo_data:/data/db
     networks:

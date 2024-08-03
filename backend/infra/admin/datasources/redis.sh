@@ -29,6 +29,7 @@ REDIS_INSTANCES=(
   "User Redis|6235|user_password|user_redis"
   "Restaurant Redis|6236|restaurant_password|restaurant_redis"
   "Location Redis|6300|location_password|location_redis"
+  "Order Redis|6301|order_password|order_redis"
 )
 
 add_redis_database() {

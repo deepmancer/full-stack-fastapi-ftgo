@@ -51,7 +51,7 @@ base_location = [
     "latitude": 35.741228,
     "longitude": 51.399940,
 ]
-radius_m = 3000
+radius_m = 5000
 
 
 def generate_location() -> dict:
@@ -83,6 +83,9 @@ def generate_national_id() -> str:
 
 def generate_phone_number() -> str:
     return '09' + ''.join(random.choice(string.digits) for _ in range(9))
+
+
+
 
 def generate_user(role: str) -> dict:
     if role not in roles:
