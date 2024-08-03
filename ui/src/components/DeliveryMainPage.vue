@@ -141,8 +141,8 @@ export default {
     },
     async setDriverOnlineStatus() {
       const url = this.isActive
-          ? 'http://localhost:8000/api/v1/status/online'
-          : 'http://localhost:8000/api/v1/status/offline';
+        ? 'http://localhost:8000/api/v1/status/online'
+        : 'http://localhost:8000/api/v1/status/offline';
 
       try {
         await Vue.axios.post(url, {}, {
@@ -155,28 +155,34 @@ export default {
         console.error(`Failed to set driver status to ${this.isActive ? 'Online' : 'Offline'}:`, error);
       }
     },
+    async submitLocation() {
+      this.driverLocation.latitude = this.driverLocation.latitude + 0.005;
+      this.driverLocation.longitude = this.driverLocation.longitude + 0.005;
+      const locationInfo = {
+          locations: [
+            {
+              latitude: this.driverLocation.latitude,
+              longitude: this.driverLocation.longitude,
+              timestamp: 1,
+              accuracy: 2,
+              speed: 5,
+              bearing: 188,
+              altitude: 10
+            }
+          ]
+        };
+        await Vue.axios.post(
+          'http://localhost:8000/api/v1/location/submit',
+          locationInfo,
+          { headers: { Authorization: `Bearer ${this.token}` } }
+        );
+    },
     refreshData() {
       this.fetchDriverOnlineStatus();
-      this.customIcon = L.icon({
-        iconUrl: markerIcon,
-        iconSize: [32, 32],
-        iconAnchor: [32, 32],
-        popupAnchor: [0, -32]
-      });
+      if (this.isActive) {
+        this.submitLocation()
+      }
 
-      this.restaurantIcon = L.icon({
-        iconUrl: restauranMarkertIcon,
-        iconSize: [32, 32],
-        iconAnchor: [32, 32],
-        popupAnchor: [0, -32]
-      });
-
-      this.destinationtIcon = L.icon({
-        iconUrl: destinationMarkerIcon,
-        iconSize: [32, 32],
-        iconAnchor: [32, 32],
-        popupAnchor: [0, -32]
-      });
     },
     startRefresh() {
       setInterval(() => {
