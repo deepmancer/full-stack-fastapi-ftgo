@@ -19,6 +19,8 @@ COPY ./requirements.txt /gateway/requirements.txt
 
 RUN pip install --no-cache-dir -r /gateway/requirements.txt
 
+RUN pip install prometheus-fastapi-instrumentator
+
 COPY ./ /gateway/
 
 ENV PYTHONPATH=/gateway/src

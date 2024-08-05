@@ -16,10 +16,10 @@ echo "Gateway IP for network $NETWORK_NAME is $GATEWAY_IP"
 
 # Database configurations with the gateway IP
 DATABASES=(
-  "User Database|$GATEWAY_IP|5438|user_database|user_user|user_password|postgres"
-  "Restaurant Database|$GATEWAY_IP|5440|restaurant_database|restaurant_user|restaurant_password|postgres"
-  "Location Database|$GATEWAY_IP|5439|location_database|location_user|location_password|postgres"
-  "Order Database|$GATEWAY_IP|7017|order_database|order_user|order_password|mongo"
+  "User Database|$GATEWAY_IP|5438|user_database|user_user|user_password"
+    "Restaurant Database|$GATEWAY_IP|5440|restaurant_database|restaurant_user|restaurant_password"
+  "Location Database|$GATEWAY_IP|5439|location_database|location_user|location_password"
+  "Order Database|$GATEWAY_IP|5432|order_database|order_user|order_password"
 )
 
 # Function to authenticate with Metabase and get a session token
@@ -50,14 +50,13 @@ add_database() {
   local DBNAME=$4
   local USER=$5
   local PASSWORD=$6
-  local ENGINE=$7
 
   echo "Adding database: $NAME..."
 
   curl -s -X POST -H "Content-Type: application/json" -H "X-Metabase-Session: ${SESSION_ID}" \
     -d "{
       \"name\": \"${NAME}\",
-      \"engine\": \"${ENGINE}\",
+      \"engine\": \"postgres\",
       \"details\": {
         \"host\": \"${HOST}\",
         \"port\": ${PORT},
@@ -81,7 +80,7 @@ authenticate_metabase
 # Loop through each database configuration and add it to Metabase
 for db in "${DATABASES[@]}"; do
   IFS='|' read -r DB_NAME DB_HOST DB_PORT DB_DBNAME DB_USER DB_PASSWORD <<< "$db"
-  add_database "$DB_NAME" "$DB_HOST" "$DB_PORT" "$DB_DBNAME" "$DB_USER" "$DB_PASSWORD" "$ENGINE"
+  add_database "$DB_NAME" "$DB_HOST" "$DB_PORT" "$DB_DBNAME" "$DB_USER" "$DB_PASSWORD"
 done
 
 echo "Finished adding databases."

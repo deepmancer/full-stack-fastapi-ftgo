@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse
 from application import get_logger
 from application.dependencies import AccessManager

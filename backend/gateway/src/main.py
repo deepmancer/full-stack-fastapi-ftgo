@@ -10,6 +10,7 @@ from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
 from ftgo_utils.logger import init_logging, get_logger
 from middleware.builder import MiddlewareBuilder
+from prometheus_fastapi_instrumentator import Instrumentator
 
 load_dotenv()
 
@@ -30,7 +31,7 @@ app = FastAPI(
 )
 
 app.include_router(init_router(), prefix=service_config.api_prefix)
-
+Instrumentator().instrument(app).expose(app)
 middleware_builder = (
     MiddlewareBuilder()
     .add_rate_limit()
@@ -43,8 +44,6 @@ middleware_builder = (
 )
 
 middleware_builder.build(app=app)
-
-
 if __name__ == "__main__":
     load_dotenv()
 

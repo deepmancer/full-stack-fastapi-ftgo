@@ -17,7 +17,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - 8888:8888
+      - 3000:3000
     restart: unless-stopped
     environment:
       - GF_SECURITY_ADMIN_USER=admin

@@ -4,3 +4,4 @@ include:
   - ./rabbitmq/docker-compose.yaml
   - ./mongo/docker-compose.yaml
   - ./admin/docker-compose.yaml
+  - ./monitoring/docker-compose.yaml
