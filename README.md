@@ -122,7 +122,7 @@ npm run serve
 ![image](https://github.com/user-attachments/assets/0f6f6e7b-46db-4741-b8bf-01c6ac320952)
 
 **RedisInsight (localhost:5540)[localhost:5540]:**
-![image](https://github.com/user-attachments/assets/05a223d0-b706-4f63-8d40-a65e5c5cda81)
+![image](https://github.com/user-attachments/assets/0e04ec30-8180-486d-bf7f-11c98f4476ae)
 
 **Mongo Compass:**
 ![image](https://github.com/user-attachments/assets/11be638a-6cd3-4f9c-ad84-eedda8bc4867)
