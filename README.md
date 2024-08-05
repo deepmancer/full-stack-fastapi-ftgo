@@ -44,7 +44,7 @@
 - 🔆 [**Grafana**](https://grafana.com/): Automatic metric dashboards on endpoints using [Prometheus](https://prometheus.io/).
 - 📉 [**Metabase**](https://www.metabase.com/): PostgreSQL/MongoDB analytics and reporting.
 - 📕 [**RedisInsight**](https://redis.io/insight/): Redis data visualization and management.
-- 🌿 [**Mongo-Express**](https://github.com/mongo-express/mongo-express): MongoDB management.
+- 🌿 [**Mongo-Express**](https://github.com/mongo-express/mongo-express): MongoDB admin interface.
 - 💥 [**RabbitMQ Management**](https://www.rabbitmq.com/docs/management): Visualizing and monitoring events.
  
 These tools are configured and run via Docker in the `infra/admin/docker-compose.yaml`.
