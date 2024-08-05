@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Metabase API details
-METABASE_URL="http://localhost:3000/api"
-METABASE_USERNAME="alirezaheidari.cs@gmail.com"
-METABASE_PASSWORD="Alireza1qaz"
+METABASE_URL="http://localhost:3030/api"
+METABASE_USERNAME="youremail"
+METABASE_PASSWORD="yourpassword"
 
 NETWORK_NAME="backend-network"
 GATEWAY_IP=$(docker network inspect $NETWORK_NAME --format '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
