@@ -16,6 +16,7 @@
     - 📛 Rate limiting for API protection.
     - ⌚ RequestId, Timing, and many exciting middlewares!
     - 🔒 Secure password hashing by default.
+    - 🌀 Customizable profilers with [Prometheus][https://prometheus.io/].
 
 - 🌱 [**MongoDB**](https://www.mongodb.com/): 
   - Async operations using [motor](https://github.com/mongodb/motor).
@@ -43,7 +44,7 @@
   - Async tests for pytest.
 
 ## **📂 GUI Management Tools**
-
+- 🔆 [**Grafana**](https://grafana.com/): Automatic metric dashboards on endpoints using [Prometheus][https://prometheus.io/].
 - 📉 [**Metabase**](https://www.metabase.com/): PostgreSQL/MongoDB analytics and reporting.
 - 📕 [**RedisInsight**](https://redis.io/insight/): Redis data visualization and management.
 - 🌿 [**Mongo-Express**](https://github.com/mongo-express/mongo-express): For MongoDB management.
@@ -117,9 +118,12 @@ npm run serve
 ### Interactive API Documentation
 ![image](https://github.com/user-attachments/assets/ebfe2c0e-b9e0-4e01-b266-89b54776428c)
 
-### Admin Dashbords
-**Metabase (localhost:3000)[localhost:3000]:**
-![image](https://github.com/user-attachments/assets/0f6f6e7b-46db-4741-b8bf-01c6ac320952)
+### Admin Dashboards
+**Grafana (localhost:3000)[localhost:3000]:**
+![image](https://github.com/user-attachments/assets/1b2a7305-c542-48a4-8d94-b64879027886)
+
+**Metabase (localhost:3030)[localhost:3030]:**
+![image](https://github.com/user-attachments/assets/a6f962fa-ae6c-4d25-80ca-ed95837972e9)
 
 **RedisInsight (localhost:5540)[localhost:5540]:**
 ![image](https://github.com/user-attachments/assets/0e04ec30-8180-486d-bf7f-11c98f4476ae)
@@ -127,6 +131,6 @@ npm run serve
 **Mongo Compass:**
 ![image](https://github.com/user-attachments/assets/11be638a-6cd3-4f9c-ad84-eedda8bc4867)
 
-**RabbitMQ Management:**
+**RabbitMQ Management (localhost:15673)[localhost:15673]:**
 ![image](https://github.com/user-attachments/assets/17532670-8b31-4b2d-b305-723b8ce49f77)
 
