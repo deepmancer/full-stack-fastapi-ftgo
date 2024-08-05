@@ -7,7 +7,7 @@
 
 🔊 New features and technologies will be added soon!
 
-### 🔥 Technology Stack and Features
+## 🔥 Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com):
     - 🔮 [pydantic](https://docs.pydantic.dev) for settings and request/response validation.
