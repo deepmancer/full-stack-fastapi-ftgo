@@ -16,7 +16,7 @@
     - 📛 Rate limiting for API protection.
     - ⌚ RequestId, Timing, and many exciting middlewares!
     - 🔒 Secure password hashing by default.
-    - 🌀 Customizable profilers with (Prometheus)[https://prometheus.io/].
+    - 🌀 Customizable profilers with [Prometheus](https://prometheus.io/).
 
 - 🌱 [**MongoDB**](https://www.mongodb.com/): 
   - Async client with [motor](https://github.com/mongodb/motor) and Object Document Mapping (ODM) with [beanie](https://beanie-odm.dev/).
