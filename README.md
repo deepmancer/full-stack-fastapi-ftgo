@@ -1,7 +1,7 @@
 
 # **🍕 Full-stack Microservice-Based Food Ordering Application**
 
-> FTGO is a scalable, microservice-based food ordering application built with Python and Vue.js, designed following object-oriented design principles.
+> FTGO is a scalable, microservice-based food ordering application built with Python (FastAPI) and Vue.js, designed following object-oriented design principles.
 
 **💎 You can use this project as a template to build your backend microservice project in Python 💎**
 
