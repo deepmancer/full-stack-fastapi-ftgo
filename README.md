@@ -10,7 +10,7 @@
 ### 🔥 Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com):
-    - 🔮 [pydantic](https://docs.pydantic.dev) for setting and validation.
+    - 🔮 [pydantic](https://docs.pydantic.dev) for settings and request/response validation.
     - 🔑 JWT middleware for secure authentication.
     - 🚧 Permission manager for role-based access control on routes.
     - 📛 Rate limiting for API protection.
