@@ -49,6 +49,7 @@
 - 📕 [**RedisInsight**](https://redis.io/insight/): Redis data visualization and management.
 - 🌿 [**Mongo-Express**](https://github.com/mongo-express/mongo-express): MongoDB management.
 - 💥 [**RabbitMQ Management**](https://www.rabbitmq.com/docs/management): Visualizing and monitoring events.
+- 
 These tools are configured and run via Docker in the `infra/admin/docker-compose.yaml`.
 
 ## **Setup Instructions**
