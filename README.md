@@ -38,7 +38,7 @@
   - Containers for simplified deployment and scaling.
 
 - ✅ [**Pytest**](https://github.com/pytest-dev/pytest):
-  - Async tests for pytest.
+  - Async tests with pytest and pytest-async.
 
 ## **📂 GUI Management Tools**
 - 🔆 [**Grafana**](https://grafana.com/): Automatic metric dashboards on endpoints using [Prometheus](https://prometheus.io/).
