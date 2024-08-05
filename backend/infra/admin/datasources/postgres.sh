@@ -6,41 +6,38 @@ METABASE_USERNAME="youremail"
 METABASE_PASSWORD="yourpassword"
 
 NETWORK_NAME="backend-network"
-GATEWAY_IP=$(docker network inspect $NETWORK_NAME --format '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
+# Retrieve the gateway IP for the Docker network
+GATEWAY_IP=$(docker network inspect "$NETWORK_NAME" --format '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
 
+# Set to 127.0.0.1 if gateway IP is not available
 if [ -z "$GATEWAY_IP" ]; then
-  echo "Failed to retrieve gateway IP for network $NETWORK_NAME. Exiting."
-  exit 1
+  GATEWAY_IP="127.0.0.1"
+  echo "Gateway IP for network $NETWORK_NAME not found. Using default IP $GATEWAY_IP."
+else
+  echo "Gateway IP for network $NETWORK_NAME is $GATEWAY_IP"
 fi
-echo "Gateway IP for network $NETWORK_NAME is $GATEWAY_IP"
 
-# Database configurations with the gateway IP
+# Database configurations: NAME|NETWORK_IP|PORT|DB_NAME|USER|PASSWORD
 DATABASES=(
   "User Database|$GATEWAY_IP|5438|user_database|user_user|user_password"
-    "Restaurant Database|$GATEWAY_IP|5440|restaurant_database|restaurant_user|restaurant_password"
+  "Restaurant Database|$GATEWAY_IP|5440|restaurant_database|restaurant_user|restaurant_password"
   "Location Database|$GATEWAY_IP|5439|location_database|location_user|location_password"
-  "Order Database|$GATEWAY_IP|5432|order_database|order_user|order_password"
 )
 
-# Function to authenticate with Metabase and get a session token
+# Function to authenticate with Metabase and retrieve a session token
 authenticate_metabase() {
-  echo "Attempting to authenticate with Metabase..."
+  echo "Authenticating with Metabase..."
   SESSION_ID=$(curl -s -X POST -H "Content-Type: application/json" \
     -d "{\"username\": \"${METABASE_USERNAME}\", \"password\": \"${METABASE_PASSWORD}\"}" \
-    "${METABASE_URL}/session" | grep -o '"id":"[^"]*' | grep -o '[^"]*$')
+    "${METABASE_URL}/session" | jq -r '.id')
 
   if [ -z "$SESSION_ID" ]; then
-    echo "Failed to authenticate with Metabase. Exiting."
+    echo "Authentication failed. Exiting."
     exit 1
-  else
-    echo "Authenticated. Session ID: ${SESSION_ID}"
   fi
+
+  echo "Authenticated successfully. Session ID: ${SESSION_ID}"
 }
-
-
-RETRY_COUNT=0
-MAX_RETRIES=30
-SLEEP_INTERVAL=5
 
 # Function to add a database to Metabase
 add_database() {
@@ -52,8 +49,8 @@ add_database() {
   local PASSWORD=$6
 
   echo "Adding database: $NAME..."
-
-  curl -s -X POST -H "Content-Type: application/json" -H "X-Metabase-Session: ${SESSION_ID}" \
+  
+  RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -H "X-Metabase-Session: ${SESSION_ID}" \
     -d "{
       \"name\": \"${NAME}\",
       \"engine\": \"postgres\",
@@ -65,19 +62,18 @@ add_database() {
         \"password\": \"${PASSWORD}\"
       }
     }" \
-    "${METABASE_URL}/database" > /dev/null
+    "${METABASE_URL}/database")
 
-  if [ $? -eq 0 ]; then
-    echo "Successfully added database: $NAME"
+  if echo "$RESPONSE" | jq -e '.id' >/dev/null; then
+    echo "Database '$NAME' added successfully."
   else
-    echo "Failed to add database: $NAME"
+    echo "Failed to add database '$NAME'. Response: $RESPONSE"
   fi
 }
 
-
+# Main script execution
 authenticate_metabase
 
-# Loop through each database configuration and add it to Metabase
 for db in "${DATABASES[@]}"; do
   IFS='|' read -r DB_NAME DB_HOST DB_PORT DB_DBNAME DB_USER DB_PASSWORD <<< "$db"
   add_database "$DB_NAME" "$DB_HOST" "$DB_PORT" "$DB_DBNAME" "$DB_USER" "$DB_PASSWORD"
