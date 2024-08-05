@@ -14,9 +14,9 @@ services:
       MB_DB_HOST: "metabase_db"
       MB_PASSWORD_COMPLEXITY: "weak"
       MB_PASSWORD_LENGTH: "8"
-      MB_ADMIN_EMAIL: "alirezaheidari.cs@gmail.com"
-      MB_USER_EMAIL: "alirezaheidari.cs@gmail.com"
-      MB_USER_PASSWORD: "Alireza1qaz"
+      MB_ADMIN_EMAIL: "youremail"
+      MB_USER_EMAIL: "youremail"
+      MB_USER_PASSWORD: "yourpassword"
       MAX_SESSION_AGE: "20160"
       MB_DISABLE_SESSION_THROTTLE: "true"
       MB_SOURCE_ADDRESS_HEADER: NULL
