@@ -19,8 +19,7 @@
     - 🌀 Customizable profilers with [Prometheus][https://prometheus.io/].
 
 - 🌱 [**MongoDB**](https://www.mongodb.com/): 
-  - Async operations using [motor](https://github.com/mongodb/motor).
-  - ODM with [beanie](https://beanie-odm.dev/).
+  - Async client with [motor](https://github.com/mongodb/motor) and Object Document Mapping (ODM) with [beanie](https://beanie-odm.dev/).
   - [mongo-motors](https://github.com/alirezaheidari-cs/mongo-motors) package for singleton and managed connection.
 
 - 🧰 [**Redis**](https://redis.io/):
@@ -28,12 +27,10 @@
   - [redis-py](https://github.com/redis/redis-py) with [aredis-client](https://github.com/alirezaheidari-cs/aredis-client).
 
 - 💾 **PostgreSQL**:
-  - Async with [aqlachemy](https://github.com/sqlalchemy/sqlalchemy) ORM.
-  - Database migrations with [alembic](https://github.com/sqlalchemy/alembic).
+  - Async client with [aqlachemy](https://github.com/sqlalchemy/sqlalchemy) ORM & automatic migrations with [alembic](https://github.com/sqlalchemy/alembic)..
   - [asyncpg-client](https://github.com/alirezaheidari-cs/asyncpg-client) as the session manager.
 
 - 🚀 [**RabbitMQ**](https://www.rabbitmq.com/):
-  - As the message broker for inter-microservice communications.
   - Utilizing [rabbitmq-rpc](https://github.com/alirezaheidari-cs/rabbitmq-rpc) and [aio-pika](https://github.com/mosquito/aio-pika).
   - No server-side implementation.
 
@@ -49,7 +46,7 @@
 - 📕 [**RedisInsight**](https://redis.io/insight/): Redis data visualization and management.
 - 🌿 [**Mongo-Express**](https://github.com/mongo-express/mongo-express): MongoDB management.
 - 💥 [**RabbitMQ Management**](https://www.rabbitmq.com/docs/management): Visualizing and monitoring events.
-- 
+ 
 These tools are configured and run via Docker in the `infra/admin/docker-compose.yaml`.
 
 ## **Setup Instructions**
