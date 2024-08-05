@@ -112,7 +112,21 @@ Run the development server with hot-reloading enabled.
 npm run serve
 ```
 
-## **Additional Features**
+## Enjoy!
 
-- **Monitoring and Logging**: Integrated logging, rate limiting, and monitoring with Grafana and Prometheus.
-- **Security**: JWT authentication, role-based access control, and Pydantic data validation.
+### Interactive API Documentation
+![image](https://github.com/user-attachments/assets/ebfe2c0e-b9e0-4e01-b266-89b54776428c)
+
+### Admin Dashbords
+**Metabase (localhost:3000)[localhost:3000]:**
+![image](https://github.com/user-attachments/assets/0f6f6e7b-46db-4741-b8bf-01c6ac320952)
+
+**RedisInsight (localhost:5540)[localhost:5540]:**
+![image](https://github.com/user-attachments/assets/05a223d0-b706-4f63-8d40-a65e5c5cda81)
+
+**Mongo Compass:**
+![image](https://github.com/user-attachments/assets/11be638a-6cd3-4f9c-ad84-eedda8bc4867)
+
+**RabbitMQ Management:**
+![image](https://github.com/user-attachments/assets/17532670-8b31-4b2d-b305-723b8ce49f77)
+
