@@ -1,16 +1,17 @@
 # gateway/src/middleware/builder.py
 
 from typing import List, Callable
-from fastapi import FastAPI
 
+from fastapi import FastAPI
 from middleware.authentication import mount_middleware as mount_authentication
 from middleware.cors import mount_middleware as mount_cors
 from middleware.exception_handling import mount_middleware as mount_exception_handling
-from middleware.rate_limit import mount_middleware as mount_rate_limit
 from middleware.https_redirect import mount_middleware as mount_https_redirect
-from middleware.timing import mount_middleware as mount_timing
 from middleware.logger import mount_middleware as mount_logger
+from middleware.rate_limit import mount_middleware as mount_rate_limit
 from middleware.request_id import mount_middleware as mount_request_id
+from middleware.timing import mount_middleware as mount_timing
+
 
 class MiddlewareBuilder:
     def __init__(self) -> None:

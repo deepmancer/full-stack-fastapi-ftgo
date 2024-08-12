@@ -108,9 +108,9 @@
 
 <script>
 import axios from 'axios';
-import { mapGetters } from 'vuex';
+import {mapGetters} from 'vuex';
 
-import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
+import {LMap, LMarker, LTileLayer} from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerIcon from "../assets/images/location-logo.png";

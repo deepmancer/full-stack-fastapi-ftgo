@@ -5,7 +5,7 @@
   </template>
 
   <script>
-import UserComp from '../components/DeliveryMainPage.vue'
+  import UserComp from '../components/DeliveryMainPage.vue'
 
   export default {
     name: 'Home',

@@ -1,19 +1,15 @@
-from fastapi import APIRouter, HTTPException, Request, status, Depends
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-
 from application import get_logger
+from application.dependencies import AccessManager
 from application.exceptions import handle_exception
-from application.schemas.common import EmptyResponse, SuccessResponse
-from application.schemas.user import UserStateSchema
 from application.schemas.account.profile import UpdateUserRequest, UserInfo
-from config import AuthConfig
+from application.schemas.common import SuccessResponse
+from application.schemas.user import UserStateSchema
 from domain.token_manager import TokenManager
+from fastapi import APIRouter, Request, Depends
 from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
 from ftgo_utils.schemas import UserInfoMixin
 from services.user import UserService
-from application.dependencies import AccessManager
 
 router = APIRouter(
     prefix='/profile',

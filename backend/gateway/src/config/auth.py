@@ -1,5 +1,7 @@
 from typing import Optional
+
 from config.base import BaseConfig, env_var
+
 
 class AuthConfig(BaseConfig):
     def __init__(

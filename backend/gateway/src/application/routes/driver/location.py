@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Request, Depends
-from application.schemas.driver.location import LocationsSchema, LocationPointMixin
+from application.dependencies import AccessManager
 from application.exceptions import handle_exception
+from application.schemas.common import SuccessResponse
+from application.schemas.driver.location import LocationsSchema, LocationPointMixin
+from fastapi import APIRouter, Request, Depends
 from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
-from application.schemas.common import SuccessResponse
 from services.location import LocationService
-from application.dependencies import AccessManager
 
 router = APIRouter(
     prefix='/location',

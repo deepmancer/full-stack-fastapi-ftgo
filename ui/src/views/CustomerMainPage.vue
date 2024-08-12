@@ -5,8 +5,8 @@
   </template>
   
   <script>
-import UserComp from '../components/CustomerMainPage.vue'
-  
+  import UserComp from '../components/CustomerMainPage.vue'
+
   export default {
     name: 'Home',
     components: {

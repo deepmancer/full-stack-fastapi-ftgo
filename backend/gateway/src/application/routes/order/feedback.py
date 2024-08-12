@@ -9,9 +9,6 @@ from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
 from services.feedback import FeedbackService
 
-from application.schemas.auth.registration import (
-    UserAuthCodeSchema, UpdateProfileSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
-)
 from application.schemas.order.feedback import (
     CreateDeliveryRatingRequest, CreateDeliveryRatingResponse, UpdateDeliveryRatingRequest, UpdateDeliveryRatingResponse,
     GetDeliveryRatingRequest, GetDeliveryRatingResponse, GetCustomerDeliveryRatingsRequest, GetCustomerDeliveryRatingsResponse,

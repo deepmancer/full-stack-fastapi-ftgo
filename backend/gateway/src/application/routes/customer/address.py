@@ -1,17 +1,17 @@
-from fastapi import APIRouter, Request, Depends
-from application.schemas.account.address import (
-    AddressIdSchema, AddressesSchema, AddressIdPreferencySchema
-)
-from ftgo_utils.schemas import (
-    AddressMixin, AddressInfoMixin
-)
-from application.schemas.user import UserStateSchema
+from application.dependencies import AccessManager
 from application.exceptions import handle_exception
+from application.schemas.account.address import (
+        AddressIdSchema, AddressesSchema, AddressIdPreferencySchema
+)
+from application.schemas.common import SuccessResponse
+from application.schemas.user import UserStateSchema
+from fastapi import APIRouter, Request, Depends
 from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
-from application.schemas.common import SuccessResponse
+from ftgo_utils.schemas import (
+        AddressMixin, AddressInfoMixin
+)
 from services.user import UserService
-from application.dependencies import AccessManager
 
 router = APIRouter(
     prefix='/address',

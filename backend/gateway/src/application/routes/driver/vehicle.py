@@ -1,12 +1,11 @@
-from fastapi import APIRouter, status, HTTPException, Request
 from application import get_logger
-
+from application.exceptions import handle_exception
 from application.schemas.driver.vehicle import (
-    RegisterVehicleRequest, RegisterVehicleResponse,
-    DeleteVehicleResponse, GetVehicleInfoResponse
+        RegisterVehicleRequest, RegisterVehicleResponse,
+        DeleteVehicleResponse, GetVehicleInfoResponse
 )
 from application.schemas.user import UserStateSchema
-from application.exceptions import handle_exception
+from fastapi import APIRouter, Request
 from ftgo_utils.enums import ResponseStatus
 from ftgo_utils.errors import BaseError, ErrorCodes
 from services.vehicle import VehicleService

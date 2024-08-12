@@ -5,7 +5,7 @@
   </template>
 
   <script>
-import UserComp from '../components/VerifyAccountPage.vue'
+  import UserComp from '../components/VerifyAccountPage.vue'
 
   export default {
     name: 'Home',

@@ -67,13 +67,13 @@
 </template>
 
 <script>
-import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
+import {LMap, LMarker, LTileLayer} from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerIcon from "../assets/images/location-logo.png";
 import destinationMarkerIcon from "../assets/images/destination-icon.png";
 import restauranMarkertIcon from "../assets/images/restaurant-icon.png";
-import { mapGetters } from 'vuex';
+import {mapGetters} from 'vuex';
 import Vue from "vue";
 
 export default {

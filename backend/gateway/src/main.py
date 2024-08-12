@@ -1,16 +1,13 @@
-import asyncio
-import contextlib
-
-from fastapi import FastAPI
 import uvicorn
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from ftgo_utils.logger import init_logging, get_logger
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from application.app import init_router
 from config import ServiceConfig
 from data_access.events.lifecycle import setup, teardown
-from ftgo_utils.logger import init_logging, get_logger
 from middleware.builder import MiddlewareBuilder
-from prometheus_fastapi_instrumentator import Instrumentator
 
 load_dotenv()
 

@@ -39,10 +39,11 @@
 import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
+import {BVToastPlugin} from "bootstrap-vue";
+import {mapGetters} from 'vuex';
+
 Vue.use(VueAxios, axios);
-import { BVToastPlugin } from "bootstrap-vue";
 Vue.use(BVToastPlugin);
-import { mapGetters } from 'vuex';
 
 
 export default {

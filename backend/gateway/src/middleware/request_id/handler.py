@@ -1,7 +1,7 @@
 from fastapi import Request
+from ftgo_utils.uuid_gen import uuid4
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from ftgo_utils.uuid_gen import uuid4
 
 class RequestUUIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

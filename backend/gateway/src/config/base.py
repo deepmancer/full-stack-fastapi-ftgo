@@ -1,6 +1,5 @@
-import os
-from typing import Any, Type, TypeVar, Callable
-from pydantic import BaseModel, Field
+from typing import Any, TypeVar, Callable
+
 from decouple import config, UndefinedValueError
 
 T = TypeVar('T')

@@ -1,5 +1,7 @@
 import logging
+
 from config.base import BaseConfig, env_var
+
 
 class ServiceConfig(BaseConfig):
     def __init__(

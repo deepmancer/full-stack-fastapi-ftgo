@@ -1,19 +1,15 @@
-from typing import Optional
+from fastapi import APIRouter, Request, status, Depends
 
-from fastapi import APIRouter, HTTPException, Request, status, Depends
-
+from application.dependencies import AccessManager
 from application.exceptions import handle_exception
 from application.schemas.auth.registration import (
-    UserAuthCodeSchema, UpdateProfileSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
+        UserAuthCodeSchema, UserIdMixin, LoginSchema, RegistrationSchema, LoggedInUserSchema
 )
-from application.schemas.common import EmptyResponse, SuccessResponse
-from application.dependencies import AccessManager
-from config import AuthConfig
-from data_access.repository import CacheRepository
+from application.schemas.common import SuccessResponse
 from domain.token_manager import TokenManager
+from fastapi import APIRouter, Request, status, Depends
 from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes
-from ftgo_utils.jwt_auth import encode
 from services import UserService
 
 router = APIRouter(

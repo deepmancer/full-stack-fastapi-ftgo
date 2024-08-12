@@ -1,5 +1,7 @@
 from typing import Dict
+
 from services.base import Microservice
+
 
 class LocationService(Microservice):
     _service_name = 'location'

@@ -1,12 +1,14 @@
 from datetime import timedelta
 from typing import Optional
+
+from application.schemas.user import UserStateSchema
 from config import AuthConfig
 from data_access.repository import CacheRepository
-from ftgo_utils.jwt_auth import encode
 from domain import get_logger
-from application.schemas.user import UserStateSchema
-from ftgo_utils.errors import BaseError, ErrorCodes
+from ftgo_utils.errors import ErrorCodes
+from ftgo_utils.jwt_auth import encode
 from utils.exception import handle_exception
+
 
 class TokenManager:
     def __init__(self, auth_config: Optional[AuthConfig] = None):

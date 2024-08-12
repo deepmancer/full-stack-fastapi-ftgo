@@ -1,20 +1,20 @@
 import time
 from typing import Callable, Coroutine, Any
+
+import jwt.exceptions as jwt_errors
+from application.schemas.user import UserStateSchema
+from config.auth import AuthConfig
+from data_access.repository.cache_repository import CacheRepository
+from domain.token_manager import TokenManager
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from ftgo_utils.errors import BaseError, ErrorCodes
+from ftgo_utils.jwt_auth import decode
+from middleware import get_logger
 from starlette.datastructures import Headers
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from starlette.types import ASGIApp
-from domain.token_manager import TokenManager
-from application.schemas.user import UserStateSchema
-from config.auth import AuthConfig
-from data_access.repository.cache_repository import CacheRepository
-from ftgo_utils.errors import BaseError, ErrorCodes
-from ftgo_utils.jwt_auth import decode
-from middleware import get_logger
-import jwt.exceptions as jwt_errors
-
 
 
 class JWTAuthenticationMiddleware(BaseHTTPMiddleware):

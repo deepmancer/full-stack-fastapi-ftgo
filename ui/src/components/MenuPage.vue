@@ -48,11 +48,11 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import {mapActions, mapGetters} from 'vuex';
 import axios from 'axios';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {library} from '@fortawesome/fontawesome-svg-core';
+import {faMinus, faPlus} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 
 library.add(faPlus, faMinus);
 

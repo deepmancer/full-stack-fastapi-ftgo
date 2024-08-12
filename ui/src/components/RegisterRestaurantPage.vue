@@ -82,14 +82,15 @@
 import Vue from "vue";
 import axios from "axios";
 import VueAxios from "vue-axios";
-Vue.use(VueAxios, axios);
-import { BVToastPlugin } from "bootstrap-vue";
-Vue.use(BVToastPlugin);
-import { mapGetters, mapActions } from 'vuex';
-import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
+import {BVToastPlugin} from "bootstrap-vue";
+import {mapActions, mapGetters} from 'vuex';
+import {LMap, LMarker, LTileLayer} from "vue2-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerIcon from "../assets/images/location-logo.png";
+
+Vue.use(VueAxios, axios);
+Vue.use(BVToastPlugin);
 
 export default {
   components: {

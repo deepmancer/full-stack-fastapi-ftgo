@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Request, Depends
-from application.schemas.driver.location import LocationsSchema, LocationPointMixin
 from application.exceptions import handle_exception
 from ftgo_utils.enums import ResponseStatus, Roles
 from ftgo_utils.errors import BaseError, ErrorCodes

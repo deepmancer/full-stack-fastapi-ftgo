@@ -1,5 +1,7 @@
-from typing import Dict, Any
+from typing import Dict
+
 from services.base import Microservice
+
 
 class FeedbackService(Microservice):
     _service_name = 'feedback'

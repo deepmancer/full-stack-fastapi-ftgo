@@ -1,5 +1,7 @@
 from typing import Dict
+
 from services.base import Microservice
+
 
 class UserService(Microservice):
     _service_name = 'user'
