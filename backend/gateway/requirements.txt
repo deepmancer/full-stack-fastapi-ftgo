@@ -30,6 +30,6 @@ trio
 uvicorn
 uvloop
 starlette
-git+https://github.com/alirezaheidari-cs/ftgo-utils.git
-git+https://github.com/alirezaheidari-cs/aredis-client.git
-git+https://github.com/alirezaheidari-cs/rabbitmq-rpc.git
+git+https://github.com/deepmancer/ftgo-utils.git
+git+https://github.com/deepmancer/aredis-client.git
+git+https://github.com/deepmancer/rabbitmq-rpc.git

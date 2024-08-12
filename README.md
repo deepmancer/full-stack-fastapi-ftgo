@@ -20,18 +20,18 @@
 
 - 🌱 [**MongoDB**](https://www.mongodb.com/): 
   - Async client with [motor](https://github.com/mongodb/motor) and Object Document Mapping (ODM) with [beanie](https://beanie-odm.dev/).
-  - [mongo-motors](https://github.com/alirezaheidari-cs/mongo-motors) package for singleton and managed connection.
+  - [mongo-motors](https://github.com/deepmancer/mongo-motors) package for singleton and managed connection.
 
 - 🧰 [**Redis**](https://redis.io/):
   - Async operations for caching and session management.
-  - [redis-py](https://github.com/redis/redis-py) with [aredis-client](https://github.com/alirezaheidari-cs/aredis-client).
+  - [redis-py](https://github.com/redis/redis-py) with [aredis-client](https://github.com/deepmancer/aredis-client).
 
 - 💾 **PostgreSQL**:
   - Async client with [aqlachemy](https://github.com/sqlalchemy/sqlalchemy) ORM & automatic migrations with [alembic](https://github.com/sqlalchemy/alembic)..
-  - [asyncpg-client](https://github.com/alirezaheidari-cs/asyncpg-client) as the session manager.
+  - [asyncpg-client](https://github.com/deepmancer/asyncpg-client) as the session manager.
 
 - 🚀 [**RabbitMQ**](https://www.rabbitmq.com/):
-  - Utilizing [rabbitmq-rpc](https://github.com/alirezaheidari-cs/rabbitmq-rpc) and [aio-pika](https://github.com/mosquito/aio-pika).
+  - Utilizing [rabbitmq-rpc](https://github.com/deepmancer/rabbitmq-rpc) and [aio-pika](https://github.com/mosquito/aio-pika).
   - No server-side implementation.
 
 - 🐋 [**Docker Compose**](https://www.docker.com):

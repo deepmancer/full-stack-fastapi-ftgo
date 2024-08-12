@@ -20,7 +20,7 @@ COPY ./requirements.txt /tmp/requirements.txt
 
 
 RUN pip install -r /tmp/requirements.txt --no-cache-dir --force-reinstall
-RUN pip install --upgrade --no-deps git+https://github.com/alirezaheidari-cs/aredis-client.git
+RUN pip install --upgrade --no-deps git+https://github.com/deepmancer/aredis-client.git
 # Copy the application code to the container
 COPY . /order
 

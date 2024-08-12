@@ -21,7 +21,7 @@ COPY ./requirements.txt /tmp/requirements.txt
 
 RUN pip install -r /tmp/requirements.txt --no-cache-dir
 
-RUN pip install git+https://github.com/alirezaheidari-cs/ftgo-utils.git
+RUN pip install git+https://github.com/deepmancer/ftgo-utils.git
 
 # Copy the application code to the container
 COPY . /location
