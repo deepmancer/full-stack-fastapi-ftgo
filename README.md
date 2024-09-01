@@ -29,7 +29,7 @@
 
 ---
 
-**Source Code**: <a href="https://github.com/deepmancer/full-stack-fastapi-ftgo/" target="_blank">https://github.com/deepmancer/full-stack-fastapi-ftgo/</a>
+**Source Code**: <a href="https://github.com/deepmancer/full-stack-fastapi-ftgo/" target="_blank">https://github.com/deepmancer/full-stack-fastapi-ftgo</a>
 
 ---
 
