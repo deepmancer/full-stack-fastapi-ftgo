@@ -1,5 +1,5 @@
 
-# **🍕 Full-stack Microservice-Based Food Ordering Application**
+# **🍕 Full-stack Microservice-Based Food Delivery Application**
 
 <p align="center">
     <img src="https://img.shields.io/badge/FastAPI-009688.svg?style=for-the-badge&logo=FastAPI&logoColor=white" alt="FastAPI">
@@ -21,7 +21,6 @@
     <img src="https://img.shields.io/badge/H3-1E54B7.svg?style=for-the-badge&logo=H3&logoColor=white" alt="H3">
 </p>
 
-
 > FTGO is a scalable, microservice-based food ordering application built with Python (FastAPI) and Vue.js, designed following object-oriented design principles.
 
 **💎 You can use this project as a template to build your backend microservice project in Python 💎**
@@ -29,6 +28,11 @@
 🔊 New features and technologies will be added soon!
 
 ---
+
+**Source Code**: <a href="https://github.com/deepmancer/full-stack-fastapi-ftgo/" target="_blank">https://github.com/deepmancer/full-stack-fastapi-ftgo/</a>
+
+---
+
 
 ## 🔥 Technology Stack and Features
 
