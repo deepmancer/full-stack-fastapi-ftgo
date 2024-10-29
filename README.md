@@ -54,7 +54,7 @@
   - [redis-py](https://github.com/redis/redis-py) with [aredis-client](https://github.com/deepmancer/aredis-client).
 
 - 💾 **PostgreSQL**:
-  - Async client with [aqlachemy](https://github.com/sqlalchemy/sqlalchemy) ORM & automatic migrations with [alembic](https://github.com/sqlalchemy/alembic)..
+  - Async client with [SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy) ORM & automatic migrations with [alembic](https://github.com/sqlalchemy/alembic)..
   - [asyncpg-client](https://github.com/deepmancer/asyncpg-client) as the session manager.
 
 - 🚀 [**RabbitMQ**](https://www.rabbitmq.com/):
